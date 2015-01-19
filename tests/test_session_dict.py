@@ -93,3 +93,19 @@ class SessionTests(unittest.TestCase):
         self.assertEqual(list(s), [])
         self.assertNotIn('foo', s)
         self.assertNotIn('key', s)
+
+    def test_change(self):
+        s = Session('test_identity', new=False, data={'a': {'key': 'value'}})
+        self.assertFalse(s._changed)
+
+        s['a']['key2'] = 'val2'
+        self.assertFalse(s._changed)
+        self.assertEqual({'a': {'key': 'value',
+                                'key2': 'val2'}},
+                         s)
+
+        s.changed()
+        self.assertTrue(s._changed)
+        self.assertEqual({'a': {'key': 'value',
+                                'key2': 'val2'}},
+                         s)

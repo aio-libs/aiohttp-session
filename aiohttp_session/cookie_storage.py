@@ -1,0 +1,35 @@
+import asyncio
+import json
+from . import AbstractStorage, Session, SESSION_KEY
+
+
+class SimpleCookieStorage(AbstractStorage):
+    """Simple JSON storage.
+
+    Doesn't any encryption/validation, use it for tests only"""
+
+    def __init__(self, identity="AIOHTTP_COOKIE_SESSION", *,
+                 domain=None, max_age=None, path=None,
+                 secure=None, httponly=None):
+        super().__init__(identity, domain=domain, max_age=max_age,
+                         path=path, secure=secure, httponly=httponly)
+
+    @asyncio.coroutine
+    def make_session(self, request):
+        cookie = request.cookies.get(self.identity)
+        if cookie is None:
+            session = Session(self.identity, new=True)
+        else:
+            data = json.loads(cookie)
+            session = Session(self.identity, data=data, new=False)
+
+        request[SESSION_KEY] = session
+
+    @asyncio.coroutine
+    def save_session(self, request, response):
+        session = request[SESSION_KEY]
+        if not session._changed:
+            return
+
+        cookie_data = json.dumps(session._data)
+        response.set_cookie(self.identity, cookie_data, **self.cookie_params)

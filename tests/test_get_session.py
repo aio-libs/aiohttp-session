@@ -24,7 +24,7 @@ class TestGetSession(unittest.TestCase):
 
     def test_get_stored_session(self):
         req = self.make_request('GET', '/')
-        session = Session()
+        session = Session('identity')
         req[SESSION_KEY] = session
 
         self.assertIs(session, get_session(req))

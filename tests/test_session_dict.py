@@ -6,70 +6,67 @@ from aiohttp_session import Session
 class SessionTests(unittest.TestCase):
 
     def test_create(self):
-        s = Session()
+        s = Session('test_identity', new=True)
         self.assertEqual(s, {})
         self.assertTrue(s.new)
-        self.assertIsNone(s.identity)
+        self.assertEqual('test_identity', s.identity)
         self.assertFalse(s._changed)
 
-        s = Session(data={'some': 'data'})
+    def test_create2(self):
+        s = Session('test_identity', data={'some': 'data'})
         self.assertEqual(s, {'some': 'data'})
-        self.assertTrue(s.new)
-        self.assertIsNone(s.identity)
+        self.assertFalse(s.new)
+        self.assertEqual('test_identity', s.identity)
         self.assertFalse(s._changed)
 
-        s = Session(identity=1)
+    def test_create3(self):
+        s = Session(identity=1, new=True)
         self.assertEqual(s, {})
-        self.assertFalse(s.new)
+        self.assertTrue(s.new)
         self.assertEqual(s.identity, 1)
         self.assertFalse(s._changed)
 
     def test__repr__(self):
-        s = Session()
+        s = Session('test_identity', new=True)
         self.assertEqual(str(s), '<Session [new:True, changed:False] {}>')
         s['foo'] = 'bar'
         self.assertEqual(str(s),
                          "<Session [new:True, changed:True] {'foo': 'bar'}>")
-        s = Session(data={'key': 123}, identity=1)
+
+    def test__repr__2(self):
+        s = Session('test_identity', data={'key': 123}, new=False)
         self.assertEqual(str(s),
                          "<Session [new:False, changed:False] {'key': 123}>")
         s.invalidate()
         self.assertEqual(str(s), "<Session [new:False, changed:True] {}>")
 
     def test_invalidate(self):
-        s = Session(data={'foo': 'bar'})
+        s = Session('test_identity', data={'foo': 'bar'})
         self.assertEqual(s, {'foo': 'bar'})
-        self.assertTrue(s.new)
-        self.assertIsNone(s.identity)
         self.assertFalse(s._changed)
 
         s.invalidate()
         self.assertEqual(s, {})
-        self.assertTrue(s.new)
-        self.assertIsNone(s.identity)
         self.assertTrue(s._changed)
 
-        s = Session(data={'foo': 'bar'}, identity=1)
+    def test_invalidate2(self):
+        s = Session('test_identity', data={'foo': 'bar'})
         self.assertEqual(s, {'foo': 'bar'})
-        self.assertFalse(s.new)
-        self.assertEqual(s.identity, 1)
         self.assertFalse(s._changed)
 
         s.invalidate()
         self.assertEqual(s, {})
-        self.assertFalse(s.new)
-        self.assertEqual(s.identity, 1)
         self.assertTrue(s._changed)
 
     def test_operations(self):
-        s = Session()
+        s = Session('test_identity')
         self.assertEqual(s, {})
         self.assertEqual(len(s), 0)
         self.assertEqual(list(s), [])
         self.assertNotIn('foo', s)
         self.assertNotIn('key', s)
 
-        s = Session(data={'foo': 'bar'})
+        s = Session('test_identity', data={'foo': 'bar'})
         self.assertEqual(len(s), 1)
         self.assertEqual(s, {'foo': 'bar'})
         self.assertEqual(list(s), ['foo'])

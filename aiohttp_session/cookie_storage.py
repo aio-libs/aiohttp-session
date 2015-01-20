@@ -16,7 +16,7 @@ class SimpleCookieStorage(AbstractStorage):
 
     @asyncio.coroutine
     def make_session(self, request):
-        cookie = request.cookies.get(self.identity)
+        cookie = self.load_cookie(request)
         if cookie is None:
             session = Session(self.identity, new=True)
         else:
@@ -32,4 +32,4 @@ class SimpleCookieStorage(AbstractStorage):
             return
 
         cookie_data = json.dumps(session._mapping)
-        response.set_cookie(self.identity, cookie_data, **self.cookie_params)
+        self.store_cookie(response, cookie_data)

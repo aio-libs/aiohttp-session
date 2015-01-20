@@ -135,6 +135,13 @@ class AbstractStorage(metaclass=abc.ABCMeta):
     def save_session(self, response):
         pass
 
+    def load_cookie(self, request):
+        cookie = request.cookies.get(self._identity)
+        return cookie
+
+    def store_cookie(self, response, cookie_data):
+        response.set_cookie(self._identity, cookie_data, **self._cookie_params)
+
 
 class CookieSessionMiddleware:
 

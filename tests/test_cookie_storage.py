@@ -1,9 +1,9 @@
-import unittest
 import asyncio
+import json
 import socket
+import unittest
 
 from aiohttp import web, request
-
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.cookie_storage import SimpleCookieStorage
 
@@ -38,6 +38,10 @@ class TestSimleCookieStorage(unittest.TestCase):
         self.addCleanup(srv.close)
         return app, srv, url
 
+    def make_cookie(self, data):
+        value = json.dumps(data)
+        return {'AIOHTTP_COOKIE_SESSION': value}
+
     def test_create_new_sesssion(self):
 
         @asyncio.coroutine
@@ -54,5 +58,48 @@ class TestSimleCookieStorage(unittest.TestCase):
             _, _, url = yield from self.create_server('GET', '/', handler)
             resp = yield from request('GET', url, loop=self.loop)
             self.assertEqual(200, resp.status)
+
+        self.loop.run_until_complete(go())
+
+    def test_load_existing_sesssion(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = get_session(request)
+            self.assertIsInstance(session, Session)
+            self.assertFalse(session.new)
+            self.assertFalse(session._changed)
+            self.assertEqual({'a': 1, 'b': 2}, session)
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler)
+            resp = yield from request(
+                'GET', url,
+                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+
+        self.loop.run_until_complete(go())
+
+    def test_change_sesssion(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = get_session(request)
+            session['c'] = 3
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler)
+            resp = yield from request(
+                'GET', url,
+                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+            self.assertEqual({'a': 1, 'b': 2, 'c': 3},
+                             resp.cookies)
 
         self.loop.run_until_complete(go())

@@ -3,6 +3,8 @@ import json
 import socket
 import unittest
 
+from http.cookies import SimpleCookie
+
 from aiohttp import web, request
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.cookie_storage import SimpleCookieStorage
@@ -99,7 +101,8 @@ class TestSimleCookieStorage(unittest.TestCase):
                 cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            self.assertEqual({'a': 1, 'b': 2, 'c': 3},
+            self.assertEqual(SimpleCookie({'AIOHTTP_COOKIE_SESSION':
+                                           {'a': 1, 'b': 2, 'c': 3}}),
                              resp.cookies)
 
         self.loop.run_until_complete(go())

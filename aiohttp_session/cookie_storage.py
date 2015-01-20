@@ -31,5 +31,5 @@ class SimpleCookieStorage(AbstractStorage):
         if not session._changed:
             return
 
-        cookie_data = json.dumps(session._data)
+        cookie_data = json.dumps(session._mapping)
         response.set_cookie(self.identity, cookie_data, **self.cookie_params)

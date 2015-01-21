@@ -106,3 +106,24 @@ class TestSimleCookieStorage(unittest.TestCase):
                              resp.cookies)
 
         self.loop.run_until_complete(go())
+
+    def test_clear_cookie_on_sesssion_invalidation(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = yield from get_session(request)
+            session.invalidate()
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler)
+            resp = yield from request(
+                'GET', url,
+                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+            self.assertEqual(SimpleCookie({'AIOHTTP_COOKIE_SESSION': {}}),
+                             resp.cookies)
+
+        self.loop.run_until_complete(go())

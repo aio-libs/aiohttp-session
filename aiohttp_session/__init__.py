@@ -151,7 +151,11 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         return cookie
 
     def store_cookie(self, response, cookie_data):
-        response.set_cookie(self._identity, cookie_data, **self._cookie_params)
+        if not cookie_data:
+            response.del_cookie(self._identity)
+        else:
+            response.set_cookie(self._identity, cookie_data,
+                                **self._cookie_params)
 
 
 class CookieSessionMiddleware:

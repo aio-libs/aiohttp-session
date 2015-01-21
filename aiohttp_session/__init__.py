@@ -62,14 +62,25 @@ class Session(MutableMapping):
 
 
 SESSION_KEY = 'aiohttp_session'
+STORAGE_KEY = 'aiohttp_session_stroage'
 
 
+@asyncio.coroutine
 def get_session(request):
     ret = request.get(SESSION_KEY)
     if ret is None:
-        raise RuntimeError(
-            "Install aiohttp_session middleware "
-            "in your aiohttp.web.Application")
+        storage = request.get(STORAGE_KEY)
+        if storage is None:
+            raise RuntimeError(
+                "Install aiohttp_session middleware "
+                "in your aiohttp.web.Application")
+        else:
+            yield from storage.make_session(request)
+            ret = request.get(SESSION_KEY)
+            if ret is None:
+                raise RuntimeError(
+                    "Installed {!r} storage should fill request[SESSION_KEY] "
+                    "on .make_session() call.")
     return ret
 
 
@@ -82,7 +93,7 @@ def session_middleware(storage):
 
         @asyncio.coroutine
         def middleware(request):
-            yield from storage.make_session(request)
+            request[STORAGE_KEY] = storage
             response = yield from handler(request)
             if not isinstance(response, web.StreamResponse):
                 raise RuntimeError("Expect response, not {!r}", type(response))

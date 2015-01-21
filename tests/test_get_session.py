@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 from unittest import mock
 
@@ -8,6 +9,13 @@ from aiohttp_session import Session, get_session, SESSION_KEY
 
 
 class TestGetSession(unittest.TestCase):
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+
+    def tearDown(self):
+        self.loop.close()
 
     def make_request(self, method, path, headers=CIMultiDict(), *,
                      version=HttpVersion(1, 1), closing=False):
@@ -23,14 +31,25 @@ class TestGetSession(unittest.TestCase):
         return req
 
     def test_get_stored_session(self):
-        req = self.make_request('GET', '/')
-        session = Session('identity')
-        req[SESSION_KEY] = session
 
-        self.assertIs(session, get_session(req))
+        @asyncio.coroutine
+        def go():
+            req = self.make_request('GET', '/')
+            session = Session('identity')
+            req[SESSION_KEY] = session
+
+            ret = yield from get_session(req)
+            self.assertIs(session, ret)
+
+        self.loop.run_until_complete(go())
 
     def test_session_is_not_stored(self):
-        req = self.make_request('GET', '/')
 
-        with self.assertRaises(RuntimeError):
-            get_session(req)
+        @asyncio.coroutine
+        def go():
+            req = self.make_request('GET', '/')
+
+            with self.assertRaises(RuntimeError):
+                yield from get_session(req)
+
+        self.loop.run_until_complete(go())

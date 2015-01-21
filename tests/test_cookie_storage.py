@@ -48,7 +48,7 @@ class TestSimleCookieStorage(unittest.TestCase):
 
         @asyncio.coroutine
         def handler(request):
-            session = get_session(request)
+            session = yield from get_session(request)
             self.assertIsInstance(session, Session)
             self.assertTrue(session.new)
             self.assertFalse(session._changed)
@@ -67,7 +67,7 @@ class TestSimleCookieStorage(unittest.TestCase):
 
         @asyncio.coroutine
         def handler(request):
-            session = get_session(request)
+            session = yield from get_session(request)
             self.assertIsInstance(session, Session)
             self.assertFalse(session.new)
             self.assertFalse(session._changed)
@@ -89,7 +89,7 @@ class TestSimleCookieStorage(unittest.TestCase):
 
         @asyncio.coroutine
         def handler(request):
-            session = get_session(request)
+            session = yield from get_session(request)
             session['c'] = 3
             return web.Response(body=b'OK')
 

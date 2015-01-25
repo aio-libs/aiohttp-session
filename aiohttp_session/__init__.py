@@ -114,8 +114,8 @@ def session_middleware(storage):
 class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, identity="AIOHTTP_SESSION", *,
-                 domain=None, max_age=None, path=None,
-                 secure=None, httponly=None):
+                 domain=None, max_age=None, path='/',
+                 secure=None, httponly=True):
         self._identity = identity
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,

@@ -9,8 +9,8 @@ class SimpleCookieStorage(AbstractStorage):
     Doesn't any encryption/validation, use it for tests only"""
 
     def __init__(self, identity="AIOHTTP_COOKIE_SESSION", *,
-                 domain=None, max_age=None, path=None,
-                 secure=None, httponly=None):
+                 domain=None, max_age=None, path='/',
+                 secure=None, httponly=True):
         super().__init__(identity, domain=domain, max_age=max_age,
                          path=path, secure=secure, httponly=httponly)
 

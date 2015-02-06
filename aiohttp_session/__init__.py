@@ -62,7 +62,7 @@ class Session(MutableMapping):
 
 
 SESSION_KEY = 'aiohttp_session'
-STORAGE_KEY = 'aiohttp_session_stroage'
+STORAGE_KEY = 'aiohttp_session_storage'
 
 
 @asyncio.coroutine

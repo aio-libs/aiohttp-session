@@ -2,6 +2,9 @@ import asyncio
 import json
 from . import AbstractStorage, Session, SESSION_KEY
 
+from Crypto.Cipher import AES
+from Crypto import Random
+
 
 class SimpleCookieStorage(AbstractStorage):
     """Simple JSON storage.
@@ -33,3 +36,53 @@ class SimpleCookieStorage(AbstractStorage):
 
         cookie_data = json.dumps(session._mapping)
         self.store_cookie(response, cookie_data)
+
+
+class EncryptedCookieStorage(AbstractStorage):
+    """Encrypted JSON storage.
+    """
+
+    def __init__(self, secret_key, identity="AIOHTTP_COOKIE_SESSION", *,
+                 domain=None, max_age=None, path='/',
+                 secure=None, httponly=True, iv=None):
+        super().__init__(identity, domain=domain, max_age=max_age,
+                         path=path, secure=secure, httponly=httponly)
+
+        self.__secret_key = secret_key
+        if len(self.__secret_key) % AES.block_size != 0:
+            raise TypeError(
+                'Secret key must be a multiple of {} in length'.format(
+                    AES.block_size))
+        self.__iv = iv
+        if iv is None:
+            self.__iv = Random.new().read(AES.block_size)
+
+    @asyncio.coroutine
+    def make_session(self, request):
+        cookie = self.load_cookie(request)
+        if cookie is None:
+            session = Session(self.identity, new=True)
+        else:
+            cookie = eval(cookie)  # FIXME !!!
+            cipher = AES.new(self.__secret_key, AES.MODE_CBC, self.__iv)
+            decrypted = cipher.decrypt(cookie)
+            data = json.loads(decrypted.decode('utf-8'))
+            session = Session(self.identity, data=data, new=False)
+
+        request[SESSION_KEY] = session
+
+    @asyncio.coroutine
+    def save_session(self, request, response):
+        session = request[SESSION_KEY]
+        if not session._changed:
+            return
+
+        cookie_data = json.dumps(session._mapping).encode('utf-8')
+        if len(cookie_data) % AES.block_size != 0:
+            # padding with spaces to full blocks
+            to_pad = AES.block_size - (len(cookie_data) % AES.block_size)
+            cookie_data += b' ' * to_pad
+
+        cipher = AES.new(self.__secret_key, AES.MODE_CBC, self.__iv)
+        encrypted = cipher.encrypt(cookie_data)
+        self.store_cookie(response, encrypted)

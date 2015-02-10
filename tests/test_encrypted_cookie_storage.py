@@ -2,6 +2,7 @@ import asyncio
 import json
 import socket
 import unittest
+import base64
 
 from Crypto.Cipher import AES
 
@@ -51,7 +52,13 @@ class TestSimleCookieStorage(unittest.TestCase):
             cookie_data += b' ' * to_pad
         cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
         encrypted = cipher.encrypt(cookie_data)
-        return {'AIOHTTP_COOKIE_SESSION': encrypted}
+        b64coded = base64.b64encode(encrypted).decode('utf-8')
+        return {'AIOHTTP_COOKIE_SESSION': b64coded}
+
+    def test_init(self):
+        EncryptedCookieStorage(self.key)  # ensure that random IV do not fail
+        with self.assertRaises(TypeError):
+            EncryptedCookieStorage(b'123')  # short key
 
     def test_create_new_sesssion(self):
 
@@ -112,8 +119,9 @@ class TestSimleCookieStorage(unittest.TestCase):
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
             cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
-            encrypted = cipher.decrypt(eval(morsel.value)).decode('utf-8')
-            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, json.loads(encrypted))
+            decoded = base64.b64decode(morsel.value)
+            decrypted = cipher.decrypt(decoded).decode('utf-8')
+            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, json.loads(decrypted))
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 
@@ -137,8 +145,10 @@ class TestSimleCookieStorage(unittest.TestCase):
             self.assertEqual(200, resp.status)
             cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
             encrypted = cipher.encrypt('{}'+' '*14)
-            self.assertEqual(
-                'Set-Cookie: AIOHTTP_COOKIE_SESSION="{}"; httponly; Path=/'.format(encrypted),
-                resp.cookies['AIOHTTP_COOKIE_SESSION'].output())
+            b64coded = base64.b64encode(encrypted).decode('utf-8')
+            expected_header = ('Set-Cookie: AIOHTTP_COOKIE_SESSION="{}"; '
+                               'httponly; Path=/').format(b64coded)
+            self.assertEqual(expected_header,
+                             resp.cookies['AIOHTTP_COOKIE_SESSION'].output())
 
         self.loop.run_until_complete(go())

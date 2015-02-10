@@ -1,5 +1,6 @@
 import asyncio
 import json
+import base64
 from . import AbstractStorage, Session, SESSION_KEY
 
 from Crypto.Cipher import AES
@@ -63,7 +64,7 @@ class EncryptedCookieStorage(AbstractStorage):
         if cookie is None:
             session = Session(self.identity, new=True)
         else:
-            cookie = eval(cookie)  # FIXME !!!
+            cookie = base64.b64decode(cookie)
             cipher = AES.new(self.__secret_key, AES.MODE_CBC, self.__iv)
             decrypted = cipher.decrypt(cookie)
             data = json.loads(decrypted.decode('utf-8'))
@@ -85,4 +86,5 @@ class EncryptedCookieStorage(AbstractStorage):
 
         cipher = AES.new(self.__secret_key, AES.MODE_CBC, self.__iv)
         encrypted = cipher.encrypt(cookie_data)
-        self.store_cookie(response, encrypted)
+        b64coded = base64.b64encode(encrypted).decode('utf-8')
+        self.store_cookie(response, b64coded)

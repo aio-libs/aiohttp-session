@@ -5,6 +5,7 @@ import unittest
 import base64
 
 from Crypto.Cipher import AES
+from Crypto import Random
 
 from aiohttp import web, request
 from aiohttp_session import Session, session_middleware, get_session
@@ -17,7 +18,6 @@ class TestSimleCookieStorage(unittest.TestCase):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
         self.key = b'Sixteen byte key'
-        self.iv = b'This is an IV456'
 
     def tearDown(self):
         self.loop.close()
@@ -32,7 +32,7 @@ class TestSimleCookieStorage(unittest.TestCase):
     @asyncio.coroutine
     def create_server(self, method, path, handler=None):
         middleware = session_middleware(
-            EncryptedCookieStorage(self.key, iv=self.iv))
+            EncryptedCookieStorage(self.key))
         app = web.Application(middlewares=[middleware], loop=self.loop)
         if handler:
             app.router.add_route(method, path, handler)
@@ -50,13 +50,23 @@ class TestSimleCookieStorage(unittest.TestCase):
             # padding with spaces to full blocks
             to_pad = AES.block_size - (len(cookie_data) % AES.block_size)
             cookie_data += b' ' * to_pad
-        cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
         encrypted = cipher.encrypt(cookie_data)
+        encrypted = iv + encrypted
         b64coded = base64.b64encode(encrypted).decode('utf-8')
         return {'AIOHTTP_COOKIE_SESSION': b64coded}
 
-    def test_init(self):
-        EncryptedCookieStorage(self.key)  # ensure that random IV do not fail
+    def decrypt(self, cookie_value):
+        assert type(cookie_value) == str
+        decoded = base64.b64decode(cookie_value)
+        iv = decoded[:AES.block_size]
+        data = decoded[AES.block_size:]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        decrypted = cipher.decrypt(data).decode('utf-8')
+        return json.loads(decrypted)
+
+    def test_invalid_key(self):
         with self.assertRaises(TypeError):
             EncryptedCookieStorage(b'123')  # short key
 
@@ -118,10 +128,10 @@ class TestSimleCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
-            cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
-            decoded = base64.b64decode(morsel.value)
-            decrypted = cipher.decrypt(decoded).decode('utf-8')
-            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, json.loads(decrypted))
+            self.assertEqual(
+                {'a': 1, 'b': 2, 'c': 3},
+                self.decrypt(morsel.value)
+            )
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 
@@ -143,12 +153,9 @@ class TestSimleCookieStorage(unittest.TestCase):
                 cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
-            encrypted = cipher.encrypt('{}'+' '*14)
-            b64coded = base64.b64encode(encrypted).decode('utf-8')
-            expected_header = ('Set-Cookie: AIOHTTP_COOKIE_SESSION="{}"; '
-                               'httponly; Path=/').format(b64coded)
-            self.assertEqual(expected_header,
-                             resp.cookies['AIOHTTP_COOKIE_SESSION'].output())
+            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            self.assertEqual({}, self.decrypt(morsel.value))
+            self.assertTrue(morsel['httponly'])
+            self.assertEqual(morsel['path'], '/')
 
         self.loop.run_until_complete(go())

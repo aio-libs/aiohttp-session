@@ -45,18 +45,15 @@ class EncryptedCookieStorage(AbstractStorage):
 
     def __init__(self, secret_key, identity="AIOHTTP_COOKIE_SESSION", *,
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True, iv=None):
+                 secure=None, httponly=True):
         super().__init__(identity, domain=domain, max_age=max_age,
                          path=path, secure=secure, httponly=httponly)
 
-        self.__secret_key = secret_key
-        if len(self.__secret_key) % AES.block_size != 0:
+        self._secret_key = secret_key
+        if len(self._secret_key) % AES.block_size != 0:
             raise TypeError(
                 'Secret key must be a multiple of {} in length'.format(
                     AES.block_size))
-        self.__iv = iv
-        if iv is None:
-            self.__iv = Random.new().read(AES.block_size)
 
     @asyncio.coroutine
     def make_session(self, request):
@@ -65,8 +62,10 @@ class EncryptedCookieStorage(AbstractStorage):
             session = Session(self.identity, new=True)
         else:
             cookie = base64.b64decode(cookie)
-            cipher = AES.new(self.__secret_key, AES.MODE_CBC, self.__iv)
-            decrypted = cipher.decrypt(cookie)
+            iv = cookie[:AES.block_size]
+            data = cookie[AES.block_size:]
+            cipher = AES.new(self._secret_key, AES.MODE_CBC, iv)
+            decrypted = cipher.decrypt(data)
             data = json.loads(decrypted.decode('utf-8'))
             session = Session(self.identity, data=data, new=False)
 
@@ -84,7 +83,9 @@ class EncryptedCookieStorage(AbstractStorage):
             to_pad = AES.block_size - (len(cookie_data) % AES.block_size)
             cookie_data += b' ' * to_pad
 
-        cipher = AES.new(self.__secret_key, AES.MODE_CBC, self.__iv)
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self._secret_key, AES.MODE_CBC, iv)
         encrypted = cipher.encrypt(cookie_data)
+        encrypted = iv + encrypted
         b64coded = base64.b64encode(encrypted).decode('utf-8')
         self.store_cookie(response, b64coded)

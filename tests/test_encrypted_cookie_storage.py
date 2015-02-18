@@ -12,7 +12,7 @@ from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 
-class TestSimleCookieStorage(unittest.TestCase):
+class TestEncryptedCookieStorage(unittest.TestCase):
 
     def setUp(self):
         self.loop = asyncio.new_event_loop()

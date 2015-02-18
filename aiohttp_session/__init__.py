@@ -1,11 +1,12 @@
 import abc
 import asyncio
 from collections import MutableMapping
-import time
-import hmac
-import hashlib
+import json
 
 from aiohttp import web
+
+
+__version__ = '0.0.1'
 
 
 class Session(MutableMapping):
@@ -158,72 +159,33 @@ class AbstractStorage(metaclass=abc.ABCMeta):
                                 **self._cookie_params)
 
 
-class CookieSessionMiddleware:
+class SimpleCookieStorage(AbstractStorage):
+    """Simple JSON storage.
 
-    def __init__(self, secret_key, cookie_name, *,
-                 session_max_age=None, domain=None, max_age=None, path=None,
-                 secure=None, httponly=None):
-        if isinstance(secret_key, str):
-            secret_key = secret_key.encode('utf-8')
-        self._secret_key = secret_key
-        self._cookie_name = cookie_name
-        self._cookie_params = dict(domain=domain,
-                                   max_age=max_age,
-                                   path=path,
-                                   secure=secure,
-                                   httponly=httponly)
-        self._session_max_age = session_max_age
+    Doesn't any encryption/validation, use it for tests only"""
 
-    def get_session_id(self, request):
-        name = self._cookie_name
-        raw_value = request.cookies.get(name)
-        return self._decode_cookie(raw_value)
+    def __init__(self, identity="AIOHTTP_COOKIE_SESSION", *,
+                 domain=None, max_age=None, path='/',
+                 secure=None, httponly=True):
+        super().__init__(identity, domain=domain, max_age=max_age,
+                         path=path, secure=secure, httponly=httponly)
 
-    def put_session_id(self, request, cookie_value):
-        if cookie_value is None:
-            request.response.del_cookie(self._cookie_name)
+    @asyncio.coroutine
+    def make_session(self, request):
+        cookie = self.load_cookie(request)
+        if cookie is None:
+            session = Session(self.identity, new=True)
         else:
-            raw_value = self._encode_cookie(cookie_value)
-            request.response.set_cookie(self._cookie_name, raw_value,
-                                        **self._cookie_params)
+            data = json.loads(cookie)
+            session = Session(self.identity, data=data, new=False)
 
-    def _encode_cookie(self, value):
-        """Encode and sign cookie value.
+        request[SESSION_KEY] = session
 
-        value argument must be str instance.
-        """
-        assert isinstance(value, str)
-        name = self._cookie_name
-        timestamp = str(int(time.time()))
-        singature = self._get_signature(name, value, timestamp)
-        return '|'.join((value, timestamp, singature))
+    @asyncio.coroutine
+    def save_session(self, request, response):
+        session = request[SESSION_KEY]
+        if not session._changed:
+            return
 
-    def _decode_cookie(self, value):
-        """Decode and verify cookie value.
-
-        value argument must be str.
-        Returns decoded bytes value of cookie
-        or None if value could not be decoded or verified.
-        """
-        if not value:
-            return None
-        parts = value.split('|')
-        if len(parts) != 3:
-            return None
-        name = self._cookie_name
-        value, timestamp, sign = parts
-
-        if self._session_max_age is not None:
-            if int(timestamp) < int(time.time()) - self._session_max_age:
-                return None
-
-        expected_sign = self._get_signature(name, value, timestamp)
-        if not hmac.compare_digest(expected_sign, sign):
-            # TODO: log warning
-            return None
-        return value
-
-    def _get_signature(self, *parts):
-        sign = hmac.new(self._secret_key, digestmod=hashlib.sha1)
-        sign.update(('|'.join(parts)).encode('utf-8'))
-        return sign.hexdigest()
+        cookie_data = json.dumps(session._mapping)
+        self.store_cookie(response, cookie_data)

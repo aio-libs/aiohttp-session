@@ -4,8 +4,8 @@ import socket
 import unittest
 
 from aiohttp import web, request
-from aiohttp_session import Session, session_middleware, get_session
-from aiohttp_session.cookie_storage import SimpleCookieStorage
+from aiohttp_session import (Session, session_middleware,
+                             get_session, SimpleCookieStorage)
 
 
 class TestSimleCookieStorage(unittest.TestCase):

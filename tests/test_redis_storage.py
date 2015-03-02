@@ -46,12 +46,22 @@ class TestRedisStorage(unittest.TestCase):
         self.addCleanup(srv.close)
         return app, srv, url
 
+    @asyncio.coroutine
     def make_cookie(self, data):
         value = json.dumps(data)
         key = uuid.uuid4().hex
         with (yield from self.redis) as conn:
-            conn.set(key, value)
+            yield from conn.set(key, value)
         return {'AIOHTTP_COOKIE_SESSION': key}
+
+    @asyncio.coroutine
+    def load_cookie(self, cookies):
+        key = cookies['AIOHTTP_COOKIE_SESSION']
+        with (yield from self.redis) as conn:
+            encoded = yield from conn.get(key.value)
+            s = encoded.decode('utf-8')
+            value = json.loads(s)
+            return value
 
     def test_create_new_sesssion(self):
 
@@ -86,9 +96,10 @@ class TestRedisStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = yield from self.make_cookie({'a': 1, 'b': 12})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 12}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
 
@@ -105,16 +116,15 @@ class TestRedisStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = yield from self.make_cookie({'a': 1, 'b': 2})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
+            value = yield from self.load_cookie(resp.cookies)
+            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, value)
             morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
-            self.assertEqual(
-                {'a': 1, 'b': 2, 'c': 3},
-                self.decrypt(morsel.value)
-            )
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 
@@ -131,14 +141,43 @@ class TestRedisStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = yield from self.make_cookie({'a': 1, 'b': 2})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
+            value = yield from self.load_cookie(resp.cookies)
+            self.assertEqual({}, value)
             morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
-            self.assertEqual({}, self.decrypt(morsel.value))
             self.assertTrue(morsel['httponly'])
             self.assertEqual(morsel['path'], '/')
+
+        self.loop.run_until_complete(go())
+
+    def test_create_cookie_in_handler(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = yield from get_session(request)
+            session['a'] = 1
+            session['b'] = 2
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler)
+            resp = yield from request(
+                'GET', url,
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+            value = yield from self.load_cookie(resp.cookies)
+            self.assertEqual({'a': 1, 'b': 2}, value)
+            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            self.assertTrue(morsel['httponly'])
+            self.assertEqual(morsel['path'], '/')
+            with (yield from self.redis) as conn:
+                exists = yield from conn.exists(morsel.value)
+                self.assertTrue(exists)
 
         self.loop.run_until_complete(go())

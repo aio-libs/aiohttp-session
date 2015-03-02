@@ -22,12 +22,14 @@ class RedisStorage(AbstractStorage):
     def make_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            session = Session(self.identity, new=True)
+            session = Session(None, new=True)
         else:
             with (yield from self._redis) as conn:
-                data = yield from conn.get(str(cookie))
+                key = self.identity + '_' + str(cookie)
+                data = yield from conn.get(cookie)
+                data = data.decode('utf-8')
                 data = self._decoder(data)
-                session = Session(self.identity, data=data, new=False)
+                session = Session(key, data=data, new=False)
 
         request[SESSION_KEY] = session
 
@@ -36,12 +38,13 @@ class RedisStorage(AbstractStorage):
         session = request[SESSION_KEY]
         if not session._changed:
             return
-        cookie = self.load_cookie(request)
-        if cookie is None:
-            key = uuid.uuid4().hex
+        key = session.identity
+        if key is None:
+            key = self.identity + '_' + uuid.uuid4().hex
             self.store_cookie(response, key)
         else:
-            key = str(cookie)
+            key = str(key)
+            self.store_cookie(response, key)
         data = self._encoder(session._mapping)
         with (yield from self._redis) as conn:
             yield from conn.set(key, data)

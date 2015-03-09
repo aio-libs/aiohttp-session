@@ -27,14 +27,14 @@ class TestRedisStorage(unittest.TestCase):
         return port
 
     @asyncio.coroutine
-    def create_server(self, method, path, handler=None):
+    def create_server(self, method, path, handler=None, max_age=None):
         self.redis = yield from aioredis.create_pool(('localhost', 6379),
                                                      minsize=5,
                                                      maxsize=10,
                                                      loop=self.loop)
         self.addCleanup(self.redis.clear)
         middleware = session_middleware(
-            RedisStorage(self.redis))
+            RedisStorage(self.redis, max_age=max_age))
         app = web.Application(middlewares=[middleware], loop=self.loop)
         if handler:
             app.router.add_route(method, path, handler)
@@ -179,5 +179,32 @@ class TestRedisStorage(unittest.TestCase):
             with (yield from self.redis) as conn:
                 exists = yield from conn.exists(morsel.value)
                 self.assertTrue(exists)
+
+        self.loop.run_until_complete(go())
+
+    def test_set_ttl_on_session_saving(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = yield from get_session(request)
+            session['a'] = 1
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler,
+                                                      max_age=10)
+
+            resp = yield from request(
+                'GET', url,
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+
+            key = resp.cookies['AIOHTTP_COOKIE_SESSION'].value
+
+            with (yield from self.redis) as conn:
+                ttl = yield from conn.ttl(key)
+            self.assertGreater(ttl, 9)
+            self.assertLessEqual(ttl, 10)
 
         self.loop.run_until_complete(go())

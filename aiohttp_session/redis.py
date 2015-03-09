@@ -47,5 +47,6 @@ class RedisStorage(AbstractStorage):
             self.store_cookie(response, key)
         data = self._encoder(session._mapping)
         with (yield from self._redis) as conn:
-            # TODO: set TTL for stored value
-            yield from conn.set(key, data)
+            max_age = self.max_age
+            expire = max_age if max_age is not None else 0
+            yield from conn.set(key, data, expire=expire)

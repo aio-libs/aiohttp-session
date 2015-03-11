@@ -106,7 +106,8 @@ def session_middleware(storage):
                     "Cannot save session data into started response")
             session = request.get(SESSION_KEY)
             if session is not None:
-                yield from storage.save_session(request, response)
+                if session._changed:
+                    yield from storage.save_session(request, response, session)
             return response
 
         return middleware
@@ -146,7 +147,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
 
     @asyncio.coroutine
     @abc.abstractmethod
-    def save_session(self, response):
+    def save_session(self, request, response, session):
         pass
 
     def load_cookie(self, request):
@@ -184,10 +185,6 @@ class SimpleCookieStorage(AbstractStorage):
         request[SESSION_KEY] = session
 
     @asyncio.coroutine
-    def save_session(self, request, response):
-        session = request[SESSION_KEY]
-        if not session._changed:
-            return
-
+    def save_session(self, request, response, session):
         cookie_data = json.dumps(session._mapping)
         self.store_cookie(response, cookie_data)

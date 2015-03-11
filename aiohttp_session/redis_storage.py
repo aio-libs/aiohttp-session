@@ -34,10 +34,7 @@ class RedisStorage(AbstractStorage):
         request[SESSION_KEY] = session
 
     @asyncio.coroutine
-    def save_session(self, request, response):
-        session = request[SESSION_KEY]
-        if not session._changed:
-            return
+    def save_session(self, request, response, session):
         key = session.identity
         if key is None:
             key = self.identity + '_' + uuid.uuid4().hex

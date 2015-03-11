@@ -15,9 +15,10 @@ with codecs.open(os.path.join(os.path.abspath(os.path.dirname(
 def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
-install_requires = ['aiohttp>=0.14', 'jinja2', 'pycrypto']
+install_requires = ['aiohttp>=0.14']
 tests_require = install_requires + ['nose']
-extras_require = {'redis': ['aioredis>=0.1.4']}
+extras_require = {'redis': ['aioredis>=0.1.4'],
+                  'sec_cookirs': ['pycrypto']}
 
 
 setup(name='aiohttp_session',

@@ -104,7 +104,9 @@ def session_middleware(storage):
             if response.started:
                 raise RuntimeError(
                     "Cannot save session data into started response")
-            yield from storage.save_session(request, response)
+            session = request.get(SESSION_KEY)
+            if session is not None:
+                yield from storage.save_session(request, response)
             return response
 
         return middleware

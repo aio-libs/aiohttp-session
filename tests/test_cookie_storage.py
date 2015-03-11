@@ -127,3 +127,21 @@ class TestSimleCookieStorage(unittest.TestCase):
                 resp.cookies['AIOHTTP_COOKIE_SESSION'].output())
 
         self.loop.run_until_complete(go())
+
+    def test_dont_save_not_requested_session(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler)
+            resp = yield from request(
+                'GET', url,
+                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+            self.assertNotIn('AIOHTTP_COOKIE_SESSION', resp.cookies)
+
+        self.loop.run_until_complete(go())

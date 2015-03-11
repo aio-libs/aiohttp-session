@@ -2,13 +2,15 @@ import asyncio
 import json
 import socket
 import unittest
+import uuid
+import aioredis
 
 from aiohttp import web, request
-from aiohttp_session import (Session, session_middleware,
-                             get_session, SimpleCookieStorage)
+from aiohttp_session import Session, session_middleware, get_session
+from aiohttp_session.redis_storage import RedisStorage
 
 
-class TestSimleCookieStorage(unittest.TestCase):
+class TestRedisStorage(unittest.TestCase):
 
     def setUp(self):
         self.loop = asyncio.new_event_loop()
@@ -25,8 +27,14 @@ class TestSimleCookieStorage(unittest.TestCase):
         return port
 
     @asyncio.coroutine
-    def create_server(self, method, path, handler=None):
-        middleware = session_middleware(SimpleCookieStorage())
+    def create_server(self, method, path, handler=None, max_age=None):
+        self.redis = yield from aioredis.create_pool(('localhost', 6379),
+                                                     minsize=5,
+                                                     maxsize=10,
+                                                     loop=self.loop)
+        self.addCleanup(self.redis.clear)
+        middleware = session_middleware(
+            RedisStorage(self.redis, max_age=max_age))
         app = web.Application(middlewares=[middleware], loop=self.loop)
         if handler:
             app.router.add_route(method, path, handler)
@@ -38,9 +46,22 @@ class TestSimleCookieStorage(unittest.TestCase):
         self.addCleanup(srv.close)
         return app, srv, url
 
+    @asyncio.coroutine
     def make_cookie(self, data):
         value = json.dumps(data)
-        return {'AIOHTTP_COOKIE_SESSION': value}
+        key = uuid.uuid4().hex
+        with (yield from self.redis) as conn:
+            yield from conn.set(key, value)
+        return {'AIOHTTP_COOKIE_SESSION': key}
+
+    @asyncio.coroutine
+    def load_cookie(self, cookies):
+        key = cookies['AIOHTTP_COOKIE_SESSION']
+        with (yield from self.redis) as conn:
+            encoded = yield from conn.get(key.value)
+            s = encoded.decode('utf-8')
+            value = json.loads(s)
+            return value
 
     def test_create_new_sesssion(self):
 
@@ -69,15 +90,16 @@ class TestSimleCookieStorage(unittest.TestCase):
             self.assertIsInstance(session, Session)
             self.assertFalse(session.new)
             self.assertFalse(session._changed)
-            self.assertEqual({'a': 1, 'b': 2}, session)
+            self.assertEqual({'a': 1, 'b': 12}, session)
             return web.Response(body=b'OK')
 
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = yield from self.make_cookie({'a': 1, 'b': 12})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
 
@@ -94,13 +116,15 @@ class TestSimleCookieStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = yield from self.make_cookie({'a': 1, 'b': 2})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
+            value = yield from self.load_cookie(resp.cookies)
+            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, value)
             morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
-            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, eval(morsel.value))
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 
@@ -117,21 +141,27 @@ class TestSimleCookieStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = yield from self.make_cookie({'a': 1, 'b': 2})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            self.assertEqual(
-                'Set-Cookie: AIOHTTP_COOKIE_SESSION="{}"; httponly; Path=/',
-                resp.cookies['AIOHTTP_COOKIE_SESSION'].output())
+            value = yield from self.load_cookie(resp.cookies)
+            self.assertEqual({}, value)
+            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            self.assertTrue(morsel['httponly'])
+            self.assertEqual(morsel['path'], '/')
 
         self.loop.run_until_complete(go())
 
-    def test_dont_save_not_requested_session(self):
+    def test_create_cookie_in_handler(self):
 
         @asyncio.coroutine
         def handler(request):
+            session = yield from get_session(request)
+            session['a'] = 1
+            session['b'] = 2
             return web.Response(body=b'OK')
 
         @asyncio.coroutine
@@ -139,9 +169,42 @@ class TestSimleCookieStorage(unittest.TestCase):
             _, _, url = yield from self.create_server('GET', '/', handler)
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            self.assertNotIn('AIOHTTP_COOKIE_SESSION', resp.cookies)
+            value = yield from self.load_cookie(resp.cookies)
+            self.assertEqual({'a': 1, 'b': 2}, value)
+            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            self.assertTrue(morsel['httponly'])
+            self.assertEqual(morsel['path'], '/')
+            with (yield from self.redis) as conn:
+                exists = yield from conn.exists(morsel.value)
+                self.assertTrue(exists)
+
+        self.loop.run_until_complete(go())
+
+    def test_set_ttl_on_session_saving(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = yield from get_session(request)
+            session['a'] = 1
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler,
+                                                      max_age=10)
+
+            resp = yield from request(
+                'GET', url,
+                loop=self.loop)
+            self.assertEqual(200, resp.status)
+
+            key = resp.cookies['AIOHTTP_COOKIE_SESSION'].value
+
+            with (yield from self.redis) as conn:
+                ttl = yield from conn.ttl(key)
+            self.assertGreater(ttl, 9)
+            self.assertLessEqual(ttl, 10)
 
         self.loop.run_until_complete(go())

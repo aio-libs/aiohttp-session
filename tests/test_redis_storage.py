@@ -7,7 +7,7 @@ import aioredis
 
 from aiohttp import web, request
 from aiohttp_session import Session, session_middleware, get_session
-from aiohttp_session.redis import RedisStorage
+from aiohttp_session.redis_storage import RedisStorage
 
 
 class TestRedisStorage(unittest.TestCase):

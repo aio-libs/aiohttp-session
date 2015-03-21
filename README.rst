@@ -12,11 +12,11 @@ Usage
 The library allows to store user-specific data into session object.
 
 The session object has dict-like interface (operations like
-`session[key] = value`, `value = session[key]` etc. are present).
+``session[key] = value``, ``value = session[key]`` etc. are present).
 
 
 Before processing session in web-handler you have to register *session
-middleware* in `aiohttp.web.Application`.
+middleware* in ``aiohttp.web.Application``.
 
 A trivial usage example::
 
@@ -36,29 +36,29 @@ A trivial usage example::
 
     app.router.add_route('GET', '/', handler)
 
-All storages uses HTTP Cookie named `AIOHTTP_COOKIE_SESSION` for storing data.
+All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
 
 Available session storages are:
 
-* `aiohttp_session.SimpleCookieStorage()` -- keeps session data as
+* ``aiohttp_session.SimpleCookieStorage()`` -- keeps session data as
   plain JSON string in cookie body. Use the storage only for testing
   purposes, it's very non-secure.
 
-* `aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)`
-  -- stores session data into cookies as `SimpleCookieStorage` but
-  encodes it via AES cipher. `secrect_key` is `bytes` key for AES
+* ``aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)``
+  -- stores session data into cookies as ``SimpleCookieStorage`` but
+  encodes it via AES cipher. ``secrect_key`` is a ``bytes`` key for AES
   encryption/decryption, the length should be 16 bytes.
 
-  Requires `PyCrypto` library::
+  Requires ``PyCrypto`` library::
 
       $ pip install aiohttp_session[pycrypto]
 
-* `aiohttp_session.redis_storage.RedisStorage(redis_pool)` -- stores
+* ``aiohttp_session.redis_storage.RedisStorage(redis_pool)`` -- stores
   JSON-ed data into *redis*, keepeng into cookie only redis key
-  (random UUID). `redis_pool` is `aioredis` pool object, created by
-  `yield from aioredis.create_pool(...)` call.
+  (random UUID). ``redis_pool`` is ``aioredis`` pool object, created by
+  ``yield from aioredis.create_pool(...)`` call.
 
-  Requires `aioredis` library::
+  Requires ``aioredis`` library::
 
       $ pip install aiohttp_session[aioredis]
 

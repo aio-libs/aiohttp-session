@@ -18,7 +18,7 @@ The session object has dict-like interface (operations like
 Before processing session in web-handler you have to register *session
 middleware* in `aiohttp.web.Application`.
 
-The trivial usage example::
+A trivial usage example::
 
     import asycio
     import time

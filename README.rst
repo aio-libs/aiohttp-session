@@ -49,14 +49,18 @@ Available session storages are:
   encodes it via AES cipher. `secrect_key` is `bytes` key for AES
   encryption/decryption, the length should be 16 bytes.
 
-  Requires `PyCrypto` library.
+  Requires `PyCrypto` library::
+
+      $ pip install aiohttp_session[pycrypto]
 
 * `aiohttp_session.redis_storage.RedisStorage(redis_pool)` -- stores
   JSON-ed data into *redis*, keepeng into cookie only redis key
   (random UUID). `redis_pool` is `aioredis` pool object, created by
   `yield from aioredis.create_pool(...)` call.
 
-  Requires `aioredis` library.
+  Requires `aioredis` library::
+
+      $ pip install aiohttp_session[aioredis]
 
 License
 -------

@@ -24,7 +24,7 @@ extras_require = {'aioredis': ['aioredis>=0.1.4'],
 setup(name='aiohttp_session',
       version=version,
       description=("sessions for aiohttp.web"),
-      lond_description='\n\n'.join((read('README.rst'), read('CHANGES.txt'))),
+      long_description='\n\n'.join((read('README.rst'), read('CHANGES.txt'))),
       classifiers=[
           'License :: OSI Approved :: Apache Software License',
           'Intended Audience :: Developers',

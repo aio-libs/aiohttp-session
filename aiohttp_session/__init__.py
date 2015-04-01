@@ -1,3 +1,5 @@
+"""User sessions for aiohttp.web."""
+
 import abc
 import asyncio
 from collections import MutableMapping
@@ -10,8 +12,8 @@ __version__ = '0.0.1'
 
 
 class Session(MutableMapping):
-    """Session dict-like object.
-    """
+
+    """Session dict-like object."""
 
     def __init__(self, identity, *, data=None, new=False):
         self._changed = False

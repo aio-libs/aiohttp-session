@@ -328,6 +328,6 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None,
+intersphinx_mapping = {'https://docs.python.org/3': None,
                        'http://aiohttp.readthedocs.org/en/stable': None,
                        'http://aioredis.readthedocs.org/en/latest': None}

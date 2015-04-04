@@ -9,6 +9,20 @@
 .. currentmodule:: aiohttp_session
 
 
+Public functions
+================
+
+.. function:: get_session(request)
+
+   A :ref:`coroutine<coroutine>` for getting session instance from
+   request object.
+
+   See example below in :ref:`Session<aiohttp-session-session>`
+   section for :func:`get_session` usage.
+
+
+.. _aiohttp-session-session:
+
 Session
 =======
 

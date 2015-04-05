@@ -78,11 +78,11 @@ def get_session(request):
                 "Install aiohttp_session middleware "
                 "in your aiohttp.web.Application")
         else:
-            session = yield from storage.make_session(request)
+            session = yield from storage.load_session(request)
             if not isinstance(session, Session):
                 raise RuntimeError(
                     "Installed {!r} storage should return session instance "
-                    "on .make_session() call, got {!r}.".format(storage,
+                    "on .load_session() call, got {!r}.".format(storage,
                                                                 session))
             request[SESSION_KEY] = session
     return session
@@ -145,7 +145,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
 
     @asyncio.coroutine
     @abc.abstractmethod
-    def make_session(self, request):
+    def load_session(self, request):
         pass
 
     @asyncio.coroutine
@@ -157,7 +157,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         cookie = request.cookies.get(self._cookie_name)
         return cookie
 
-    def store_cookie(self, response, cookie_data):
+    def save_cookie(self, response, cookie_data):
         if not cookie_data:
             response.del_cookie(self._cookie_name)
         else:
@@ -178,7 +178,7 @@ class SimpleCookieStorage(AbstractStorage):
                          httponly=httponly)
 
     @asyncio.coroutine
-    def make_session(self, request):
+    def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, new=True)
@@ -189,4 +189,4 @@ class SimpleCookieStorage(AbstractStorage):
     @asyncio.coroutine
     def save_session(self, request, response, session):
         cookie_data = json.dumps(session._mapping)
-        self.store_cookie(response, cookie_data)
+        self.save_cookie(response, cookie_data)

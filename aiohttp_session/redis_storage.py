@@ -20,7 +20,7 @@ class RedisStorage(AbstractStorage):
         self._redis = redis_pool
 
     @asyncio.coroutine
-    def make_session(self, request):
+    def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, new=True)
@@ -37,10 +37,10 @@ class RedisStorage(AbstractStorage):
         key = session.identity
         if key is None:
             key = self.cookie_name + '_' + uuid.uuid4().hex
-            self.store_cookie(response, key)
+            self.save_cookie(response, key)
         else:
             key = str(key)
-            self.store_cookie(response, key)
+            self.save_cookie(response, key)
         data = self._encoder(session._mapping)
         with (yield from self._redis) as conn:
             max_age = self.max_age

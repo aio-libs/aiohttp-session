@@ -25,7 +25,7 @@ class EncryptedCookieStorage(AbstractStorage):
                     AES.block_size))
 
     @asyncio.coroutine
-    def make_session(self, request):
+    def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, new=True)
@@ -51,4 +51,4 @@ class EncryptedCookieStorage(AbstractStorage):
         encrypted = cipher.encrypt(cookie_data)
         encrypted = iv + encrypted
         b64coded = base64.b64encode(encrypted).decode('utf-8')
-        self.store_cookie(response, b64coded)
+        self.save_cookie(response, b64coded)

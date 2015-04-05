@@ -159,7 +159,7 @@ implement :meth:`AbstractStorage.make_session`,
       :class:`dict` of cookie params: *domain*, *max_age*, *path*,
       *secure* and *httponly*.
 
-   .. method:: make_session(request)
+   .. method:: load_session(request)
 
       An *abstract* :ref:`coroutine<coroutine>`, called by internal
       machinery for retrieving :class:`Session` object for given
@@ -179,7 +179,7 @@ implement :meth:`AbstractStorage.make_session`,
       A helper for loading cookie (:class:`http.cookies.SimpleCookie`
       instance) from *request* (:class:`aiohttp.web.Request`).
 
-   .. method:: store_cookie(response, cookie_data)
+   .. method:: save_cookie(response, cookie_data)
 
       A helper for saving *cookie_data* (:class:`str`) into *response*
       (:class:`aiohttp.web.StreamResponse` or descendants).

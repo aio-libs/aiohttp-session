@@ -20,6 +20,19 @@ Public functions
    See example below in :ref:`Session<aiohttp-session-session>`
    section for :func:`get_session` usage.
 
+.. function:: session_middleware(storage)
+
+   Session middleware factory.
+
+   Create session middleware to pass into
+   :class:`aiohttp.web.Application` constructor.
+
+   *storage* is a session storage instance (object used to store
+   session data into cookies, Redis, database etc., class is derived
+   from :class:`AbstractStorage`).
+
+   .. seealso:: :ref:`aiohttp-session-storage`
+
 
 .. _aiohttp-session-session:
 
@@ -96,3 +109,77 @@ Session
 
       Call this when you want to invalidate the session (dump all
       data, and -- perhaps -- set a clearing cookie).
+
+
+.. _aiohttp-session-storage:
+
+Session storages
+================
+
+:mod:`aiohttp_session` uses storages to save/load persistend session data.
+
+All storages should be derived from :class:`AbstractStorage` and
+implement :meth:`AbstractStorage.make_session`,
+:meth:`AbstractStorage.save_session` methods.
+
+.. class:: AbstraceStorage(cookie_name="AIOHTTP_SESSION", *, \
+                           domain=None, max_age=None, path='/', \
+                           secure=None, httponly=True)
+
+   Base class for session storage implementations.
+
+   It uses HTTP cookie for storing at least key for session data, but
+   some implementations may save all session info into cookies.
+
+   *cookie_name* -- name of cookie used for saving session data.
+
+   *domain* -- cookie's domain, :class:`str` or ``None``.
+
+   *max_age* -- cookie's max age, :class:`int` or ``None``.
+
+   *path* -- cookie's path, :class:`str` or ``None``.
+
+   *secure* -- cookie's secure flag, :class:`bool` or ``None`` (the
+   same as ``False``).
+
+   *httponly* -- cookie's http-only flag, :class:`bool` or ``None`` (the
+   same as ``False``).
+
+   .. attribute:: max_age
+
+      Maximum age for session data, :class:`int` seconds or ``None``
+      for infinite session.
+
+   .. attribute:: cookie_name
+
+      Name of cookie used for saving session data.
+
+   .. attribute:: cookie_params
+
+      :class:`dict` of cookie params: *domain*, *max_age*, *path*,
+      *secure* and *httponly*.
+
+   .. method:: make_session(request)
+
+      An *abstract* :ref:`coroutine<coroutine>`, called by internal
+      machinery for retrieving :class:`Session` object for given
+      *request* (:class:`aiohttp.web.Request` instance).
+
+      Return :class:`Session` instance.
+
+   .. method:: save_session(request, response, session)
+
+      An *abstract* :ref:`coroutine<coroutine>`, called by internal
+      machinery for storing *session* (:class:`Session`) instance for
+      given *request* (:class:`aiohttp.web.Request`) using *response*
+      (:class:`aiohttp.web.StreamResponse` or descendants).
+
+   .. method:: load_cookie(request)
+
+      A helper for loading cookie (:class:`http.cookies.SimpleCookie`
+      instance) from *request* (:class:`aiohttp.web.Request`).
+
+   .. method:: store_cookie(response, cookie_data)
+
+      A helper for saving *cookie_data* (:class:`str`) into *response*
+      (:class:`aiohttp.web.StreamResponse` or descendants).

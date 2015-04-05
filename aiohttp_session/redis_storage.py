@@ -8,7 +8,7 @@ from . import AbstractStorage, Session, SESSION_KEY
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(self, redis_pool, *, cookie_name="AIOHTTP_COOKIE_SESSION",
+    def __init__(self, redis_pool, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
                  encoder=json.dumps, decoder=json.loads):

@@ -11,7 +11,7 @@ class EncryptedCookieStorage(AbstractStorage):
     """Encrypted JSON storage.
     """
 
-    def __init__(self, secret_key, *, cookie_name="AIOHTTP_COOKIE_SESSION",
+    def __init__(self, secret_key, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True):
         super().__init__(cookie_name=cookie_name, domain=domain,

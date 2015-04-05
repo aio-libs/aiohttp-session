@@ -70,21 +70,22 @@ STORAGE_KEY = 'aiohttp_session_storage'
 
 @asyncio.coroutine
 def get_session(request):
-    ret = request.get(SESSION_KEY)
-    if ret is None:
+    session = request.get(SESSION_KEY)
+    if session is None:
         storage = request.get(STORAGE_KEY)
         if storage is None:
             raise RuntimeError(
                 "Install aiohttp_session middleware "
                 "in your aiohttp.web.Application")
         else:
-            yield from storage.make_session(request)
-            ret = request.get(SESSION_KEY)
-            if ret is None:
+            session = yield from storage.make_session(request)
+            if not isinstance(session, Session):
                 raise RuntimeError(
-                    "Installed {!r} storage should fill request[SESSION_KEY] "
-                    "on .make_session() call.")
-    return ret
+                    "Installed {!r} storage should return session instance "
+                    "on .make_session() call, got {!r}.".format(storage,
+                                                                session))
+            request[SESSION_KEY] = session
+    return session
 
 
 def session_middleware(storage):
@@ -180,12 +181,10 @@ class SimpleCookieStorage(AbstractStorage):
     def make_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            session = Session(None, new=True)
+            return Session(None, new=True)
         else:
             data = json.loads(cookie)
-            session = Session(None, data=data, new=False)
-
-        request[SESSION_KEY] = session
+            return Session(None, data=data, new=False)
 
     @asyncio.coroutine
     def save_session(self, request, response, session):

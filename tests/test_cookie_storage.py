@@ -40,7 +40,7 @@ class TestSimleCookieStorage(unittest.TestCase):
 
     def make_cookie(self, data):
         value = json.dumps(data)
-        return {'AIOHTTP_COOKIE_SESSION': value}
+        return {'AIOHTTP_SESSION': value}
 
     def test_create_new_sesssion(self):
 
@@ -99,7 +99,7 @@ class TestSimleCookieStorage(unittest.TestCase):
                 cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertEqual({'a': 1, 'b': 2, 'c': 3}, eval(morsel.value))
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
@@ -123,8 +123,8 @@ class TestSimleCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             self.assertEqual(
-                'Set-Cookie: AIOHTTP_COOKIE_SESSION="{}"; httponly; Path=/',
-                resp.cookies['AIOHTTP_COOKIE_SESSION'].output())
+                'Set-Cookie: AIOHTTP_SESSION="{}"; httponly; Path=/',
+                resp.cookies['AIOHTTP_SESSION'].output())
 
         self.loop.run_until_complete(go())
 
@@ -142,6 +142,6 @@ class TestSimleCookieStorage(unittest.TestCase):
                 cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            self.assertNotIn('AIOHTTP_COOKIE_SESSION', resp.cookies)
+            self.assertNotIn('AIOHTTP_SESSION', resp.cookies)
 
         self.loop.run_until_complete(go())

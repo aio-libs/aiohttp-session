@@ -55,7 +55,7 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         encrypted = cipher.encrypt(cookie_data)
         encrypted = iv + encrypted
         b64coded = base64.b64encode(encrypted).decode('utf-8')
-        return {'AIOHTTP_COOKIE_SESSION': b64coded}
+        return {'AIOHTTP_SESSION': b64coded}
 
     def decrypt(self, cookie_value):
         assert type(cookie_value) == str
@@ -127,7 +127,7 @@ class TestEncryptedCookieStorage(unittest.TestCase):
                 cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertEqual(
                 {'a': 1, 'b': 2, 'c': 3},
                 self.decrypt(morsel.value)
@@ -153,7 +153,7 @@ class TestEncryptedCookieStorage(unittest.TestCase):
                 cookies=self.make_cookie({'a': 1, 'b': 2}),
                 loop=self.loop)
             self.assertEqual(200, resp.status)
-            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertEqual({}, self.decrypt(morsel.value))
             self.assertTrue(morsel['httponly'])
             self.assertEqual(morsel['path'], '/')

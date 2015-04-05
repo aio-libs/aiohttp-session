@@ -52,11 +52,11 @@ class TestRedisStorage(unittest.TestCase):
         key = uuid.uuid4().hex
         with (yield from self.redis) as conn:
             yield from conn.set(key, value)
-        return {'AIOHTTP_COOKIE_SESSION': key}
+        return {'AIOHTTP_SESSION': key}
 
     @asyncio.coroutine
     def load_cookie(self, cookies):
-        key = cookies['AIOHTTP_COOKIE_SESSION']
+        key = cookies['AIOHTTP_SESSION']
         with (yield from self.redis) as conn:
             encoded = yield from conn.get(key.value)
             s = encoded.decode('utf-8')
@@ -124,7 +124,7 @@ class TestRedisStorage(unittest.TestCase):
             self.assertEqual(200, resp.status)
             value = yield from self.load_cookie(resp.cookies)
             self.assertEqual({'a': 1, 'b': 2, 'c': 3}, value)
-            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 
@@ -149,7 +149,7 @@ class TestRedisStorage(unittest.TestCase):
             self.assertEqual(200, resp.status)
             value = yield from self.load_cookie(resp.cookies)
             self.assertEqual({}, value)
-            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertTrue(morsel['httponly'])
             self.assertEqual(morsel['path'], '/')
 
@@ -173,7 +173,7 @@ class TestRedisStorage(unittest.TestCase):
             self.assertEqual(200, resp.status)
             value = yield from self.load_cookie(resp.cookies)
             self.assertEqual({'a': 1, 'b': 2}, value)
-            morsel = resp.cookies['AIOHTTP_COOKIE_SESSION']
+            morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertTrue(morsel['httponly'])
             self.assertEqual(morsel['path'], '/')
             with (yield from self.redis) as conn:
@@ -200,7 +200,7 @@ class TestRedisStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
 
-            key = resp.cookies['AIOHTTP_COOKIE_SESSION'].value
+            key = resp.cookies['AIOHTTP_SESSION'].value
 
             with (yield from self.redis) as conn:
                 ttl = yield from conn.ttl(key)

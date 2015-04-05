@@ -2,7 +2,7 @@ import asyncio
 import json
 import uuid
 
-from . import AbstractStorage, Session, SESSION_KEY
+from . import AbstractStorage, Session
 
 
 class RedisStorage(AbstractStorage):
@@ -23,16 +23,14 @@ class RedisStorage(AbstractStorage):
     def make_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            session = Session(None, new=True)
+            return Session(None, new=True)
         else:
             with (yield from self._redis) as conn:
                 key = self.cookie_name + '_' + str(cookie)
                 data = yield from conn.get(cookie)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
-                session = Session(key, data=data, new=False)
-
-        request[SESSION_KEY] = session
+                return Session(key, data=data, new=False)
 
     @asyncio.coroutine
     def save_session(self, request, response, session):

@@ -1,7 +1,7 @@
 import asyncio
 import json
 import base64
-from . import AbstractStorage, Session, SESSION_KEY
+from . import AbstractStorage, Session
 
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -28,7 +28,7 @@ class EncryptedCookieStorage(AbstractStorage):
     def make_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            session = Session(None, new=True)
+            return Session(None, new=True)
         else:
             cookie = base64.b64decode(cookie)
             iv = cookie[:AES.block_size]
@@ -36,9 +36,7 @@ class EncryptedCookieStorage(AbstractStorage):
             cipher = AES.new(self._secret_key, AES.MODE_CBC, iv)
             decrypted = cipher.decrypt(data)
             data = json.loads(decrypted.decode('utf-8'))
-            session = Session(None, data=data, new=False)
-
-        request[SESSION_KEY] = session
+            return Session(None, data=data, new=False)
 
     @asyncio.coroutine
     def save_session(self, request, response, session):

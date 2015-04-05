@@ -119,10 +119,10 @@ def session_middleware(storage):
 
 class AbstractStorage(metaclass=abc.ABCMeta):
 
-    def __init__(self, identity="AIOHTTP_SESSION", *,
+    def __init__(self, *, cookie_name="AIOHTTP_COOKIE_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True):
-        self._identity = identity
+        self._cookie_name = cookie_name
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,
                                    path=path,
@@ -131,8 +131,8 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         self._max_age = max_age
 
     @property
-    def identity(self):
-        return self._identity
+    def cookie_name(self):
+        return self._cookie_name
 
     @property
     def max_age(self):
@@ -153,14 +153,14 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         pass
 
     def load_cookie(self, request):
-        cookie = request.cookies.get(self._identity)
+        cookie = request.cookies.get(self._cookie_name)
         return cookie
 
     def store_cookie(self, response, cookie_data):
         if not cookie_data:
-            response.del_cookie(self._identity)
+            response.del_cookie(self._cookie_name)
         else:
-            response.set_cookie(self._identity, cookie_data,
+            response.set_cookie(self._cookie_name, cookie_data,
                                 **self._cookie_params)
 
 
@@ -169,20 +169,21 @@ class SimpleCookieStorage(AbstractStorage):
 
     Doesn't any encryption/validation, use it for tests only"""
 
-    def __init__(self, identity="AIOHTTP_COOKIE_SESSION", *,
+    def __init__(self, cookie_name="AIOHTTP_COOKIE_SESSION", *,
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True):
-        super().__init__(identity, domain=domain, max_age=max_age,
-                         path=path, secure=secure, httponly=httponly)
+        super().__init__(cookie_name=cookie_name, domain=domain,
+                         max_age=max_age, path=path, secure=secure,
+                         httponly=httponly)
 
     @asyncio.coroutine
     def make_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            session = Session(self.identity, new=True)
+            session = Session(None, new=True)
         else:
             data = json.loads(cookie)
-            session = Session(self.identity, data=data, new=False)
+            session = Session(None, data=data, new=False)
 
         request[SESSION_KEY] = session
 

@@ -8,12 +8,13 @@ from . import AbstractStorage, Session, SESSION_KEY
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(self, redis_pool, identity="AIOHTTP_COOKIE_SESSION", *,
+    def __init__(self, redis_pool, *, cookie_name="AIOHTTP_COOKIE_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
                  encoder=json.dumps, decoder=json.loads):
-        super().__init__(identity, domain=domain, max_age=max_age,
-                         path=path, secure=secure, httponly=httponly)
+        super().__init__(cookie_name=cookie_name, domain=domain,
+                         max_age=max_age, path=path, secure=secure,
+                         httponly=httponly)
         self._encoder = encoder
         self._decoder = decoder
         self._redis = redis_pool
@@ -25,7 +26,7 @@ class RedisStorage(AbstractStorage):
             session = Session(None, new=True)
         else:
             with (yield from self._redis) as conn:
-                key = self.identity + '_' + str(cookie)
+                key = self.cookie_name + '_' + str(cookie)
                 data = yield from conn.get(cookie)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
@@ -37,7 +38,7 @@ class RedisStorage(AbstractStorage):
     def save_session(self, request, response, session):
         key = session.identity
         if key is None:
-            key = self.identity + '_' + uuid.uuid4().hex
+            key = self.cookie_name + '_' + uuid.uuid4().hex
             self.store_cookie(response, key)
         else:
             key = str(key)

@@ -11,11 +11,12 @@ class EncryptedCookieStorage(AbstractStorage):
     """Encrypted JSON storage.
     """
 
-    def __init__(self, secret_key, identity="AIOHTTP_COOKIE_SESSION", *,
+    def __init__(self, secret_key, *, cookie_name="AIOHTTP_COOKIE_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True):
-        super().__init__(identity, domain=domain, max_age=max_age,
-                         path=path, secure=secure, httponly=httponly)
+        super().__init__(cookie_name=cookie_name, domain=domain,
+                         max_age=max_age, path=path, secure=secure,
+                         httponly=httponly)
 
         self._secret_key = secret_key
         if len(self._secret_key) % AES.block_size != 0:
@@ -27,7 +28,7 @@ class EncryptedCookieStorage(AbstractStorage):
     def make_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            session = Session(self.identity, new=True)
+            session = Session(None, new=True)
         else:
             cookie = base64.b64decode(cookie)
             iv = cookie[:AES.block_size]
@@ -35,7 +36,7 @@ class EncryptedCookieStorage(AbstractStorage):
             cipher = AES.new(self._secret_key, AES.MODE_CBC, iv)
             decrypted = cipher.decrypt(data)
             data = json.loads(decrypted.decode('utf-8'))
-            session = Session(self.identity, data=data, new=False)
+            session = Session(None, data=data, new=False)
 
         request[SESSION_KEY] = session
 

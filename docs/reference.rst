@@ -7,6 +7,7 @@
 
 .. module:: aiohttp_session
 .. currentmodule:: aiohttp_session
+.. highlight:: python
 
 
 Public functions
@@ -183,3 +184,100 @@ implement :meth:`AbstractStorage.make_session`,
 
       A helper for saving *cookie_data* (:class:`str`) into *response*
       (:class:`aiohttp.web.StreamResponse` or descendants).
+
+
+Simple Storage
+==============
+
+For testing purposes there is :class:`SimpleCookieStorage`. It stores
+session data as unencrypted and unsigned JSON data in browser cookies,
+so it's totally insecure.
+
+.. warning:: Never use this storage on production!!! It's highly insecure!!!
+
+To use the storage you should push it into
+:func:`aiohttp_session.session_middleware`::
+
+   app = aiohttp.web.Application(
+       middlewares=[aiohttp_session.SimpleCookieStorage()])
+
+.. class:: SimpleCookieStorage(*, \
+                               cookie_name="AIOHTTP_SESSION", \
+                               domain=None, max_age=None, path='/', \
+                               secure=None, httponly=True)
+
+   Create unencrypted cookie storage.
+
+   The class is inherited from :class:`aiohttp_session.AbstractStorage`.
+
+   Parameters are the same as for
+   :class:`aiohttp_session.AbstractStorage` constructor.
+
+
+.. module:: aiohttp_session.cookie_storage
+.. currentmodule:: aiohttp_session.cookie_storage
+
+
+Cookie Storage
+==============
+
+There is a storage that saves session data in HTTP cookies as AES
+encrypted data.
+
+To use the storage you should push it into
+:func:`aiohttp_session.session_middleware`::
+
+   app = aiohttp.web.Application(middlewares=[
+       aiohttp_session.cookie_storage.EncryptedCookieStorage(
+           b'Sixteen byte key'])
+
+.. class:: EncryptedCookieStorage(secret_key, *, \
+                                  cookie_name="AIOHTTP_SESSION", \
+                                  domain=None, max_age=None, path='/', \
+                                  secure=None, httponly=True)
+
+   Create encryted cookies storage.
+
+   The class is inherited from :class:`aiohttp_session.AbstractStorage`.
+
+   *secret_key* is :class:`bytes` secret key with length of 16, used
+   for AES encoding.
+
+   Other parameters are the same as for
+   :class:`aiohttp_session.AbstractStorage` constructor.
+
+
+
+.. module:: aiohttp_session.redis_storage
+.. currentmodule:: aiohttp_session.redis_storage
+
+
+Redis Storage
+==============
+
+There is a storage that stores session data in Redis database and
+keeps only Redis keys (random hashes) in HTTP cookies.
+
+It operates with Redis database via :class:`aioredis.RedisPool`.
+
+To use the storage you need setup it first::
+
+   redis = yield from aioredis.create_pool(('localhost', 6379))
+   storage = aiohttp_session.redis_storage.RedisStorage(redis)
+   app = aiohttp.web.Application(middlewares=[storage])
+
+
+.. class:: RedisCookieStorage(redis_pool, *, \
+                              cookie_name="AIOHTTP_SESSION", \
+                              domain=None, max_age=None, path='/', \
+                              secure=None, httponly=True)
+
+   Create Redis storage for user session data.
+
+   The class is inherited from :class:`aiohttp_session.AbstractStorage`.
+
+   *redis_storage* is a :class:`aioredis.RedisPool` which should be
+   created by :func:`aioredis.create_pool` call.
+
+   Other parameters are the same as for
+   :class:`aiohttp_session.AbstractStorage` constructor.

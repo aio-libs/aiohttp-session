@@ -64,6 +64,43 @@ Available session storages are:
 
       $ pip install aiohttp_session[aioredis]
 
+Installation
+--------------------
+
+.. code::
+
+   pip3 install aiohttp_session
+
+Source code
+-----------
+
+The project is hosted on GitHub_
+
+.. _GitHub: https://github.com/aio-libs/aiohttp_session
+
+Please feel free to file an issue on `bug tracker
+<https://github.com/aio-libs/aiopg/issues>`_ if you have found a bug
+or have some suggestion for library improvement.
+
+The library uses `Travis <https://travis-ci.org/aio-libs/aiohttp_session>`_ for
+Continious Integration.
+
+IRC channel
+-----------
+
+You can discuss the library on Freenode_ at **#aio-libs** channel.
+
+.. _Freenode: http://freenode.net
+
+
+Dependencies
+------------
+
+- Python 3.3 and :mod:`asyncio` or Python 3.4+
+- psycopg2
+- aiopg.sa requires :term:`sqlalchemy`.
+
+
 License
 -------
 

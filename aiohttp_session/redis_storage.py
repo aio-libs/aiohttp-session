@@ -28,6 +28,8 @@ class RedisStorage(AbstractStorage):
             with (yield from self._redis) as conn:
                 key = str(cookie)
                 data = yield from conn.get(cookie)
+                if not data:
+                    return Session(None, new=True)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
                 return Session(key, data=data, new=False)

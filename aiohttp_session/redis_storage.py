@@ -26,8 +26,10 @@ class RedisStorage(AbstractStorage):
             return Session(None, new=True)
         else:
             with (yield from self._redis) as conn:
-                key = self.cookie_name + '_' + str(cookie)
-                data = yield from conn.get(cookie)
+                key = str(cookie)
+                data = yield from conn.get(self.cookie_name + '_' + key)
+                if data is None:
+                    return Session(None, new=True)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
                 return Session(key, data=data, new=False)
@@ -36,7 +38,7 @@ class RedisStorage(AbstractStorage):
     def save_session(self, request, response, session):
         key = session.identity
         if key is None:
-            key = self.cookie_name + '_' + uuid.uuid4().hex
+            key = uuid.uuid4().hex
             self.save_cookie(response, key)
         else:
             key = str(key)
@@ -45,4 +47,5 @@ class RedisStorage(AbstractStorage):
         with (yield from self._redis) as conn:
             max_age = self.max_age
             expire = max_age if max_age is not None else 0
-            yield from conn.set(key, data, expire=expire)
+            yield from conn.set(self.cookie_name + '_' + key,
+                                data, expire=expire)

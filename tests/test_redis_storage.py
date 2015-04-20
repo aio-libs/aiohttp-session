@@ -51,14 +51,14 @@ class TestRedisStorage(unittest.TestCase):
         value = json.dumps(data)
         key = uuid.uuid4().hex
         with (yield from self.redis) as conn:
-            yield from conn.set(key, value)
+            yield from conn.set('AIOHTTP_SESSION_' + key, value)
         return {'AIOHTTP_SESSION': key}
 
     @asyncio.coroutine
     def load_cookie(self, cookies):
         key = cookies['AIOHTTP_SESSION']
         with (yield from self.redis) as conn:
-            encoded = yield from conn.get(key.value)
+            encoded = yield from conn.get('AIOHTTP_SESSION_' + key.value)
             s = encoded.decode('utf-8')
             value = json.loads(s)
             return value
@@ -177,7 +177,8 @@ class TestRedisStorage(unittest.TestCase):
             self.assertTrue(morsel['httponly'])
             self.assertEqual(morsel['path'], '/')
             with (yield from self.redis) as conn:
-                exists = yield from conn.exists(morsel.value)
+                exists = yield from conn.exists('AIOHTTP_SESSION_' +
+                                                morsel.value)
                 self.assertTrue(exists)
 
         self.loop.run_until_complete(go())
@@ -203,8 +204,26 @@ class TestRedisStorage(unittest.TestCase):
             key = resp.cookies['AIOHTTP_SESSION'].value
 
             with (yield from self.redis) as conn:
-                ttl = yield from conn.ttl(key)
+                ttl = yield from conn.ttl('AIOHTTP_SESSION_'+key)
             self.assertGreater(ttl, 9)
             self.assertLessEqual(ttl, 10)
+
+        self.loop.run_until_complete(go())
+
+    def test_create_new_sesssion_if_key_doesnt_exists_in_redis(self):
+
+        @asyncio.coroutine
+        def handler(request):
+            session = yield from get_session(request)
+            self.assertTrue(session.new)
+            return web.Response(body=b'OK')
+
+        @asyncio.coroutine
+        def go():
+            _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = {'AIOHTTP_SESSION': 'invalid_key'}
+            resp = yield from request('GET', url, cookies=cookies,
+                                      loop=self.loop)
+            self.assertEqual(200, resp.status)
 
         self.loop.run_until_complete(go())

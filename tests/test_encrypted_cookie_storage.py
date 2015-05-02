@@ -20,6 +20,7 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         self.key = b'Sixteen byte key'
         self.handler = None
         self.srv = None
+
     def tearDown(self):
         if self.handler is not None:
             self.loop.run_until_complete(self.handler.finish_connections())

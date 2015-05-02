@@ -13,8 +13,12 @@ class TestSimleCookieStorage(unittest.TestCase):
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
+        self.srv = None
+        self.handler = None
 
     def tearDown(self):
+        self.loop.run_until_complete(self.handler.finish_connections())
+        self.srv.close()
         self.loop.close()
 
     def find_unused_port(self):
@@ -32,10 +36,12 @@ class TestSimleCookieStorage(unittest.TestCase):
             app.router.add_route(method, path, handler)
 
         port = self.find_unused_port()
+        handler = app.make_handler()
         srv = yield from self.loop.create_server(
-            app.make_handler(), '127.0.0.1', port)
+            handler, '127.0.0.1', port)
         url = "http://127.0.0.1:{}".format(port) + path
-        self.addCleanup(srv.close)
+        self.handler = handler
+        self.srv = srv
         return app, srv, url
 
     def make_cookie(self, data):
@@ -123,8 +129,8 @@ class TestSimleCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             self.assertEqual(
-                'Set-Cookie: AIOHTTP_SESSION="{}"; httponly; Path=/',
-                resp.cookies['AIOHTTP_SESSION'].output())
+                'Set-Cookie: AIOHTTP_SESSION="{}"; httponly; Path=/'.upper(),
+                resp.cookies['AIOHTTP_SESSION'].output().upper())
 
         self.loop.run_until_complete(go())
 

@@ -18,8 +18,13 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
         self.key = b'Sixteen byte key'
-
+        self.handler = None
+        self.srv = None
     def tearDown(self):
+        if self.handler is not None:
+            self.loop.run_until_complete(self.handler.finish_connections())
+        if self.srv is not None:
+            self.srv.close()
         self.loop.close()
 
     def find_unused_port(self):
@@ -38,10 +43,12 @@ class TestEncryptedCookieStorage(unittest.TestCase):
             app.router.add_route(method, path, handler)
 
         port = self.find_unused_port()
+        handler = app.make_handler()
         srv = yield from self.loop.create_server(
-            app.make_handler(), '127.0.0.1', port)
+            handler, '127.0.0.1', port)
         url = "http://127.0.0.1:{}".format(port) + path
-        self.addCleanup(srv.close)
+        self.srv = srv
+        self.handler = handler
         return app, srv, url
 
     def make_cookie(self, data):

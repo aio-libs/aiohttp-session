@@ -5,8 +5,6 @@ from . import AbstractStorage, Session
 
 from cryptography.fernet import Fernet
 
-key =  b'klef1rMWEwD5VGJHAMfBa7vwIygLblPRuODdJLX_C2U='
-
 class EncryptedCookieStorage(AbstractStorage):
     """Encrypted JSON storage.
     """
@@ -18,13 +16,14 @@ class EncryptedCookieStorage(AbstractStorage):
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly)
 
-        self._secret_key = secret_key
-
-        if len(self._secret_key) < 44:
+        if len(secret_key) < 44:
             raise TypeError(
-                'Secret key must be a least {} in length'.format(
+'''Secret key must be a least {} in length.
+Please, generate it by :
+from cryptography.fernet import Fernet
+key = Fernet.generate_key()'''.format(
                     44))
-        self.cipher = Fernet(key)
+        self.cipher = Fernet(secret_key)
 
     @asyncio.coroutine
     def load_session(self, request):
@@ -33,7 +32,7 @@ class EncryptedCookieStorage(AbstractStorage):
             return Session(None, new=True)
         else:
             cookie = base64.b64decode(cookie)
-            decrypted = self.cipher.decrypt(data)
+            decrypted = self.cipher.decrypt(cookie)
             data = json.loads(decrypted.decode('utf-8'))
             return Session(None, data=data, new=False)
 

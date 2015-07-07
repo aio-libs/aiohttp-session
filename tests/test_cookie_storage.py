@@ -75,6 +75,7 @@ class TestSimleCookieStorage(unittest.TestCase):
             self.assertIsInstance(session, Session)
             self.assertFalse(session.new)
             self.assertFalse(session._changed)
+            self.assertIsNotNone(session.created)
             self.assertEqual({'a': 1, 'b': 2}, session)
             return web.Response(body=b'OK')
 
@@ -100,13 +101,21 @@ class TestSimleCookieStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = self.make_cookie({'a': 1, 'b': 2})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, eval(morsel.value))
+            cookie_data = eval(morsel.value)
+            self.assertIn('a', cookie_data)
+            self.assertIn('b', cookie_data)
+            self.assertIn('c', cookie_data)
+            self.assertIn('created', cookie_data)
+            self.assertEqual(cookie_data['a'], 1)
+            self.assertEqual(cookie_data['b'], 2)
+            self.assertEqual(cookie_data['c'], 3)
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 

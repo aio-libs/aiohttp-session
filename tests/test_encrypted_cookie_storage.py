@@ -136,10 +136,14 @@ class TestEncryptedCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertEqual(
-                {'a': 1, 'b': 2, 'c': 3},
-                self.decrypt(morsel.value)
-            )
+            cookie_data = self.decrypt(morsel.value)
+            self.assertIn('a', cookie_data)
+            self.assertIn('b', cookie_data)
+            self.assertIn('c', cookie_data)
+            self.assertIn('created', cookie_data)
+            self.assertEqual(cookie_data['a'], 1)
+            self.assertEqual(cookie_data['b'], 2)
+            self.assertEqual(cookie_data['c'], 3)
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 

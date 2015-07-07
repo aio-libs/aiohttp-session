@@ -4,6 +4,7 @@ import abc
 import asyncio
 from collections import MutableMapping
 import json
+import time
 
 from aiohttp import web
 
@@ -20,6 +21,13 @@ class Session(MutableMapping):
         self._mapping = {}
         self._identity = identity
         self._new = new
+        created = data.pop('created', None) if data else None
+
+        if new or created is None:
+            self._created = int(time.time())
+        else:
+            self._created = created
+
         if data is not None:
             self._mapping.update(data)
 
@@ -35,6 +43,10 @@ class Session(MutableMapping):
     @property
     def identity(self):
         return self._identity
+
+    @property
+    def created(self):
+        return self._created
 
     def changed(self):
         self._changed = True
@@ -143,6 +155,16 @@ class AbstractStorage(metaclass=abc.ABCMeta):
     def cookie_params(self):
         return self._cookie_params
 
+    def get_session_data(self, session):
+        if session._mapping:
+            data = session._mapping.copy()
+            data.update({
+                'created': session._created
+            })
+        else:
+            data = {}
+        return data
+
     @asyncio.coroutine
     @abc.abstractmethod
     def load_session(self, request):
@@ -188,5 +210,5 @@ class SimpleCookieStorage(AbstractStorage):
 
     @asyncio.coroutine
     def save_session(self, request, response, session):
-        cookie_data = json.dumps(session._mapping)
+        cookie_data = json.dumps(self.get_session_data(session))
         self.save_cookie(response, cookie_data)

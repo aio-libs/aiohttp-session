@@ -42,7 +42,8 @@ class EncryptedCookieStorage(AbstractStorage):
     def save_session(self, request, response, session):
         if not session._mapping:
             return self.save_cookie(response, session._mapping)
-        cookie_data = json.dumps(session._mapping).encode('utf-8')
+        cookie_data = json.dumps(self.get_session_data(session)).encode(
+            'utf-8')
         if len(cookie_data) % AES.block_size != 0:
             # padding with spaces to full blocks
             to_pad = AES.block_size - (len(cookie_data) % AES.block_size)

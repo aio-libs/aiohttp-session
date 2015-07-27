@@ -40,8 +40,9 @@ class EncryptedCookieStorage(AbstractStorage):
 
     @asyncio.coroutine
     def save_session(self, request, response, session):
-        if not session._mapping:
+        if session.is_empty:
             return self.save_cookie(response, session._mapping)
+
         cookie_data = json.dumps(self.get_session_data(session)).encode(
             'utf-8')
         if len(cookie_data) % AES.block_size != 0:

@@ -21,15 +21,16 @@ class Session(MutableMapping):
         self._mapping = {}
         self._identity = identity
         self._new = new
-        created = data.pop('created', None) if data else None
+        created = data.get('created', None) if data else None
+        session_data = data.get('session', None) if data else None
 
         if new or created is None:
             self._created = int(time.time())
         else:
             self._created = created
 
-        if data is not None:
-            self._mapping.update(data)
+        if session_data is not None:
+            self._mapping.update(session_data)
 
     def __repr__(self):
         return '<{} [new:{}, changed:{}] {!r}>'.format(
@@ -47,6 +48,10 @@ class Session(MutableMapping):
     @property
     def created(self):
         return self._created
+
+    @property
+    def is_empty(self):
+        return not bool(self._mapping)
 
     def changed(self):
         self._changed = True
@@ -156,11 +161,11 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         return self._cookie_params
 
     def get_session_data(self, session):
-        if session._mapping:
-            data = session._mapping.copy()
-            data.update({
-                'created': session._created
-            })
+        if not session.is_empty:
+            data = {
+                'created': session.created,
+                'session': session._mapping
+            }
         else:
             data = {}
         return data

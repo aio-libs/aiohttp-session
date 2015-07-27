@@ -2,6 +2,7 @@ import asyncio
 import json
 import socket
 import unittest
+import time
 
 from aiohttp import web, request
 from aiohttp_session import (Session, session_middleware,
@@ -45,7 +46,15 @@ class TestSimleCookieStorage(unittest.TestCase):
         return app, srv, url
 
     def make_cookie(self, data):
-        value = json.dumps(data)
+        if data:
+            session_data = {
+                'session': data,
+                'created': int(time.time())
+            }
+        else:
+            session_data = data
+
+        value = json.dumps(session_data)
         return {'AIOHTTP_SESSION': value}
 
     def test_create_new_sesssion(self):
@@ -108,14 +117,15 @@ class TestSimleCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_SESSION']
-            cookie_data = eval(morsel.value)
-            self.assertIn('a', cookie_data)
-            self.assertIn('b', cookie_data)
-            self.assertIn('c', cookie_data)
+            cookie_data = json.loads(morsel.value)
+            self.assertIn('session', cookie_data)
+            self.assertIn('a', cookie_data['session'])
+            self.assertIn('b', cookie_data['session'])
+            self.assertIn('c', cookie_data['session'])
             self.assertIn('created', cookie_data)
-            self.assertEqual(cookie_data['a'], 1)
-            self.assertEqual(cookie_data['b'], 2)
-            self.assertEqual(cookie_data['c'], 3)
+            self.assertEqual(cookie_data['session']['a'], 1)
+            self.assertEqual(cookie_data['session']['b'], 2)
+            self.assertEqual(cookie_data['session']['c'], 3)
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 

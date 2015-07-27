@@ -4,6 +4,7 @@ import socket
 import unittest
 import uuid
 import aioredis
+import time
 
 from aiohttp import web, request
 from aiohttp_session import Session, session_middleware, get_session
@@ -56,7 +57,14 @@ class TestRedisStorage(unittest.TestCase):
 
     @asyncio.coroutine
     def make_cookie(self, data):
-        value = json.dumps(data)
+        if data:
+            session_data = {
+                'session': data,
+                'created': int(time.time())
+            }
+        else:
+            session_data = data
+        value = json.dumps(session_data)
         key = uuid.uuid4().hex
         with (yield from self.redis) as conn:
             yield from conn.set('AIOHTTP_SESSION_' + key, value)
@@ -131,13 +139,14 @@ class TestRedisStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             value = yield from self.load_cookie(resp.cookies)
-            self.assertIn('a', value)
-            self.assertIn('b', value)
-            self.assertIn('c', value)
+            self.assertIn('session', value)
+            self.assertIn('a', value['session'])
+            self.assertIn('b', value['session'])
+            self.assertIn('c', value['session'])
             self.assertIn('created', value)
-            self.assertEqual(value['a'], 1)
-            self.assertEqual(value['b'], 2)
-            self.assertEqual(value['c'], 3)
+            self.assertEqual(value['session']['a'], 1)
+            self.assertEqual(value['session']['b'], 2)
+            self.assertEqual(value['session']['c'], 3)
             morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
@@ -186,11 +195,12 @@ class TestRedisStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             value = yield from self.load_cookie(resp.cookies)
-            self.assertIn('a', value)
-            self.assertIn('b', value)
+            self.assertIn('session', value)
+            self.assertIn('a', value['session'])
+            self.assertIn('b', value['session'])
             self.assertIn('created', value)
-            self.assertEqual(value['a'], 1)
-            self.assertEqual(value['b'], 2)
+            self.assertEqual(value['session']['a'], 1)
+            self.assertEqual(value['session']['b'], 2)
             morsel = resp.cookies['AIOHTTP_SESSION']
             self.assertTrue(morsel['httponly'])
             self.assertEqual(morsel['path'], '/')

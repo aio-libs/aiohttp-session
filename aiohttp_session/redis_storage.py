@@ -43,6 +43,7 @@ class RedisStorage(AbstractStorage):
         else:
             key = str(key)
             self.save_cookie(response, key)
+
         data = self._encoder(self.get_session_data(session))
         with (yield from self._redis) as conn:
             max_age = self.max_age

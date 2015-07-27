@@ -1,4 +1,5 @@
 import unittest
+import time
 
 from aiohttp_session import Session
 
@@ -14,7 +15,7 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_create2(self):
-        s = Session('test_identity', data={'some': 'data'})
+        s = Session('test_identity', data={'session': {'some': 'data'}})
         self.assertEqual(s, {'some': 'data'})
         self.assertFalse(s.new)
         self.assertEqual('test_identity', s.identity)
@@ -37,14 +38,14 @@ class SessionTests(unittest.TestCase):
                          "<Session [new:True, changed:True] {'foo': 'bar'}>")
 
     def test__repr__2(self):
-        s = Session('test_identity', data={'key': 123}, new=False)
+        s = Session('test_identity', data={'session': {'key': 123}}, new=False)
         self.assertEqual(str(s),
                          "<Session [new:False, changed:False] {'key': 123}>")
         s.invalidate()
         self.assertEqual(str(s), "<Session [new:False, changed:True] {}>")
 
     def test_invalidate(self):
-        s = Session('test_identity', data={'foo': 'bar'})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}})
         self.assertEqual(s, {'foo': 'bar'})
         self.assertFalse(s._changed)
 
@@ -54,7 +55,7 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_invalidate2(self):
-        s = Session('test_identity', data={'foo': 'bar'})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}})
         self.assertEqual(s, {'foo': 'bar'})
         self.assertFalse(s._changed)
 
@@ -71,7 +72,7 @@ class SessionTests(unittest.TestCase):
         self.assertNotIn('foo', s)
         self.assertNotIn('key', s)
 
-        s = Session('test_identity', data={'foo': 'bar'})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}})
         self.assertEqual(len(s), 1)
         self.assertEqual(s, {'foo': 'bar'})
         self.assertEqual(list(s), ['foo'])
@@ -100,8 +101,13 @@ class SessionTests(unittest.TestCase):
         self.assertNotIn('key', s)
 
     def test_change(self):
-        s = Session('test_identity', new=False, data={'a': {'key': 'value'}})
-        created = s.created
+        created = int(time.time())
+        s = Session('test_identity', new=False, data={
+            'session': {
+                'a': {'key': 'value'}
+            },
+            'created': created
+        })
         self.assertFalse(s._changed)
 
         s['a']['key2'] = 'val2'

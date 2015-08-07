@@ -8,7 +8,7 @@ import json
 from aiohttp import web
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 class Session(MutableMapping):

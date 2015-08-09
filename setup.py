@@ -18,7 +18,7 @@ def read(f):
 install_requires = ['aiohttp>=0.14']
 tests_require = install_requires + ['nose']
 extras_require = {'aioredis': ['aioredis>=0.1.4'],
-                  'pycrypto': ['pycrypto']}
+                  'cryptography': ['cryptography']}
 
 
 setup(name='aiohttp_session',

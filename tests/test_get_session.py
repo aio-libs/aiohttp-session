@@ -15,6 +15,8 @@ class TestGetSession(unittest.TestCase):
         asyncio.set_event_loop(None)
 
     def tearDown(self):
+        self.loop.stop()
+        self.loop.run_forever()
         self.loop.close()
 
     def make_request(self, method, path, headers=CIMultiDict(), *,

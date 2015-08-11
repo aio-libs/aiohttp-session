@@ -26,6 +26,8 @@ class TestEncryptedCookieStorage(unittest.TestCase):
             self.loop.run_until_complete(self.handler.finish_connections())
         if self.srv is not None:
             self.srv.close()
+        self.loop.stop()
+        self.loop.run_forever()
         self.loop.close()
 
     def find_unused_port(self):

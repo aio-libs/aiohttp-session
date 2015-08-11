@@ -19,6 +19,8 @@ class TestSimleCookieStorage(unittest.TestCase):
     def tearDown(self):
         self.loop.run_until_complete(self.handler.finish_connections())
         self.srv.close()
+        self.loop.stop()
+        self.loop.run_forever()
         self.loop.close()
 
     def find_unused_port(self):

@@ -32,17 +32,34 @@ class SessionTests(unittest.TestCase):
 
     def test__repr__(self):
         s = Session('test_identity', new=True)
-        self.assertEqual(str(s), '<Session [new:True, changed:False] {}>')
+        self.assertEqual(
+            str(s),
+            '<Session [new:True, changed:False, created:{0}] {{}}>'.format(
+                s.created))
         s['foo'] = 'bar'
-        self.assertEqual(str(s),
-                         "<Session [new:True, changed:True] {'foo': 'bar'}>")
+        self.assertEqual(
+            str(s),
+            "<Session [new:True, changed:True, created:{0}]"
+            " {{'foo': 'bar'}}>".format(s.created))
 
     def test__repr__2(self):
-        s = Session('test_identity', data={'session': {'key': 123}}, new=False)
-        self.assertEqual(str(s),
-                         "<Session [new:False, changed:False] {'key': 123}>")
+        created = int(time.time()) - 1000
+        session_data = {
+            'session': {
+                'key': 123
+            },
+            'created': created
+        }
+        s = Session('test_identity', data=session_data, new=False)
+        self.assertEqual(
+            str(s),
+            "<Session [new:False, changed:False, created:{0}]"
+            " {{'key': 123}}>".format(created))
         s.invalidate()
-        self.assertEqual(str(s), "<Session [new:False, changed:True] {}>")
+        self.assertEqual(
+            str(s),
+            "<Session [new:False, changed:True, created:{0}] {{}}>".format(
+                created))
 
     def test_invalidate(self):
         s = Session('test_identity', data={'session': {'foo': 'bar'}})

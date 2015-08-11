@@ -33,9 +33,9 @@ class Session(MutableMapping):
             self._mapping.update(session_data)
 
     def __repr__(self):
-        return '<{} [new:{}, changed:{}] {!r}>'.format(
+        return '<{} [new:{}, changed:{}, created:{}] {!r}>'.format(
             self.__class__.__name__, self.new, self._changed,
-            self._mapping)
+            self.created, self._mapping)
 
     @property
     def new(self):
@@ -50,7 +50,7 @@ class Session(MutableMapping):
         return self._created
 
     @property
-    def is_empty(self):
+    def empty(self):
         return not bool(self._mapping)
 
     def changed(self):
@@ -160,8 +160,8 @@ class AbstractStorage(metaclass=abc.ABCMeta):
     def cookie_params(self):
         return self._cookie_params
 
-    def get_session_data(self, session):
-        if not session.is_empty:
+    def _get_session_data(self, session):
+        if not session.empty:
             data = {
                 'created': session.created,
                 'session': session._mapping
@@ -215,5 +215,5 @@ class SimpleCookieStorage(AbstractStorage):
 
     @asyncio.coroutine
     def save_session(self, request, response, session):
-        cookie_data = json.dumps(self.get_session_data(session))
+        cookie_data = json.dumps(self._get_session_data(session))
         self.save_cookie(response, cookie_data)

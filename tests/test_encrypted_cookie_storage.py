@@ -3,6 +3,7 @@ import json
 import socket
 import unittest
 import base64
+import time
 
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -53,7 +54,15 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         return app, srv, url
 
     def make_cookie(self, data):
-        cookie_data = json.dumps(data).encode('utf-8')
+        if data:
+            session_data = {
+                'session': data,
+                'created': int(time.time())
+            }
+        else:
+            session_data = data
+
+        cookie_data = json.dumps(session_data).encode('utf-8')
         if len(cookie_data) % AES.block_size != 0:
             # padding with spaces to full blocks
             to_pad = AES.block_size - (len(cookie_data) % AES.block_size)
@@ -136,10 +145,15 @@ class TestEncryptedCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertEqual(
-                {'a': 1, 'b': 2, 'c': 3},
-                self.decrypt(morsel.value)
-            )
+            cookie_data = self.decrypt(morsel.value)
+            self.assertIn('session', cookie_data)
+            self.assertIn('a', cookie_data['session'])
+            self.assertIn('b', cookie_data['session'])
+            self.assertIn('c', cookie_data['session'])
+            self.assertIn('created', cookie_data)
+            self.assertEqual(cookie_data['session']['a'], 1)
+            self.assertEqual(cookie_data['session']['b'], 2)
+            self.assertEqual(cookie_data['session']['c'], 3)
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 

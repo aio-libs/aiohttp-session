@@ -5,10 +5,10 @@ import unittest
 import base64
 import time
 
-from Crypto.Cipher import AES
-from Crypto import Random
-
 from aiohttp import web, request
+
+from cryptography import fernet
+
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
@@ -18,7 +18,10 @@ class TestEncryptedCookieStorage(unittest.TestCase):
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
-        self.key = b'Sixteen byte key'
+
+        key = fernet.Fernet.generate_key()
+        self.fernet = fernet.Fernet(key)
+        self.key = base64.urlsafe_b64decode(key)
         self.handler = None
         self.srv = None
 
@@ -63,28 +66,18 @@ class TestEncryptedCookieStorage(unittest.TestCase):
             session_data = data
 
         cookie_data = json.dumps(session_data).encode('utf-8')
-        if len(cookie_data) % AES.block_size != 0:
-            # padding with spaces to full blocks
-            to_pad = AES.block_size - (len(cookie_data) % AES.block_size)
-            cookie_data += b' ' * to_pad
-        iv = Random.new().read(AES.block_size)
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        encrypted = cipher.encrypt(cookie_data)
-        encrypted = iv + encrypted
-        b64coded = base64.b64encode(encrypted).decode('utf-8')
-        return {'AIOHTTP_SESSION': b64coded}
+        data = self.fernet.encrypt(cookie_data).decode('utf-8')
+
+        return {'AIOHTTP_SESSION': data}
 
     def decrypt(self, cookie_value):
         assert type(cookie_value) == str
-        decoded = base64.b64decode(cookie_value)
-        iv = decoded[:AES.block_size]
-        data = decoded[AES.block_size:]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        decrypted = cipher.decrypt(data).decode('utf-8')
-        return json.loads(decrypted)
+        return json.loads(
+            self.fernet.decrypt(cookie_value.encode('utf-8')).decode('utf-8')
+        )
 
     def test_invalid_key(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             EncryptedCookieStorage(b'123')  # short key
 
     def test_create_new_sesssion(self):

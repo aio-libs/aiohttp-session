@@ -19,7 +19,7 @@ install:
 - pip install coveralls --use-mirrors
 - pip install aiohttp
 - pip install aioredis
-- pip install pycrypto
+- pip install cryptography
 - python setup.py develop
 
 before_script:

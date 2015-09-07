@@ -16,7 +16,7 @@ class Session(MutableMapping):
 
     """Session dict-like object."""
 
-    def __init__(self, identity, *, data=None, new=False, max_age):
+    def __init__(self, identity, *, data=None, new=False):
         self._changed = False
         self._mapping = {}
         self._identity = identity
@@ -28,10 +28,6 @@ class Session(MutableMapping):
             self._created = int(time.time())
         else:
             self._created = created
-
-        self._expire_at = data.get('expire_at')
-        if self._expire_at is None:
-            self._expire_at = time.time() + max_age
 
         if session_data is not None:
             self._mapping.update(session_data)

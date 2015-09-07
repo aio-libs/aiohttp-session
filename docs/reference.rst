@@ -67,7 +67,8 @@ Session
 
    .. attribute:: created
 
-      TIMESTAMP
+      Creation UNIX TIMESTAMP, the value returned by :func:`time.time`
+      for very first access to the session object.
 
    .. attribute:: identity
 
@@ -119,17 +120,20 @@ Session storages
 
 :mod:`aiohttp_session` uses storages to save/load persistend session data.
 
-All storages should be derived from :class:`AbstractStorage` and
-implement :meth:`AbstractStorage.make_session`,
-:meth:`AbstractStorage.save_session` methods.
+Abstract Storage
+----------------
 
-.. class:: AbstraceStorage(cookie_name="AIOHTTP_SESSION", *, \
+All storages should be derived from :class:`AbstractStorage` and
+implement both :meth:`~AbstractStorage.load_session` and
+:meth:`~AbstractStorage.save_session` methods.
+
+.. class:: AbstractStorage(cookie_name="AIOHTTP_SESSION", *, \
                            domain=None, max_age=None, path='/', \
                            secure=None, httponly=True)
 
    Base class for session storage implementations.
 
-   It uses HTTP cookie for storing at least key for session data, but
+   It uses HTTP cookie for storing at least the key for session data, but
    some implementations may save all session info into cookies.
 
    *cookie_name* -- name of cookie used for saving session data.
@@ -187,7 +191,7 @@ implement :meth:`AbstractStorage.make_session`,
 
 
 Simple Storage
-==============
+--------------
 
 For testing purposes there is :class:`SimpleCookieStorage`. It stores
 session data as unencrypted and unsigned JSON data in browser cookies,
@@ -196,7 +200,7 @@ so it's totally insecure.
 .. warning:: Never use this storage on production!!! It's highly insecure!!!
 
 To use the storage you should push it into
-:func:`aiohttp_session.session_middleware`::
+:func:`session_middleware`::
 
    app = aiohttp.web.Application(
        middlewares=[aiohttp_session.SimpleCookieStorage()])
@@ -208,10 +212,10 @@ To use the storage you should push it into
 
    Create unencrypted cookie storage.
 
-   The class is inherited from :class:`aiohttp_session.AbstractStorage`.
+   The class is inherited from :class:`AbstractStorage`.
 
-   Parameters are the same as for
-   :class:`aiohttp_session.AbstractStorage` constructor.
+   Parameters are the same as for :class:`AbstractStorage`
+   constructor.
 
 
 .. module:: aiohttp_session.cookie_storage
@@ -219,13 +223,13 @@ To use the storage you should push it into
 
 
 Cookie Storage
-==============
+--------------
 
-There is a storage that saves session data in HTTP cookies as AES
-encrypted data.
+The storage that saves session data in HTTP cookies as
+:class:`~cryptography.fernet.Fernet` encrypted data.
 
 To use the storage you should push it into
-:func:`aiohttp_session.session_middleware`::
+:func:`~aiohttp_session.session_middleware`::
 
    app = aiohttp.web.Application(middlewares=[
        aiohttp_session.cookie_storage.EncryptedCookieStorage(
@@ -238,14 +242,18 @@ To use the storage you should push it into
 
    Create encryted cookies storage.
 
-   The class is inherited from :class:`aiohttp_session.AbstractStorage`.
+   The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
-   *secret_key* is :class:`bytes` secret key with length of 16, used
-   for AES encoding.
+   *secret_key* is :class:`bytes` secret key with length of 32, used
+   for encoding.
 
    Other parameters are the same as for
-   :class:`aiohttp_session.AbstractStorage` constructor.
+   :class:`~aiohttp_session.AbstractStorage` constructor.
 
+   .. note::
+
+      For key generation use
+      :meth:`cryptography.fernet.Fernet.generate_key` method.
 
 
 .. module:: aiohttp_session.redis_storage
@@ -253,10 +261,10 @@ To use the storage you should push it into
 
 
 Redis Storage
-==============
+-------------
 
-There is a storage that stores session data in Redis database and
-keeps only Redis keys (random hashes) in HTTP cookies.
+The storage that stores session data in Redis database and
+keeps only Redis keys (UUIDs actually) in HTTP cookies.
 
 It operates with Redis database via :class:`aioredis.RedisPool`.
 
@@ -274,10 +282,10 @@ To use the storage you need setup it first::
 
    Create Redis storage for user session data.
 
-   The class is inherited from :class:`aiohttp_session.AbstractStorage`.
+   The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
-   *redis_storage* is a :class:`aioredis.RedisPool` which should be
-   created by :func:`aioredis.create_pool` call.
+   *redis_storage* is a :class:`~aioredis.RedisPool` which should be
+   created by :func:`~aioredis.create_pool` call.
 
    Other parameters are the same as for
-   :class:`aiohttp_session.AbstractStorage` constructor.
+   :class:`~aiohttp_session.AbstractStorage` constructor.

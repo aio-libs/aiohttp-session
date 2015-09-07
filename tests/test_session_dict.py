@@ -7,7 +7,7 @@ from aiohttp_session import Session
 class SessionTests(unittest.TestCase):
 
     def test_create(self):
-        s = Session('test_identity', new=True)
+        s = Session('test_identity', new=True, default_age=123)
         self.assertEqual(s, {})
         self.assertTrue(s.new)
         self.assertEqual('test_identity', s.identity)

@@ -1,10 +1,12 @@
 Changes
 =======
 
-0.2.0 (XXXX-XX-XX)
+0.2.0 (2015-09-07)
 ------------------
 
 - Add session.created property #14
+
+- Replaced PyCrypto with crypthography library #16
 
 0.1.2 (2015-08-07)
 ------------------

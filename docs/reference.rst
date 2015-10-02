@@ -276,7 +276,7 @@ To use the storage you need setup it first::
    app = aiohttp.web.Application(middlewares=[session_middleware])
 
 
-.. class:: RedisCookieStorage(redis_pool, *, \
+.. class:: RedisStorage(redis_pool, *, \
                               cookie_name="AIOHTTP_SESSION", \
                               domain=None, max_age=None, path='/', \
                               secure=None, httponly=True)

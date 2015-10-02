@@ -72,7 +72,7 @@ Available session storages are:
 
       $ pip install aiohttp_session[secure]
 
-* :class:`~aiohttp_session.redis_storage.RedisCookieStorage` -- stores
+* :class:`~aiohttp_session.redis_storage.RedisStorage` -- stores
   JSON-ed data into *redis*, keepeng into cookie only redis key
   (random UUID).
 
@@ -109,7 +109,7 @@ Dependencies
 - :term:`cryptography` for
   :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
 - :term:`aioredis` for
-  :class:`~aiohttp_session.redis_storage.RedisCookieStorage`.
+  :class:`~aiohttp_session.redis_storage.RedisStorage`.
 
 
 License

@@ -272,7 +272,8 @@ To use the storage you need setup it first::
 
    redis = yield from aioredis.create_pool(('localhost', 6379))
    storage = aiohttp_session.redis_storage.RedisStorage(redis)
-   app = aiohttp.web.Application(middlewares=[storage])
+   session_middleware = aiohttp_session.session_middleware(storage)
+   app = aiohttp.web.Application(middlewares=[session_middleware])
 
 
 .. class:: RedisCookieStorage(redis_pool, *, \

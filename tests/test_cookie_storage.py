@@ -2,6 +2,7 @@ import asyncio
 import json
 import socket
 import unittest
+import time
 
 from aiohttp import web, request
 from aiohttp_session import (Session, session_middleware,
@@ -19,6 +20,8 @@ class TestSimleCookieStorage(unittest.TestCase):
     def tearDown(self):
         self.loop.run_until_complete(self.handler.finish_connections())
         self.srv.close()
+        self.loop.stop()
+        self.loop.run_forever()
         self.loop.close()
 
     def find_unused_port(self):
@@ -45,7 +48,15 @@ class TestSimleCookieStorage(unittest.TestCase):
         return app, srv, url
 
     def make_cookie(self, data):
-        value = json.dumps(data)
+        if data:
+            session_data = {
+                'session': data,
+                'created': int(time.time())
+            }
+        else:
+            session_data = data
+
+        value = json.dumps(session_data)
         return {'AIOHTTP_SESSION': value}
 
     def test_create_new_sesssion(self):
@@ -75,6 +86,7 @@ class TestSimleCookieStorage(unittest.TestCase):
             self.assertIsInstance(session, Session)
             self.assertFalse(session.new)
             self.assertFalse(session._changed)
+            self.assertIsNotNone(session.created)
             self.assertEqual({'a': 1, 'b': 2}, session)
             return web.Response(body=b'OK')
 
@@ -100,13 +112,22 @@ class TestSimleCookieStorage(unittest.TestCase):
         @asyncio.coroutine
         def go():
             _, _, url = yield from self.create_server('GET', '/', handler)
+            cookies = self.make_cookie({'a': 1, 'b': 2})
             resp = yield from request(
                 'GET', url,
-                cookies=self.make_cookie({'a': 1, 'b': 2}),
+                cookies=cookies,
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertEqual({'a': 1, 'b': 2, 'c': 3}, eval(morsel.value))
+            cookie_data = json.loads(morsel.value)
+            self.assertIn('session', cookie_data)
+            self.assertIn('a', cookie_data['session'])
+            self.assertIn('b', cookie_data['session'])
+            self.assertIn('c', cookie_data['session'])
+            self.assertIn('created', cookie_data)
+            self.assertEqual(cookie_data['session']['a'], 1)
+            self.assertEqual(cookie_data['session']['b'], 2)
+            self.assertEqual(cookie_data['session']['c'], 3)
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 

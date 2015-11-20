@@ -6,6 +6,9 @@
 aiohttp_session
 ===============
 
+.. currentmodule:: aiohttp_session
+.. highlight:: python
+
 The library provides sessions for :ref:`aiohttp.web<aiohttp-web>`.
 
 Usage
@@ -14,11 +17,11 @@ Usage
 The library allows to store user-specific data into session object.
 
 The session object has dict-like interface (operations like
-``session[key] = value``, ``value = session[key]`` etc. are present).
+``session[key] = value`` or ``value = session[key]`` etc. are supported).
 
 
 Before processing session in web-handler you have to register *session
-middleware* in ``aiohttp.web.Application``.
+middleware* in :class:`aiohttp.web.Application`.
 
 A trivial usage example::
 
@@ -37,7 +40,7 @@ A trivial usage example::
     @asyncio.coroutine
     def init(loop):
         app = web.Application(middlewares=[session_middleware(
-            EncryptedCookieStorage(b'Sixteen byte key'))])
+            EncryptedCookieStorage(b'Thirty  two  length  bytes  key.'))])
         app.router.add_route('GET', '/', handler)
         srv = yield from loop.create_server(
             app.make_handler(), '0.0.0.0', 8080)
@@ -54,25 +57,26 @@ All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
 
 Available session storages are:
 
-* ``aiohttp_session.SimpleCookieStorage()`` -- keeps session data as
+* :class:`SimpleCookieStorage` -- keeps session data as
   plain JSON string in cookie body. Use the storage only for testing
   purposes, it's very non-secure.
 
-* ``aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)``
-  -- stores session data into cookies as ``SimpleCookieStorage`` but
-  encodes it via AES cipher. ``secrect_key`` is a ``bytes`` key for AES
-  encryption/decryption, the length should be 16 bytes.
+* :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
+  -- stores session data into cookies like
+  :class:`SimpleCookieStorage` does but
+  encodes the data via :term:`cryptography` Fernet cipher.
 
-  Requires ``PyCrypto`` library::
+  For key generation use :meth:`cryptography.fernet.Fernet.generate_key` method.
 
-      $ pip install aiohttp_session[pycrypto]
+  Requires :term:`cryptography` library::
 
-* ``aiohttp_session.redis_storage.RedisStorage(redis_pool)`` -- stores
+      $ pip install aiohttp_session[secure]
+
+* :class:`~aiohttp_session.redis_storage.RedisStorage` -- stores
   JSON-ed data into *redis*, keepeng into cookie only redis key
-  (random UUID). ``redis_pool`` is ``aioredis`` pool object, created by
-  ``yield from aioredis.create_pool(...)`` call.
+  (random UUID).
 
-  Requires ``aioredis`` library::
+  Requires :term:`aioredis` library::
 
       $ pip install aiohttp_session[aioredis]
 
@@ -97,20 +101,15 @@ or have some suggestion for library improvement.
 The library uses `Travis <https://travis-ci.org/aio-libs/aiohttp_session>`_ for
 Continious Integration.
 
-IRC channel
------------
-
-You can discuss the library on Freenode_ at **#aio-libs** channel.
-
-.. _Freenode: http://freenode.net
-
 
 Dependencies
 ------------
 
 - Python 3.3 and :mod:`asyncio` or Python 3.4+
-- psycopg2
-- aiopg.sa requires :term:`sqlalchemy`.
+- :term:`cryptography` for
+  :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
+- :term:`aioredis` for
+  :class:`~aiohttp_session.redis_storage.RedisStorage`.
 
 
 License

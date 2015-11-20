@@ -1,35 +1,18 @@
 language: python
 python:
-  - 3.3
   - 3.4
-
-before_install:
-- sudo add-apt-repository -y ppa:chris-lea/redis-server
-- echo "deb http://ppa.launchpad.net/chris-lea/redis-server/ubuntu oneiric main" | sudo tee -a /etc/apt/sources.list
-- sudo apt-get update -qq
-# - sudo apt-get install redis-server -V;
-- sudo apt-get install redis-server/oneiric -V --force-yes
-
+  - 3.5
 
 install:
 - pip install --upgrade setuptools
 - pip install hiredis
 - pip install pyflakes
 - pip install pep8
-- pip install coveralls --use-mirrors
+- pip install coveralls
 - pip install aiohttp
 - pip install aioredis
-- pip install pycrypto
+- pip install cryptography
 - python setup.py develop
-
-before_script:
-# main redis instance listening port & socket
-- >
-  redis-server --daemonize yes
-  --pidfile ./redis-server.pid
-  --port $REDIS_PORT
-  --save ""
-- redis-cli -p $REDIS_PORT PING
 
 script:
 - pyflakes aiohttp_session tests
@@ -43,5 +26,8 @@ env:
   global:
   - REDIS_PORT=6379
   matrix:
-  - PYTHONASYNCIODEBUG=1
-  - PYTHONASYNCIODEBUG=0
+  - PYTHONASYNCIODEBUG=x
+  - PYTHONASYNCIODEBUG=
+services:
+  - redis-server
+sudo: false

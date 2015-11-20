@@ -1,6 +1,25 @@
 Changes
 =======
 
+0.3.0 (2015-11-20)
+------------------
+
+- Reflect aiohttp changes: minimum required Python version is 3.4.1
+
+- Use explicit 'aiohttp_session' package
+
+0.2.0 (2015-09-07)
+------------------
+
+- Add session.created property #14
+
+- Replaced PyCrypto with crypthography library #16
+
+0.1.2 (2015-08-07)
+------------------
+
+- Add manifest file #15
+
 0.1.1 (2015-04-20)
 ------------------
 

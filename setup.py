@@ -1,5 +1,5 @@
 import codecs
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 import re
 
@@ -15,10 +15,13 @@ with codecs.open(os.path.join(os.path.abspath(os.path.dirname(
 def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
-install_requires = ['aiohttp>=0.14']
+install_requires = ['aiohttp>=0.18']
 tests_require = install_requires + ['nose']
-extras_require = {'aioredis': ['aioredis>=0.1.4'],
-                  'pycrypto': ['pycrypto']}
+extras_require = {
+    'aioredis': ['aioredis>=0.1.4'],
+    'pycrypto': ['cryptography'],
+    'secure': ['cryptography'],
+}
 
 
 setup(name='aiohttp_session',
@@ -30,7 +33,6 @@ setup(name='aiohttp_session',
           'Intended Audience :: Developers',
           'Programming Language :: Python',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Topic :: Internet :: WWW/HTTP'],
@@ -38,7 +40,7 @@ setup(name='aiohttp_session',
       author_email='andrew.svetlov@gmail.com',
       url='https://github.com/aio-libs/aiohttp_session/',
       license='Apache 2',
-      packages=find_packages(),
+      packages=['aiohttp_session'],
       install_requires=install_requires,
       tests_require=tests_require,
       test_suite='nose.collector',

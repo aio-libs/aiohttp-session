@@ -3,11 +3,12 @@ import json
 import socket
 import unittest
 import base64
-
-from Crypto.Cipher import AES
-from Crypto import Random
+import time
 
 from aiohttp import web, request
+
+from cryptography import fernet
+
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
@@ -17,7 +18,10 @@ class TestEncryptedCookieStorage(unittest.TestCase):
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
-        self.key = b'Sixteen byte key'
+
+        key = fernet.Fernet.generate_key()
+        self.fernet = fernet.Fernet(key)
+        self.key = base64.urlsafe_b64decode(key)
         self.handler = None
         self.srv = None
 
@@ -26,6 +30,8 @@ class TestEncryptedCookieStorage(unittest.TestCase):
             self.loop.run_until_complete(self.handler.finish_connections())
         if self.srv is not None:
             self.srv.close()
+        self.loop.stop()
+        self.loop.run_forever()
         self.loop.close()
 
     def find_unused_port(self):
@@ -53,29 +59,27 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         return app, srv, url
 
     def make_cookie(self, data):
-        cookie_data = json.dumps(data).encode('utf-8')
-        if len(cookie_data) % AES.block_size != 0:
-            # padding with spaces to full blocks
-            to_pad = AES.block_size - (len(cookie_data) % AES.block_size)
-            cookie_data += b' ' * to_pad
-        iv = Random.new().read(AES.block_size)
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        encrypted = cipher.encrypt(cookie_data)
-        encrypted = iv + encrypted
-        b64coded = base64.b64encode(encrypted).decode('utf-8')
-        return {'AIOHTTP_SESSION': b64coded}
+        if data:
+            session_data = {
+                'session': data,
+                'created': int(time.time())
+            }
+        else:
+            session_data = data
+
+        cookie_data = json.dumps(session_data).encode('utf-8')
+        data = self.fernet.encrypt(cookie_data).decode('utf-8')
+
+        return {'AIOHTTP_SESSION': data}
 
     def decrypt(self, cookie_value):
         assert type(cookie_value) == str
-        decoded = base64.b64decode(cookie_value)
-        iv = decoded[:AES.block_size]
-        data = decoded[AES.block_size:]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        decrypted = cipher.decrypt(data).decode('utf-8')
-        return json.loads(decrypted)
+        return json.loads(
+            self.fernet.decrypt(cookie_value.encode('utf-8')).decode('utf-8')
+        )
 
     def test_invalid_key(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             EncryptedCookieStorage(b'123')  # short key
 
     def test_create_new_sesssion(self):
@@ -136,10 +140,15 @@ class TestEncryptedCookieStorage(unittest.TestCase):
                 loop=self.loop)
             self.assertEqual(200, resp.status)
             morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertEqual(
-                {'a': 1, 'b': 2, 'c': 3},
-                self.decrypt(morsel.value)
-            )
+            cookie_data = self.decrypt(morsel.value)
+            self.assertIn('session', cookie_data)
+            self.assertIn('a', cookie_data['session'])
+            self.assertIn('b', cookie_data['session'])
+            self.assertIn('c', cookie_data['session'])
+            self.assertIn('created', cookie_data)
+            self.assertEqual(cookie_data['session']['a'], 1)
+            self.assertEqual(cookie_data['session']['b'], 2)
+            self.assertEqual(cookie_data['session']['c'], 3)
             self.assertTrue(morsel['httponly'])
             self.assertEqual('/', morsel['path'])
 

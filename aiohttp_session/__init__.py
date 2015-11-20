@@ -4,11 +4,12 @@ import abc
 import asyncio
 from collections import MutableMapping
 import json
+import time
 
 from aiohttp import web
 
 
-__version__ = '0.1.1'
+__version__ = '0.3.0'
 
 
 class Session(MutableMapping):
@@ -20,13 +21,21 @@ class Session(MutableMapping):
         self._mapping = {}
         self._identity = identity
         self._new = new
-        if data is not None:
-            self._mapping.update(data)
+        created = data.get('created', None) if data else None
+        session_data = data.get('session', None) if data else None
+
+        if new or created is None:
+            self._created = int(time.time())
+        else:
+            self._created = created
+
+        if session_data is not None:
+            self._mapping.update(session_data)
 
     def __repr__(self):
-        return '<{} [new:{}, changed:{}] {!r}>'.format(
+        return '<{} [new:{}, changed:{}, created:{}] {!r}>'.format(
             self.__class__.__name__, self.new, self._changed,
-            self._mapping)
+            self.created, self._mapping)
 
     @property
     def new(self):
@@ -35,6 +44,22 @@ class Session(MutableMapping):
     @property
     def identity(self):
         return self._identity
+
+    @property
+    def created(self):
+        return self._created
+
+    @property
+    def empty(self):
+        return not bool(self._mapping)
+
+    @property
+    def max_age(self):
+        return self._max_age
+
+    @max_age.setter
+    def max_age(self, value):
+        self._max_age = value
 
     def changed(self):
         self._changed = True
@@ -143,6 +168,16 @@ class AbstractStorage(metaclass=abc.ABCMeta):
     def cookie_params(self):
         return self._cookie_params
 
+    def _get_session_data(self, session):
+        if not session.empty:
+            data = {
+                'created': session.created,
+                'session': session._mapping
+            }
+        else:
+            data = {}
+        return data
+
     @asyncio.coroutine
     @abc.abstractmethod
     def load_session(self, request):
@@ -188,5 +223,5 @@ class SimpleCookieStorage(AbstractStorage):
 
     @asyncio.coroutine
     def save_session(self, request, response, session):
-        cookie_data = json.dumps(session._mapping)
+        cookie_data = json.dumps(self._get_session_data(session))
         self.save_cookie(response, cookie_data)

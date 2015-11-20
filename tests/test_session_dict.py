@@ -1,4 +1,5 @@
 import unittest
+import time
 
 from aiohttp_session import Session
 
@@ -11,13 +12,15 @@ class SessionTests(unittest.TestCase):
         self.assertTrue(s.new)
         self.assertEqual('test_identity', s.identity)
         self.assertFalse(s._changed)
+        self.assertIsNotNone(s.created)
 
     def test_create2(self):
-        s = Session('test_identity', data={'some': 'data'})
+        s = Session('test_identity', data={'session': {'some': 'data'}})
         self.assertEqual(s, {'some': 'data'})
         self.assertFalse(s.new)
         self.assertEqual('test_identity', s.identity)
         self.assertFalse(s._changed)
+        self.assertIsNotNone(s.created)
 
     def test_create3(self):
         s = Session(identity=1, new=True)
@@ -25,38 +28,58 @@ class SessionTests(unittest.TestCase):
         self.assertTrue(s.new)
         self.assertEqual(s.identity, 1)
         self.assertFalse(s._changed)
+        self.assertIsNotNone(s.created)
 
     def test__repr__(self):
         s = Session('test_identity', new=True)
-        self.assertEqual(str(s), '<Session [new:True, changed:False] {}>')
+        self.assertEqual(
+            str(s),
+            '<Session [new:True, changed:False, created:{0}] {{}}>'.format(
+                s.created))
         s['foo'] = 'bar'
-        self.assertEqual(str(s),
-                         "<Session [new:True, changed:True] {'foo': 'bar'}>")
+        self.assertEqual(
+            str(s),
+            "<Session [new:True, changed:True, created:{0}]"
+            " {{'foo': 'bar'}}>".format(s.created))
 
     def test__repr__2(self):
-        s = Session('test_identity', data={'key': 123}, new=False)
-        self.assertEqual(str(s),
-                         "<Session [new:False, changed:False] {'key': 123}>")
+        created = int(time.time()) - 1000
+        session_data = {
+            'session': {
+                'key': 123
+            },
+            'created': created
+        }
+        s = Session('test_identity', data=session_data, new=False)
+        self.assertEqual(
+            str(s),
+            "<Session [new:False, changed:False, created:{0}]"
+            " {{'key': 123}}>".format(created))
         s.invalidate()
-        self.assertEqual(str(s), "<Session [new:False, changed:True] {}>")
+        self.assertEqual(
+            str(s),
+            "<Session [new:False, changed:True, created:{0}] {{}}>".format(
+                created))
 
     def test_invalidate(self):
-        s = Session('test_identity', data={'foo': 'bar'})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}})
         self.assertEqual(s, {'foo': 'bar'})
         self.assertFalse(s._changed)
 
         s.invalidate()
         self.assertEqual(s, {})
         self.assertTrue(s._changed)
+        self.assertIsNotNone(s.created)
 
     def test_invalidate2(self):
-        s = Session('test_identity', data={'foo': 'bar'})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}})
         self.assertEqual(s, {'foo': 'bar'})
         self.assertFalse(s._changed)
 
         s.invalidate()
         self.assertEqual(s, {})
         self.assertTrue(s._changed)
+        self.assertIsNotNone(s.created)
 
     def test_operations(self):
         s = Session('test_identity')
@@ -66,7 +89,7 @@ class SessionTests(unittest.TestCase):
         self.assertNotIn('foo', s)
         self.assertNotIn('key', s)
 
-        s = Session('test_identity', data={'foo': 'bar'})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}})
         self.assertEqual(len(s), 1)
         self.assertEqual(s, {'foo': 'bar'})
         self.assertEqual(list(s), ['foo'])
@@ -95,7 +118,13 @@ class SessionTests(unittest.TestCase):
         self.assertNotIn('key', s)
 
     def test_change(self):
-        s = Session('test_identity', new=False, data={'a': {'key': 'value'}})
+        created = int(time.time())
+        s = Session('test_identity', new=False, data={
+            'session': {
+                'a': {'key': 'value'}
+            },
+            'created': created
+        })
         self.assertFalse(s._changed)
 
         s['a']['key2'] = 'val2'
@@ -103,9 +132,11 @@ class SessionTests(unittest.TestCase):
         self.assertEqual({'a': {'key': 'value',
                                 'key2': 'val2'}},
                          s)
+        self.assertEqual(s.created, created)
 
         s.changed()
         self.assertTrue(s._changed)
         self.assertEqual({'a': {'key': 'value',
                                 'key2': 'val2'}},
                          s)
+        self.assertEqual(s.created, created)

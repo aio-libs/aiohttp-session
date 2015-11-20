@@ -233,7 +233,7 @@ To use the storage you should push it into
 
    app = aiohttp.web.Application(middlewares=[
        aiohttp_session.cookie_storage.EncryptedCookieStorage(
-           b'Sixteen byte key'])
+           b'Thirty  two  length  bytes  key.'])
 
 .. class:: EncryptedCookieStorage(secret_key, *, \
                                   cookie_name="AIOHTTP_SESSION", \

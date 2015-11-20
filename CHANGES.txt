@@ -1,6 +1,13 @@
 Changes
 =======
 
+0.3.0 (2015-11-20)
+------------------
+
+- Reflect aiohttp changes: minimum required Python version is 3.4.1
+
+- Use explicit 'aiohttp_session' package
+
 0.2.0 (2015-09-07)
 ------------------
 

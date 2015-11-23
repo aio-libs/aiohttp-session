@@ -12,6 +12,7 @@ install:
 - pip install aiohttp
 - pip install aioredis
 - pip install cryptography
+- pip install pynacl
 - python setup.py develop
 
 script:

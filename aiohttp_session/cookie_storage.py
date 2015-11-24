@@ -18,7 +18,11 @@ class EncryptedCookieStorage(AbstractStorage):
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly)
 
-        self._fernet = fernet.Fernet(base64.urlsafe_b64encode(secret_key))
+        if isinstance(secret_key, str):
+            pass
+        elif isinstance(secret_key, (bytes, bytearray)):
+            secret_key = base64.urlsafe_b64encode(secret_key)
+        self._fernet = fernet.Fernet(secret_key)
 
     @asyncio.coroutine
     def load_session(self, request):

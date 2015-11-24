@@ -20,10 +20,8 @@ class TestRedisStorage(unittest.TestCase):
         self.srv = None
 
     def tearDown(self):
-        if self.handler is not None:
-            self.loop.run_until_complete(self.handler.finish_connections())
-        if self.srv is not None:
-            self.srv.close()
+        self.loop.run_until_complete(self.handler.finish_connections())
+        self.srv.close()
         self.loop.stop()
         self.loop.run_forever()
         self.loop.close()
@@ -36,7 +34,7 @@ class TestRedisStorage(unittest.TestCase):
         return port
 
     @asyncio.coroutine
-    def create_server(self, method, path, handler=None, max_age=None):
+    def create_server(self, method, path, handler, max_age=None):
         self.redis = yield from aioredis.create_pool(('localhost', 6379),
                                                      minsize=5,
                                                      maxsize=10,
@@ -45,8 +43,7 @@ class TestRedisStorage(unittest.TestCase):
         middleware = session_middleware(
             RedisStorage(self.redis, max_age=max_age))
         app = web.Application(middlewares=[middleware], loop=self.loop)
-        if handler:
-            app.router.add_route(method, path, handler)
+        app.router.add_route(method, path, handler)
 
         port = self.find_unused_port()
         handler = app.make_handler()
@@ -59,13 +56,10 @@ class TestRedisStorage(unittest.TestCase):
 
     @asyncio.coroutine
     def make_cookie(self, data):
-        if data:
-            session_data = {
-                'session': data,
-                'created': int(time.time())
-            }
-        else:
-            session_data = data
+        session_data = {
+            'session': data,
+            'created': int(time.time())
+        }
         value = json.dumps(session_data)
         key = uuid.uuid4().hex
         with (yield from self.redis) as conn:

@@ -15,7 +15,8 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_create2(self):
-        s = Session('test_identity', data={'session': {'some': 'data'}})
+        s = Session('test_identity', data={'session': {'some': 'data'}},
+                    new=False)
         self.assertEqual(s, {'some': 'data'})
         self.assertFalse(s.new)
         self.assertEqual('test_identity', s.identity)
@@ -62,7 +63,8 @@ class SessionTests(unittest.TestCase):
                 created))
 
     def test_invalidate(self):
-        s = Session('test_identity', data={'session': {'foo': 'bar'}})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}},
+                    new=False)
         self.assertEqual(s, {'foo': 'bar'})
         self.assertFalse(s._changed)
 
@@ -72,7 +74,8 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_invalidate2(self):
-        s = Session('test_identity', data={'session': {'foo': 'bar'}})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}},
+                    new=False)
         self.assertEqual(s, {'foo': 'bar'})
         self.assertFalse(s._changed)
 
@@ -82,14 +85,15 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_operations(self):
-        s = Session('test_identity')
+        s = Session('test_identity', new=False)
         self.assertEqual(s, {})
         self.assertEqual(len(s), 0)
         self.assertEqual(list(s), [])
         self.assertNotIn('foo', s)
         self.assertNotIn('key', s)
 
-        s = Session('test_identity', data={'session': {'foo': 'bar'}})
+        s = Session('test_identity', data={'session': {'foo': 'bar'}},
+                    new=False)
         self.assertEqual(len(s), 1)
         self.assertEqual(s, {'foo': 'bar'})
         self.assertEqual(list(s), ['foo'])

@@ -16,7 +16,7 @@ class Session(MutableMapping):
 
     """Session dict-like object."""
 
-    def __init__(self, identity, *, data=None, new=False):
+    def __init__(self, identity, *, data=None, new):
         self._changed = False
         self._mapping = {}
         self._identity = identity

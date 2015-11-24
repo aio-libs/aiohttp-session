@@ -331,4 +331,5 @@ texinfo_documents = [
 intersphinx_mapping = {'https://docs.python.org/3': None,
                        'http://aiohttp.readthedocs.org/en/stable': None,
                        'http://aioredis.readthedocs.org/en/latest': None,
-                       'http://cryptography.io/en/latest': None}
+                       'http://cryptography.io/en/latest': None,
+                       'https://pynacl.readthedocs.org/en/latest': None}

@@ -256,6 +256,39 @@ To use the storage you should push it into
       :meth:`cryptography.fernet.Fernet.generate_key` method.
 
 
+.. module:: aiohttp_session.cookie_storage
+.. currentmodule:: aiohttp_session.cookie_storage
+
+
+NaCl Storage
+--------------
+
+The storage that saves session data in HTTP cookies as
+:class:`~nacl.secret.SecretBox` encrypted data.
+
+To use the storage you should push it into
+:func:`~aiohttp_session.session_middleware`::
+
+   app = aiohttp.web.Application(middlewares=[
+       aiohttp_session.cookie_storage.NaClCookieStorage(
+           b'Thirty  two  length  bytes  key.'])
+
+.. class:: NaClCookieStorage(secret_key, *, \
+                                  cookie_name="AIOHTTP_SESSION", \
+                                  domain=None, max_age=None, path='/', \
+                                  secure=None, httponly=True)
+
+   Create encryted cookies storage.
+
+   The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
+
+   *secret_key* is :class:`bytes` secret key with length of 32, used
+   for encoding.
+
+   Other parameters are the same as for
+   :class:`~aiohttp_session.AbstractStorage` constructor.
+
+
 .. module:: aiohttp_session.redis_storage
 .. currentmodule:: aiohttp_session.redis_storage
 

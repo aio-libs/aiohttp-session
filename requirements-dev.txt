@@ -7,3 +7,4 @@ pep257
 -e .
 aioredis
 cryptography
+pynacl

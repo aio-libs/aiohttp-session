@@ -31,6 +31,12 @@
 
       https://cryptography.io
 
+   pynacl
+
+      Yet another libary used for encrypting secure cookied session
+
+      https://pynacl.readthedocs.org
+
    session
 
       A namespace that is valid for some period of continual activity

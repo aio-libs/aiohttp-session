@@ -336,8 +336,11 @@ To use the storage you need setup it first::
 
    The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
-   *redis_storage* is a :class:`~aioredis.RedisPool` which should be
-   created by :func:`~aioredis.create_pool` call.
+   *redis_pool* is a :class:`~aioredis.RedisPool` which should be
+   created by :func:`~aioredis.create_pool` call, e.g.::
+
+      redis = yield from aioredis.create_pool(('localhost', 6379))
+      storage = aiohttp_session.redis_storage.RedisStorage(redis)
 
    Other parameters are the same as for
    :class:`~aiohttp_session.AbstractStorage` constructor.

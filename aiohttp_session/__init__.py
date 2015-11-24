@@ -143,6 +143,12 @@ def session_middleware(storage):
     return factory
 
 
+def setup(app, storage):
+    """Setup the library in aiohttp fashion."""
+
+    app.middlewares.append(session_middleware(storage))
+
+
 class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",

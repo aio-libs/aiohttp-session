@@ -34,6 +34,24 @@ Public functions
 
    .. seealso:: :ref:`aiohttp-session-storage`
 
+   .. note:: :func:`setup` is new-fashion way for library setup.
+
+.. function:: setup(app, storage)
+
+   Setup session support for given *app*.
+
+   The function is shortcut for::
+
+      app.middlewares.append(session_middleware(storage))
+
+   *app* is :class:`aiohttp.web.Application` instance.
+
+   *storage* is a session storage instance (object used to store
+   session data into cookies, Redis, database etc., class is derived
+   from :class:`AbstractStorage`).
+
+   .. seealso:: :ref:`aiohttp-session-storage`
+
 
 .. _aiohttp-session-session:
 
@@ -245,7 +263,7 @@ To use the storage you should push it into
    The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
    *secret_key* is :class:`bytes` secret key with length of 32, used
-   for encoding.
+   for encoding or base-64 encoded :class:`str` one.
 
    Other parameters are the same as for
    :class:`~aiohttp_session.AbstractStorage` constructor.

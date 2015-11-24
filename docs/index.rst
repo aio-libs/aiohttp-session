@@ -28,7 +28,7 @@ A trivial usage example::
     import asyncio
     import time
     from aiohttp import web
-    from aiohttp_session import get_session, session_middleware
+    from aiohttp_session import get_session, setup
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
     @asyncio.coroutine
@@ -39,8 +39,9 @@ A trivial usage example::
 
     @asyncio.coroutine
     def init(loop):
-        app = web.Application(middlewares=[session_middleware(
-            EncryptedCookieStorage(b'Thirty  two  length  bytes  key.'))])
+        app = web.Application()
+        setup(app,
+            EncryptedCookieStorage(b'Thirty  two  length  bytes  key.'))
         app.router.add_route('GET', '/', handler)
         srv = yield from loop.create_server(
             app.make_handler(), '0.0.0.0', 8080)

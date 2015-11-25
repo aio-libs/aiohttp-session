@@ -41,12 +41,11 @@ class TestNaClCookieStorage(unittest.TestCase):
         return port
 
     @asyncio.coroutine
-    def create_server(self, method, path, handler=None):
+    def create_server(self, method, path, handler):
         middleware = session_middleware(
             NaClCookieStorage(self.key))
         app = web.Application(middlewares=[middleware], loop=self.loop)
-        if handler:
-            app.router.add_route(method, path, handler)
+        app.router.add_route(method, path, handler)
 
         port = self.find_unused_port()
         handler = app.make_handler()
@@ -58,13 +57,10 @@ class TestNaClCookieStorage(unittest.TestCase):
         return app, srv, url
 
     def make_cookie(self, data):
-        if data:
-            session_data = {
-                'session': data,
-                'created': int(time.time())
-            }
-        else:
-            session_data = data
+        session_data = {
+            'session': data,
+            'created': int(time.time())
+        }
 
         cookie_data = json.dumps(session_data).encode('utf-8')
         nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)

@@ -25,7 +25,7 @@ class NaClCookieStorage(AbstractStorage):
     def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            return Session(None, new=True)
+            return Session(None, data=None, new=True)
         else:
             data = json.loads(
                 self._secretbox.decrypt(cookie.encode('utf-8'),

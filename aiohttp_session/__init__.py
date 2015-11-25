@@ -16,7 +16,7 @@ class Session(MutableMapping):
 
     """Session dict-like object."""
 
-    def __init__(self, identity, *, data=None, new):
+    def __init__(self, identity, *, data, new):
         self._changed = False
         self._mapping = {}
         self._identity = identity
@@ -222,7 +222,7 @@ class SimpleCookieStorage(AbstractStorage):
     def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            return Session(None, new=True)
+            return Session(None, data=None, new=True)
         else:
             data = json.loads(cookie)
             return Session(None, data=data, new=False)

@@ -7,7 +7,7 @@ from aiohttp_session import Session
 class SessionTests(unittest.TestCase):
 
     def test_create(self):
-        s = Session('test_identity', new=True)
+        s = Session('test_identity', data=None, new=True)
         self.assertEqual(s, {})
         self.assertTrue(s.new)
         self.assertEqual('test_identity', s.identity)
@@ -24,7 +24,7 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_create3(self):
-        s = Session(identity=1, new=True)
+        s = Session(identity=1, data=None, new=True)
         self.assertEqual(s, {})
         self.assertTrue(s.new)
         self.assertEqual(s.identity, 1)
@@ -32,7 +32,7 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test__repr__(self):
-        s = Session('test_identity', new=True)
+        s = Session('test_identity', data=None, new=True)
         self.assertEqual(
             str(s),
             '<Session [new:True, changed:False, created:{0}] {{}}>'.format(
@@ -85,7 +85,7 @@ class SessionTests(unittest.TestCase):
         self.assertIsNotNone(s.created)
 
     def test_operations(self):
-        s = Session('test_identity', new=False)
+        s = Session('test_identity', data=None, new=False)
         self.assertEqual(s, {})
         self.assertEqual(len(s), 0)
         self.assertEqual(list(s), [])

@@ -23,13 +23,13 @@ class RedisStorage(AbstractStorage):
     def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            return Session(None, new=True)
+            return Session(None, data=None, new=True)
         else:
             with (yield from self._redis) as conn:
                 key = str(cookie)
                 data = yield from conn.get(self.cookie_name + '_' + key)
                 if data is None:
-                    return Session(None, new=True)
+                    return Session(None, data=None, new=True)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
                 return Session(key, data=data, new=False)

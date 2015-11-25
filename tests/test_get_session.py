@@ -37,7 +37,7 @@ class TestGetSession(unittest.TestCase):
         @asyncio.coroutine
         def go():
             req = self.make_request('GET', '/')
-            session = Session('identity', new=False)
+            session = Session('identity', data=None, new=False)
             req[SESSION_KEY] = session
 
             ret = yield from get_session(req)

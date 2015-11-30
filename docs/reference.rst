@@ -202,10 +202,13 @@ implement both :meth:`~AbstractStorage.load_session` and
       A helper for loading cookie (:class:`http.cookies.SimpleCookie`
       instance) from *request* (:class:`aiohttp.web.Request`).
 
-   .. method:: save_cookie(response, cookie_data)
+   .. method:: save_cookie(response, cookie_data, *, max_age=None)
 
       A helper for saving *cookie_data* (:class:`str`) into *response*
       (:class:`aiohttp.web.StreamResponse` or descendants).
+
+      *max_age* is cookie lifetime given from session. Storage defailt
+      is used if the value is ``None``.
 
 
 Simple Storage

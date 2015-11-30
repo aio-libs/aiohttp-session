@@ -39,10 +39,12 @@ class RedisStorage(AbstractStorage):
         key = session.identity
         if key is None:
             key = uuid.uuid4().hex
-            self.save_cookie(response, key)
+            self.save_cookie(response, key,
+                             max_age=session.max_age)
         else:
             key = str(key)
-            self.save_cookie(response, key)
+            self.save_cookie(response, key,
+                             max_age=session.max_age)
 
         data = self._encoder(self._get_session_data(session))
         with (yield from self._redis) as conn:

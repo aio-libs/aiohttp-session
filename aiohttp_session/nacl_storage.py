@@ -36,7 +36,8 @@ class NaClCookieStorage(AbstractStorage):
     @asyncio.coroutine
     def save_session(self, request, response, session):
         if session.empty:
-            return self.save_cookie(response, session._mapping)
+            return self.save_cookie(response, session._mapping,
+                                    max_age=session.max_age)
 
         cookie_data = json.dumps(
             self._get_session_data(session)
@@ -45,5 +46,6 @@ class NaClCookieStorage(AbstractStorage):
         self.save_cookie(
             response,
             self._secretbox.encrypt(cookie_data, nonce,
-                                    encoder=Base64Encoder).decode('utf-8')
+                                    encoder=Base64Encoder).decode('utf-8'),
+            max_age=session.max_age
         )

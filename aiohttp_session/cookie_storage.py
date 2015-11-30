@@ -38,7 +38,8 @@ class EncryptedCookieStorage(AbstractStorage):
     @asyncio.coroutine
     def save_session(self, request, response, session):
         if session.empty:
-            return self.save_cookie(response, session._mapping)
+            return self.save_cookie(response, session._mapping,
+                                    max_age=session.max_age)
 
         cookie_data = json.dumps(
             self._get_session_data(session)
@@ -46,4 +47,5 @@ class EncryptedCookieStorage(AbstractStorage):
         self.save_cookie(
             response,
             self._fernet.encrypt(cookie_data).decode('utf-8'),
+            max_age=session.max_age
         )

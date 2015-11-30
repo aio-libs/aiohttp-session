@@ -21,6 +21,7 @@ class Session(MutableMapping):
         self._mapping = {}
         self._identity = identity
         self._new = new
+        self._max_age = None
         created = data.get('created', None) if data else None
         session_data = data.get('session', None) if data else None
 
@@ -198,12 +199,14 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         cookie = request.cookies.get(self._cookie_name)
         return cookie
 
-    def save_cookie(self, response, cookie_data):
+    def save_cookie(self, response, cookie_data, *, max_age=None):
+        params = dict(self._cookie_params)
+        if max_age is not None:
+            params['max_age'] = max_age
         if not cookie_data:
             response.del_cookie(self._cookie_name)
         else:
-            response.set_cookie(self._cookie_name, cookie_data,
-                                **self._cookie_params)
+            response.set_cookie(self._cookie_name, cookie_data, **params)
 
 
 class SimpleCookieStorage(AbstractStorage):

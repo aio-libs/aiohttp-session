@@ -125,12 +125,14 @@ def session_middleware(storage, *, max_http_status=400):
         @asyncio.coroutine
         def middleware(request):
             request[STORAGE_KEY] = storage
+            raise_response = False
             try:
                 response = yield from handler(request)
             except web.HTTPException as exc:
                 if exc.status_code > max_http_status:
                     raise exc
                 response = exc
+                raise_response = True
             if not isinstance(response, web.StreamResponse):
                 raise RuntimeError("Expect response, not {!r}", type(response))
             if not isinstance(response, web.Response):
@@ -143,6 +145,8 @@ def session_middleware(storage, *, max_http_status=400):
             if session is not None:
                 if session._changed:
                     yield from storage.save_session(request, response, session)
+            if raise_response:
+                raise response
             return response
 
         return middleware

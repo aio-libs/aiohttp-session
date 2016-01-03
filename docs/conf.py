@@ -72,7 +72,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'aiohttp_session'
-copyright = '2015, Andrew Svetlov'
+copyright = '2015,2016 Andrew Svetlov'
 author = 'Andrew Svetlov'
 
 # The version info for the project you're documenting, acts as replacement for

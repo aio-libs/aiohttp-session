@@ -154,10 +154,11 @@ def session_middleware(storage, *, max_http_status=400):
     return factory
 
 
-def setup(app, storage):
+def setup(app, storage, *, max_http_status=400):
     """Setup the library in aiohttp fashion."""
 
-    app.middlewares.append(session_middleware(storage))
+    app.middlewares.append(
+        session_middleware(storage, max_http_status=max_http_status))
 
 
 class AbstractStorage(metaclass=abc.ABCMeta):

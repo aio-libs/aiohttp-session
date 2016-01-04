@@ -114,9 +114,10 @@ def get_session(request):
     return session
 
 
-def session_middleware(storage):
+def session_middleware(storage, *, max_http_status=400):
 
     assert isinstance(storage, AbstractStorage), storage
+    assert isinstance(max_http_status, int), max_http_status
 
     @asyncio.coroutine
     def factory(app, handler):
@@ -124,7 +125,14 @@ def session_middleware(storage):
         @asyncio.coroutine
         def middleware(request):
             request[STORAGE_KEY] = storage
-            response = yield from handler(request)
+            raise_response = False
+            try:
+                response = yield from handler(request)
+            except web.HTTPException as exc:
+                if exc.status_code > max_http_status:
+                    raise exc
+                response = exc
+                raise_response = True
             if not isinstance(response, web.StreamResponse):
                 raise RuntimeError("Expect response, not {!r}", type(response))
             if not isinstance(response, web.Response):
@@ -137,6 +145,8 @@ def session_middleware(storage):
             if session is not None:
                 if session._changed:
                     yield from storage.save_session(request, response, session)
+            if raise_response:
+                raise response
             return response
 
         return middleware
@@ -144,10 +154,11 @@ def session_middleware(storage):
     return factory
 
 
-def setup(app, storage):
+def setup(app, storage, *, max_http_status=400):
     """Setup the library in aiohttp fashion."""
 
-    app.middlewares.append(session_middleware(storage))
+    app.middlewares.append(
+        session_middleware(storage, max_http_status=max_http_status))
 
 
 class AbstractStorage(metaclass=abc.ABCMeta):

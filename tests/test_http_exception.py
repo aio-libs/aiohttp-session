@@ -30,9 +30,8 @@ class TestHttpException(unittest.TestCase):
         return port
 
     @asyncio.coroutine
-    def create_server(self, routes, max_http_status):
-        middleware = session_middleware(SimpleCookieStorage(),
-                                        max_http_status=max_http_status)
+    def create_server(self, routes):
+        middleware = session_middleware(SimpleCookieStorage())
         app = web.Application(middlewares=[middleware], loop=self.loop)
         for method, path, handler in routes:
             app.router.add_route(method, path, handler)
@@ -67,24 +66,12 @@ class TestHttpException(unittest.TestCase):
             ]
 
         @asyncio.coroutine
-        def go_good_http_status():
-            _, _, url = yield from self.create_server(get_routes(),
-                                                      max_http_status=400)
+        def go():
+            _, _, url = yield from self.create_server(get_routes())
             resp = yield from request('GET', url + '/save', loop=self.loop)
             self.assertEqual(200, resp.status)
             self.assertEqual(resp.url[-5:], '/show')
             text = yield from resp.text()
             assert text == 'works'
 
-        @asyncio.coroutine
-        def go_bad_http_status():
-            _, _, url = yield from self.create_server(get_routes(),
-                                                      max_http_status=200)
-            resp = yield from request('GET', url + '/save', loop=self.loop)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(resp.url[-5:], '/show')
-            text = yield from resp.text()
-            assert text == 'None'
-
-        self.loop.run_until_complete(go_good_http_status())
-        self.loop.run_until_complete(go_bad_http_status())
+        self.loop.run_until_complete(go())

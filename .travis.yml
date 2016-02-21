@@ -5,6 +5,7 @@ python:
 
 install:
 - pip install --upgrade setuptools
+- pip install --upgrade pip wheel
 - pip install hiredis
 - pip install pyflakes
 - pip install pep8
@@ -19,6 +20,10 @@ script:
 - pyflakes aiohttp_session tests
 - pep8 aiohttp_session tests
 - coverage run --source=aiohttp_session setup.py test
+- python setup.py check -rm
+- if python -c "import sys; sys.exit(sys.version_info < (3,5))"; then
+      python setup.py check -s;
+  fi
 
 after_success:
 - coveralls
@@ -32,3 +37,14 @@ env:
 services:
   - redis-server
 sudo: false
+
+deploy:
+  provider: pypi
+  user: andrew.svetlov
+  password:
+    secure: "HZ9GfwquRRfzvV8quu8dMdOEY7akGDiSl1yyrWoiqvr2pFq/Z/EQGQPNB7E0HpVYOvx4LqortOz41C/TxSuLRXSHzDWEK9ddXSxTrBtoLMEQKjGMe6AhAW+w/q6/rENb9LAQ0OZuLybtJuUYO0zoGByqyBUsyDflOnhMZ2EAwKg="
+  distributions: "sdist bdist_wheel"
+  on:
+    tags: true
+    all_branches: true
+    python: 3.5

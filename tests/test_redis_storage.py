@@ -20,8 +20,11 @@ class TestRedisStorage(unittest.TestCase):
         self.srv = None
 
     def tearDown(self):
-        self.loop.run_until_complete(self.handler.finish_connections())
-        self.srv.close()
+        if self.handler is not None:
+            self.loop.run_until_complete(self.handler.finish_connections())
+        if self.srv is not None:
+            self.srv.close()
+            self.loop.run_until_complete(self.srv.wait_closed())
         self.loop.stop()
         self.loop.run_forever()
         self.loop.close()

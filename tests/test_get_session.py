@@ -2,6 +2,7 @@ import asyncio
 import unittest
 from unittest import mock
 
+import aiohttp
 from aiohttp.web import Request, HttpVersion
 from aiohttp import CIMultiDict, RawRequestMessage
 
@@ -22,8 +23,14 @@ class TestGetSession(unittest.TestCase):
     def make_request(self, method, path, headers=CIMultiDict(), *,
                      version=HttpVersion(1, 1), closing=False):
         self.app = mock.Mock()
-        message = RawRequestMessage(method, path, version, headers, closing,
-                                    False)
+        if tuple(int(i) for i in aiohttp.__version__.split('.')) < (0, 21):
+            message = RawRequestMessage(method, path, version, headers,
+                                        closing, False)
+        else:
+            message = RawRequestMessage(method, path, version, headers,
+                                        [(k.encode('utf-8'), v.encode('utf-8'))
+                                         for k, v in headers.items()],
+                                        closing, False)
         self.payload = mock.Mock()
         self.transport = mock.Mock()
         self.writer = mock.Mock()

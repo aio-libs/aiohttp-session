@@ -78,7 +78,7 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         with self.assertRaises(ValueError):
             EncryptedCookieStorage(b'123')  # short key
 
-    def test_create_new_sesssion(self):
+    def test_create_new_sesssion_broken_by_fermat(self):
 
         @asyncio.coroutine
         def handler(request):
@@ -91,8 +91,15 @@ class TestEncryptedCookieStorage(unittest.TestCase):
 
         @asyncio.coroutine
         def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            resp = yield from request('GET', url, loop=self.loop)
+            key = fernet.Fernet.generate_key()
+            self.key = base64.urlsafe_b64decode(key)
+
+            _, _, url = yield from self.create_server(
+                'GET', '/', handler)
+            resp = yield from request(
+                'GET', url,
+                cookies=self.make_cookie({'a': 1, 'b': 12}),
+                loop=self.loop)
             self.assertEqual(200, resp.status)
 
         self.loop.run_until_complete(go())

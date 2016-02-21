@@ -3,6 +3,7 @@ import json
 import base64
 
 from cryptography import fernet
+from cryptography.fernet import InvalidToken
 
 from . import AbstractStorage, Session
 
@@ -30,10 +31,13 @@ class EncryptedCookieStorage(AbstractStorage):
         if cookie is None:
             return Session(None, data=None, new=True)
         else:
-            data = json.loads(
-                self._fernet.decrypt(cookie.encode('utf-8')).decode('utf-8')
-            )
-            return Session(None, data=data, new=False)
+            try:
+                data = json.loads(
+                    self._fernet.decrypt(
+                        cookie.encode('utf-8')).decode('utf-8'))
+                return Session(None, data=data, new=False)
+            except InvalidToken:
+                return Session(None, data=None, new=True)
 
     @asyncio.coroutine
     def save_session(self, request, response, session):

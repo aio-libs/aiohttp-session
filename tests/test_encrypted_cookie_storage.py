@@ -84,25 +84,18 @@ class TestEncryptedCookieStorage(unittest.TestCase):
         def handler(request):
             session = yield from get_session(request)
             self.assertIsInstance(session, Session)
-            self.assertFalse(session.new)
-            self.assertFalse(session._changed)
-            self.assertEqual({'a': 1, 'b': 12}, session)
-            return web.Response(body=b'OK')
-
-            key = fernet.Fernet.generate_key()
-            self.key = base64.urlsafe_b64decode(key)
-
-            session = yield from get_session(request)
-            self.assertIsInstance(session, Session)
             self.assertTrue(session.new)
             self.assertFalse(session._changed)
             self.assertEqual({}, session)
-
             return web.Response(body=b'OK')
 
         @asyncio.coroutine
         def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
+            key = fernet.Fernet.generate_key()
+            self.key = base64.urlsafe_b64decode(key)
+
+            _, _, url = yield from self.create_server(
+                'GET', '/', handler)
             resp = yield from request(
                 'GET', url,
                 cookies=self.make_cookie({'a': 1, 'b': 12}),

@@ -33,7 +33,8 @@ class EncryptedCookieStorage(AbstractStorage):
         else:
             try:
                 data = json.loads(
-                    self._fernet.decrypt(cookie.encode('utf-8')).decode('utf-8')
+                    self._fernet.decrypt(
+                        cookie.encode('utf-8')).decode('utf-8')
                 )
                 return Session(None, data=data, new=False)
             except InvalidToken:

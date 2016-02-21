@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.5.0 (XXXX-XX-XX)
+0.5.0 (2016-02-21)
 ------------------
 
 - Handle cryptography.fernet.InvalidToken exception by providing an

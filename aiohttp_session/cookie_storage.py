@@ -6,6 +6,7 @@ from cryptography import fernet
 from cryptography.fernet import InvalidToken
 
 from . import AbstractStorage, Session
+from .log import log
 
 
 class EncryptedCookieStorage(AbstractStorage):
@@ -37,6 +38,8 @@ class EncryptedCookieStorage(AbstractStorage):
                         cookie.encode('utf-8')).decode('utf-8'))
                 return Session(None, data=data, new=False)
             except InvalidToken:
+                log.warning("Cannot decrypt cookie value, "
+                            "create a new fresh session")
                 return Session(None, data=None, new=True)
 
     @asyncio.coroutine

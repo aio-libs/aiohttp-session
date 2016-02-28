@@ -21,8 +21,7 @@ extras_require = {
     'aioredis': ['aioredis>=0.1.4'],
     'pycrypto': ['cryptography'],
     'secure': ['cryptography'],
-    'pynacl': ['pynacl'],
-    'pymongo': ['pymongo']
+    'pynacl': ['pynacl']
 }
 
 

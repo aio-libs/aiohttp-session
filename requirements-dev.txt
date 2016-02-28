@@ -8,3 +8,4 @@ pep257
 aioredis
 cryptography
 pynacl
+pymongo

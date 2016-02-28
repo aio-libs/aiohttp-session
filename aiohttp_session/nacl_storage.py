@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 import nacl.secret
 import nacl.utils
@@ -14,10 +13,10 @@ class NaClCookieStorage(AbstractStorage):
 
     def __init__(self, secret_key, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True):
+                 secure=None, httponly=True, **kwargs):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly)
+                         httponly=httponly, **kwargs)
 
         self._secretbox = nacl.secret.SecretBox(secret_key)
 
@@ -27,7 +26,7 @@ class NaClCookieStorage(AbstractStorage):
         if cookie is None:
             return Session(None, data=None, new=True)
         else:
-            data = json.loads(
+            data = self._decoder(
                 self._secretbox.decrypt(cookie.encode('utf-8'),
                                         encoder=Base64Encoder).decode('utf-8')
             )
@@ -39,7 +38,7 @@ class NaClCookieStorage(AbstractStorage):
             return self.save_cookie(response, session._mapping,
                                     max_age=session.max_age)
 
-        cookie_data = json.dumps(
+        cookie_data = self._encoder(
             self._get_session_data(session)
         ).encode('utf-8')
         nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)

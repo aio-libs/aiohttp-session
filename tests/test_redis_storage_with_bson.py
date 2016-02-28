@@ -150,7 +150,7 @@ class TestRedisStorage(unittest.TestCase):
             self.assertIn('e', value['session'])
             self.assertIn('created', value)
             self.assertEqual(value['session']['a'], 1)
-            self.assertEqual(value['session']['b'], 2)
+            self.assertEqual(value['session']['b'], 12)
             self.assertEqual(value['session']['c'], 3)
             self.assertEqual(value['session']['d'], self.data['d'])
             self.assertEqual(value['session']['e'], e)

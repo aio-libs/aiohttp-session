@@ -22,6 +22,7 @@ extras_require = {
     'pycrypto': ['cryptography'],
     'secure': ['cryptography'],
     'pynacl': ['pynacl'],
+    'pymongo': ['pymongo']
 }
 
 

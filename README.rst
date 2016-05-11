@@ -23,31 +23,26 @@ A trivial usage example::
 
     import asyncio
     import time
+    import os
     from aiohttp import web
-    from aiohttp_session import get_session, session_middleware
+    from aiohttp_session import setup, get_session, session_middleware
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
     @asyncio.coroutine
     def handler(request):
         session = yield from get_session(request)
+        last_visit = session['last_visit'] if 'last_visit' in session else None
         session['last_visit'] = time.time()
-        return web.Response(body=b'OK')
+        text = 'Last visited: {}'.format(last_visit)
+        return web.Response(body=text.encode('utf-8'))
 
-    @asyncio.coroutine
-    def init(loop):
-        app = web.Application(middlewares=[session_middleware(
-            EncryptedCookieStorage(b'Sixteen byte key'))])
-        app.router.add_route('GET', '/', handler)
-        srv = yield from loop.create_server(
-            app.make_handler(), '0.0.0.0', 8080)
-        return srv
+    app = web.Application()
+    # secret_key must be 32 url-safe base64-encoded bytes
+    secret_key = os.urandom(32)
+    setup(app, EncryptedCookieStorage(secret_key))
+    app.router.add_route('GET', '/', handler)
+    web.run_app(app)
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(init(loop))
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
 
 All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
 
@@ -60,7 +55,7 @@ Available session storages are:
 * ``aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)``
   -- stores session data into cookies as ``SimpleCookieStorage`` but
   encodes it via AES cipher. ``secrect_key`` is a ``bytes`` key for AES
-  encryption/decryption, the length should be 16 bytes.
+  encryption/decryption, the length should be 32 bytes.
 
   Requires ``crypotgraphy`` library::
 

@@ -1,6 +1,7 @@
 import asyncio
 import time
-import os
+import base64
+from cryptography import fernet
 from aiohttp import web
 from aiohttp_session import setup, get_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
@@ -15,7 +16,8 @@ def handler(request):
 
 app = web.Application()
 # secret_key must be 32 url-safe base64-encoded bytes
-secret_key = os.urandom(32)
+fernet_key = fernet.Fernet.generate_key()
+secret_key = base64.urlsafe_b64decode(fernet_key)
 setup(app, EncryptedCookieStorage(secret_key))
 app.router.add_route('GET', '/', handler)
 web.run_app(app)

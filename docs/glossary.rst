@@ -12,7 +12,7 @@
 
       :term:`asyncio` compatible Redis client library
 
-      http://aioredis.readthedocs.org/
+      https://aioredis.readthedocs.io/
 
    asyncio
 
@@ -35,7 +35,7 @@
 
       Yet another libary used for encrypting secure cookied session
 
-      https://pynacl.readthedocs.org
+      https://pynacl.readthedocs.io
 
    session
 

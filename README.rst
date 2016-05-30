@@ -3,7 +3,7 @@ aiohttp_session
 
 The library provides sessions for `aiohttp.web`__.
 
-.. _aiohttp_web: http://aiohttp.readthedocs.org/en/latest/web.html
+.. _aiohttp_web: https://aiohttp.readthedocs.io/en/latest/web.html
 
 __ aiohttp_web_
 

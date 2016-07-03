@@ -27,19 +27,16 @@ A trivial usage example::
     from aiohttp_session import get_session, session_middleware
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
-    @asyncio.coroutine
-    def handler(request):
+    async def handler(request):
         session = yield from get_session(request)
         session['last_visit'] = time.time()
         return web.Response(body=b'OK')
 
-    @asyncio.coroutine
-    def init(loop):
+    async def init(loop):
         app = web.Application(middlewares=[session_middleware(
             EncryptedCookieStorage(b'Sixteen byte key'))])
         app.router.add_route('GET', '/', handler)
-        srv = yield from loop.create_server(
-            app.make_handler(), '0.0.0.0', 8080)
+        srv = await loop.create_server(app.make_handler(), '0.0.0.0', 8080)
         return srv
 
     loop = asyncio.get_event_loop()

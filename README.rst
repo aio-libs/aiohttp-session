@@ -28,7 +28,7 @@ A trivial usage example::
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
     async def handler(request):
-        session = yield from get_session(request)
+        session = await get_session(request)
         session['last_visit'] = time.time()
         return web.Response(body=b'OK')
 

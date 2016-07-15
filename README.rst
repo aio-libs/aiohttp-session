@@ -23,28 +23,28 @@ A trivial usage example::
 
     import asyncio
     import time
+    import base64
+    from cryptorgraphy import fernet
     from aiohttp import web
-    from aiohttp_session import get_session, session_middleware
+    from aiohttp_session import setup, get_session, session_middleware
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
     async def handler(request):
         session = await get_session(request)
-        session['last_visit'] = time.time()
-        return web.Response(body=b'OK')
+        last_visit = session['last_visit'] if 'last_visit' in session else None
+        text = 'Last visited: {}'.format(last_visit)
+        return web.Response(body=text.encode('utf-8'))
 
-    async def init(loop):
-        app = web.Application(middlewares=[session_middleware(
-            EncryptedCookieStorage(b'Sixteen byte key'))])
+    def make_app():
+        app = web.Application()
+        # secret_key must be 32 url-safe base64-encoded bytes
+        fernet_key = fernet.Fernet.generate_key()
+        secret_key = base64.urlsafe_b64decode(fernet_key)
+        setup(app, EncryptedCookieStorage(secret_key))
         app.router.add_route('GET', '/', handler)
-        srv = await loop.create_server(app.make_handler(), '0.0.0.0', 8080)
-        return srv
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(init(loop))
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
+    web.run_app(make_app())
+
 
 All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
 
@@ -57,7 +57,7 @@ Available session storages are:
 * ``aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)``
   -- stores session data into cookies as ``SimpleCookieStorage`` but
   encodes it via AES cipher. ``secrect_key`` is a ``bytes`` key for AES
-  encryption/decryption, the length should be 16 bytes.
+  encryption/decryption, the length should be 32 bytes.
 
   Requires ``crypotgraphy`` library::
 

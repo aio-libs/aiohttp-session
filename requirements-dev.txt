@@ -1,5 +1,4 @@
 flake8
-nose
 coverage
 sphinx
 alabaster>=0.6.2
@@ -8,3 +7,5 @@ pep257
 aioredis
 cryptography
 pynacl
+pytest-aiohttp
+pytest-cov

@@ -135,9 +135,9 @@ def session_middleware(storage):
             if not isinstance(response, web.Response):
                 # likely got websoket or streaming
                 return response
-            if response.started:
+            if response.prepared:
                 raise RuntimeError(
-                    "Cannot save session data into started response")
+                    "Cannot save session data into prepared response")
             session = request.get(SESSION_KEY)
             if session is not None:
                 if session._changed:

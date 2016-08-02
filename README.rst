@@ -24,7 +24,7 @@ A trivial usage example::
     import asyncio
     import time
     import base64
-    from cryptorgraphy import fernet
+    from cryptography import fernet
     from aiohttp import web
     from aiohttp_session import setup, get_session, session_middleware
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
@@ -42,6 +42,7 @@ A trivial usage example::
         secret_key = base64.urlsafe_b64decode(fernet_key)
         setup(app, EncryptedCookieStorage(secret_key))
         app.router.add_route('GET', '/', handler)
+        return app
 
     web.run_app(make_app())
 
@@ -59,7 +60,7 @@ Available session storages are:
   encodes it via AES cipher. ``secrect_key`` is a ``bytes`` key for AES
   encryption/decryption, the length should be 32 bytes.
 
-  Requires ``crypotgraphy`` library::
+  Requires ``cryptography`` library::
 
       $ pip install aiohttp_session[secure]
 

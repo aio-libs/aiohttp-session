@@ -101,7 +101,8 @@ def test_clear_cookie_on_sesssion_invalidation(test_client):
     make_cookie(client, {'a': 1, 'b': 2})
     resp = yield from client.get('/')
     assert resp.status == 200
-    assert 'Set-Cookie: AIOHTTP_SESSION="{}"; httponly; Path=/'.upper() == \
+    assert ('Set-Cookie: AIOHTTP_SESSION="{}"; '
+            'domain=127.0.0.1; httponly; Path=/'.upper()) == \
         resp.cookies['AIOHTTP_SESSION'].output().upper()
 
 

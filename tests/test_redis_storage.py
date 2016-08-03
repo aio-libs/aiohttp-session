@@ -6,9 +6,174 @@ import uuid
 import aioredis
 import time
 
+import pytest
+
 from aiohttp import web, request
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.redis_storage import RedisStorage
+
+
+@pytest.yield_fixture
+def redis(loop):
+    pool = None
+
+    @asyncio.coroutine
+    def start():
+        nonlocal pool
+        pool = yield from aioredis.create_pool(('localhost', 6379),
+                                               minsize=5,
+                                               maxsize=10,
+                                               loop=loop)
+
+    loop.run_until_complete(start())
+    yield pool
+    if pool is not None:
+        loop.run_until_complete(pool.clear())
+
+
+def create_app(loop, handler, redis, max_age=None):
+    middleware = session_middleware(
+        RedisStorage(redis, max_age=max_age))
+    app = web.Application(middlewares=[middleware], loop=loop)
+    app.router.add_route('GET', '/', handler)
+    return app
+
+
+@asyncio.coroutine
+def make_cookie(client, redis, data):
+    session_data = {
+        'session': data,
+        'created': int(time.time())
+    }
+    value = json.dumps(session_data)
+    key = uuid.uuid4().hex
+    with (yield from redis) as conn:
+        yield from conn.set('AIOHTTP_SESSION_' + key, value)
+    client.session.cookies['AIOHTTP_SESSION'] = key
+
+
+@asyncio.coroutine
+def load_cookie(client, redis):
+    key = client.session.cookies['AIOHTTP_SESSION']
+    with (yield from redis) as conn:
+        encoded = yield from conn.get('AIOHTTP_SESSION_' + key.value)
+        s = encoded.decode('utf-8')
+        value = json.loads(s)
+        return value
+
+
+@asyncio.coroutine
+def test_create_new_sesssion(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        assert isinstance(session, Session)
+        assert session.new
+        assert not session._changed
+        assert {} == session
+        return web.Response(body=b'OK')
+
+    client = yield from test_client(create_app, handler, redis)
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+
+@asyncio.coroutine
+def test_load_existing_sesssion(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        assert isinstance(session, Session)
+        assert not session.new
+        assert not session._changed
+        assert {'a': 1, 'b': 12} == session
+        return web.Response(body=b'OK')
+
+    client = yield from test_client(create_app, handler, redis)
+    yield from make_cookie(client, redis, {'a': 1, 'b': 12})
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+
+@asyncio.coroutine
+def test_change_sesssion(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        session['c'] = 3
+        return web.Response(body=b'OK')
+
+    client = yield from test_client(create_app, handler, redis)
+    yield from make_cookie(client, redis, {'a': 1, 'b': 2})
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+    value = yield from load_cookie(client, redis)
+    assert 'session' in value
+    assert 'a' in value['session']
+    assert 'b' in value['session']
+    assert 'c' in value['session']
+    assert 'created' in value
+    assert value['session']['a'] == 1
+    assert value['session']['b'] == 2
+    assert value['session']['c'] == 3
+    morsel = resp.cookies['AIOHTTP_SESSION']
+    assert morsel['httponly']
+    assert '/' == morsel['path']
+
+
+@asyncio.coroutine
+def test_clear_cookie_on_sesssion_invalidation(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        session.invalidate()
+        return web.Response(body=b'OK')
+
+    client = yield from test_client(create_app, handler, redis)
+    yield from make_cookie(client, redis, {'a': 1, 'b': 2})
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+    value = yield from load_cookie(client, redis)
+    assert {} == value
+    morsel = resp.cookies['AIOHTTP_SESSION']
+    assert morsel['httponly']
+    assert morsel['path'] == '/'
+
+
+@asyncio.coroutine
+def test_create_cookie_in_handler(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        session['a'] = 1
+        session['b'] = 2
+        return web.Response(body=b'OK', headers={'HOST': 'example.com'})
+
+    client = yield from test_client(create_app, handler, redis)
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+    value = yield from load_cookie(client, redis)
+    assert 'session' in value
+    assert 'a' in value['session']
+    assert 'b' in value['session']
+    assert 'created' in value
+    assert value['session']['a'] == 1
+    assert value['session']['b'] == 2
+    morsel = resp.cookies['AIOHTTP_SESSION']
+    assert morsel['httponly']
+    assert morsel['path'] == '/'
+    with (yield from redis) as conn:
+        exists = yield from conn.exists('AIOHTTP_SESSION_' +
+                                        morsel.value)
+        assert exists
 
 
 class TestRedisStorage(unittest.TestCase):
@@ -77,138 +242,6 @@ class TestRedisStorage(unittest.TestCase):
             s = encoded.decode('utf-8')
             value = json.loads(s)
             return value
-
-    def test_create_new_sesssion(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            self.assertIsInstance(session, Session)
-            self.assertTrue(session.new)
-            self.assertFalse(session._changed)
-            self.assertEqual({}, session)
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            resp = yield from request('GET', url, loop=self.loop)
-            self.assertEqual(200, resp.status)
-
-        self.loop.run_until_complete(go())
-
-    def test_load_existing_sesssion(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            self.assertIsInstance(session, Session)
-            self.assertFalse(session.new)
-            self.assertFalse(session._changed)
-            self.assertEqual({'a': 1, 'b': 12}, session)
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            cookies = yield from self.make_cookie({'a': 1, 'b': 12})
-            resp = yield from request(
-                'GET', url,
-                cookies=cookies,
-                loop=self.loop)
-            self.assertEqual(200, resp.status)
-
-        self.loop.run_until_complete(go())
-
-    def test_change_sesssion(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            session['c'] = 3
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            cookies = yield from self.make_cookie({'a': 1, 'b': 2})
-            resp = yield from request(
-                'GET', url,
-                cookies=cookies,
-                loop=self.loop)
-            self.assertEqual(200, resp.status)
-            value = yield from self.load_cookie(resp.cookies)
-            self.assertIn('session', value)
-            self.assertIn('a', value['session'])
-            self.assertIn('b', value['session'])
-            self.assertIn('c', value['session'])
-            self.assertIn('created', value)
-            self.assertEqual(value['session']['a'], 1)
-            self.assertEqual(value['session']['b'], 2)
-            self.assertEqual(value['session']['c'], 3)
-            morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertTrue(morsel['httponly'])
-            self.assertEqual('/', morsel['path'])
-
-        self.loop.run_until_complete(go())
-
-    def test_clear_cookie_on_sesssion_invalidation(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            session.invalidate()
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            cookies = yield from self.make_cookie({'a': 1, 'b': 2})
-            resp = yield from request(
-                'GET', url,
-                cookies=cookies,
-                loop=self.loop)
-            self.assertEqual(200, resp.status)
-            value = yield from self.load_cookie(resp.cookies)
-            self.assertEqual({}, value)
-            morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertTrue(morsel['httponly'])
-            self.assertEqual(morsel['path'], '/')
-
-        self.loop.run_until_complete(go())
-
-    def test_create_cookie_in_handler(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            session['a'] = 1
-            session['b'] = 2
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            resp = yield from request(
-                'GET', url,
-                loop=self.loop)
-            self.assertEqual(200, resp.status)
-            value = yield from self.load_cookie(resp.cookies)
-            self.assertIn('session', value)
-            self.assertIn('a', value['session'])
-            self.assertIn('b', value['session'])
-            self.assertIn('created', value)
-            self.assertEqual(value['session']['a'], 1)
-            self.assertEqual(value['session']['b'], 2)
-            morsel = resp.cookies['AIOHTTP_SESSION']
-            self.assertTrue(morsel['httponly'])
-            self.assertEqual(morsel['path'], '/')
-            with (yield from self.redis) as conn:
-                exists = yield from conn.exists('AIOHTTP_SESSION_' +
-                                                morsel.value)
-                self.assertTrue(exists)
-
-        self.loop.run_until_complete(go())
 
     def test_set_ttl_on_session_saving(self):
 

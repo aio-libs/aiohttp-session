@@ -16,7 +16,6 @@ def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
 install_requires = ['aiohttp>=0.22.5']
-tests_require = install_requires + ['nose']
 extras_require = {
     'aioredis': ['aioredis>=0.1.4'],
     'pycrypto': ['cryptography'],
@@ -43,7 +42,5 @@ setup(name='aiohttp_session',
       license='Apache 2',
       packages=['aiohttp_session'],
       install_requires=install_requires,
-      tests_require=tests_require,
-      test_suite='nose.collector',
       include_package_data=True,
       extras_require=extras_require)

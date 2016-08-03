@@ -18,8 +18,6 @@ install:
 - python setup.py develop
 
 script:
-- pyflakes aiohttp_session tests
-- pep8 aiohttp_session tests
 - make cov
 - python setup.py check -rm
 - if python -c "import sys; sys.exit(sys.version_info < (3,5))"; then

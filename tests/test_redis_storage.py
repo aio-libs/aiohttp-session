@@ -1,14 +1,12 @@
 import asyncio
 import json
-import socket
-import unittest
 import uuid
 import aioredis
 import time
 
 import pytest
 
-from aiohttp import web, request
+from aiohttp import web
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.redis_storage import RedisStorage
 
@@ -176,114 +174,38 @@ def test_create_cookie_in_handler(test_client, redis):
         assert exists
 
 
-class TestRedisStorage(unittest.TestCase):
-
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-        self.handler = None
-        self.srv = None
-
-    def tearDown(self):
-        if self.handler is not None:
-            self.loop.run_until_complete(self.handler.finish_connections())
-        if self.srv is not None:
-            self.srv.close()
-            self.loop.run_until_complete(self.srv.wait_closed())
-        self.loop.stop()
-        self.loop.run_forever()
-        self.loop.close()
-
-    def find_unused_port(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('127.0.0.1', 0))
-        port = s.getsockname()[1]
-        s.close()
-        return port
+@asyncio.coroutine
+def test_set_ttl_on_session_saving(test_client, redis):
 
     @asyncio.coroutine
-    def create_server(self, method, path, handler, max_age=None):
-        self.redis = yield from aioredis.create_pool(('localhost', 6379),
-                                                     minsize=5,
-                                                     maxsize=10,
-                                                     loop=self.loop)
-        self.addCleanup(self.redis.clear)
-        middleware = session_middleware(
-            RedisStorage(self.redis, max_age=max_age))
-        app = web.Application(middlewares=[middleware], loop=self.loop)
-        app.router.add_route(method, path, handler)
+    def handler(request):
+        session = yield from get_session(request)
+        session['a'] = 1
+        return web.Response(body=b'OK')
 
-        port = self.find_unused_port()
-        handler = app.make_handler()
-        srv = yield from self.loop.create_server(
-            handler, '127.0.0.1', port)
-        url = "http://127.0.0.1:{}".format(port) + path
-        self.srv = srv
-        self.handler = handler
-        return app, srv, url
+    client = yield from test_client(create_app, handler, redis, max_age=10)
+    resp = yield from client.get('/')
+    assert resp.status == 200
 
-    @asyncio.coroutine
-    def make_cookie(self, data):
-        session_data = {
-            'session': data,
-            'created': int(time.time())
-        }
-        value = json.dumps(session_data)
-        key = uuid.uuid4().hex
-        with (yield from self.redis) as conn:
-            yield from conn.set('AIOHTTP_SESSION_' + key, value)
-        return {'AIOHTTP_SESSION': key}
+    key = resp.cookies['AIOHTTP_SESSION'].value
+
+    with (yield from redis) as conn:
+        ttl = yield from conn.ttl('AIOHTTP_SESSION_'+key)
+
+    assert ttl > 9
+    assert ttl <= 10
+
+
+@asyncio.coroutine
+def test_create_new_sesssion_if_key_doesnt_exists_in_redis(test_client, redis):
 
     @asyncio.coroutine
-    def load_cookie(self, cookies):
-        key = cookies['AIOHTTP_SESSION']
-        with (yield from self.redis) as conn:
-            encoded = yield from conn.get('AIOHTTP_SESSION_' + key.value)
-            s = encoded.decode('utf-8')
-            value = json.loads(s)
-            return value
+    def handler(request):
+        session = yield from get_session(request)
+        assert session.new
+        return web.Response(body=b'OK')
 
-    def test_set_ttl_on_session_saving(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            session['a'] = 1
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler,
-                                                      max_age=10)
-
-            resp = yield from request(
-                'GET', url,
-                loop=self.loop)
-            self.assertEqual(200, resp.status)
-
-            key = resp.cookies['AIOHTTP_SESSION'].value
-
-            with (yield from self.redis) as conn:
-                ttl = yield from conn.ttl('AIOHTTP_SESSION_'+key)
-            self.assertGreater(ttl, 9)
-            self.assertLessEqual(ttl, 10)
-
-        self.loop.run_until_complete(go())
-
-    def test_create_new_sesssion_if_key_doesnt_exists_in_redis(self):
-
-        @asyncio.coroutine
-        def handler(request):
-            session = yield from get_session(request)
-            self.assertTrue(session.new)
-            return web.Response(body=b'OK')
-
-        @asyncio.coroutine
-        def go():
-            _, _, url = yield from self.create_server('GET', '/', handler)
-            cookies = {'AIOHTTP_SESSION': 'invalid_key'}
-            resp = yield from request('GET', url, cookies=cookies,
-                                      loop=self.loop)
-            self.assertEqual(200, resp.status)
-
-        self.loop.run_until_complete(go())
+    client = yield from test_client(create_app, handler, redis)
+    client.session.cookies['AIOHTTP_SESSION'] = 'invalid_key'
+    resp = yield from client.get('/')
+    assert resp.status == 200

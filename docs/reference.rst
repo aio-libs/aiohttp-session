@@ -171,7 +171,7 @@ implement both :meth:`~AbstractStorage.load_session` and
    .. attribute:: max_age
 
       Maximum age for session data, :class:`int` seconds or ``None``
-      for infinite session.
+      for "session cookie" which last until you close your browser.
 
    .. attribute:: cookie_name
 

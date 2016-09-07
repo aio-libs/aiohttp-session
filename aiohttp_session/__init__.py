@@ -210,8 +210,9 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         params = dict(self._cookie_params)
         if max_age is not None:
             params['max_age'] = max_age
-            params['expires'] = time.strftime("%a, %d-%b-%Y %T GMT",
-                                              time.gmtime(time.time() + max_age))
+            params['expires'] = time.strftime(
+                "%a, %d-%b-%Y %T GMT",
+                time.gmtime(time.monotonic() + max_age))
         if not cookie_data:
             response.del_cookie(self._cookie_name)
         else:
@@ -242,4 +243,4 @@ class SimpleCookieStorage(AbstractStorage):
     @asyncio.coroutine
     def save_session(self, request, response, session):
         cookie_data = json.dumps(self._get_session_data(session))
-        self.save_cookie(response, cookie_data)
+        self.save_cookie(response, cookie_data, max_age=self.max_age)

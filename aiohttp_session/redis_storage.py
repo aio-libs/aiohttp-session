@@ -48,7 +48,7 @@ class RedisStorage(AbstractStorage):
 
         data = self._encoder(self._get_session_data(session))
         with (yield from self._redis) as conn:
-            max_age = self.max_age
+            max_age = session.max_age
             expire = max_age if max_age is not None else 0
             yield from conn.set(self.cookie_name + '_' + key,
                                 data, expire=expire)

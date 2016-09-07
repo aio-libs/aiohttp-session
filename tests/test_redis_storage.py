@@ -12,7 +12,7 @@ from aiohttp_session.redis_storage import RedisStorage
 
 
 @pytest.yield_fixture
-def redis(loop):
+def redis(request, loop):
     pool = None
 
     @asyncio.coroutine
@@ -22,6 +22,10 @@ def redis(loop):
                                                minsize=5,
                                                maxsize=10,
                                                loop=loop)
+
+    def close_redis():
+        pool.close()
+    request.addfinalizer(close_redis)
 
     loop.run_until_complete(start())
     yield pool
@@ -183,7 +187,7 @@ def test_set_ttl_on_session_saving(test_client, redis):
         session['a'] = 1
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app(max_age=10), handler, redis)
+    client = yield from test_client(create_app, handler, redis, max_age=10)
     resp = yield from client.get('/')
     assert resp.status == 200
 
@@ -191,8 +195,6 @@ def test_set_ttl_on_session_saving(test_client, redis):
 
     with (yield from redis) as conn:
         ttl = yield from conn.ttl('AIOHTTP_SESSION_'+key)
-
-    import pdb; pdb.set_trace()
 
     assert ttl > 9
     assert ttl <= 10

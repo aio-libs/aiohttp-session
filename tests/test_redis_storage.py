@@ -23,9 +23,7 @@ def redis(request, loop):
                                                maxsize=10,
                                                loop=loop)
 
-    def close_redis():
-        pool.close()
-    request.addfinalizer(close_redis)
+    request.addfinalizer(lambda: pool.close())
 
     loop.run_until_complete(start())
     yield pool

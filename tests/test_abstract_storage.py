@@ -35,8 +35,8 @@ def test_max_age_also_returns_expires(test_client):
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    with mock.patch('time.monotonic') as MockClass:
-        MockClass.return_value = 0.0
+    with mock.patch('time.monotonic') as m_monotonic:
+        m_monotonic.return_value = 0.0
 
         client = yield from test_client(create_app, handler)
         make_cookie(client, {'a': 1, 'b': 2})

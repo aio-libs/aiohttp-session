@@ -199,6 +199,29 @@ def test_set_ttl_on_session_saving(test_client, redis):
 
 
 @asyncio.coroutine
+def test_set_ttl_manually_set(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        session.max_age = 10
+        session['a'] = 1
+        return web.Response(body=b'OK')
+
+    client = yield from test_client(create_app, handler, redis)
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+    key = resp.cookies['AIOHTTP_SESSION'].value
+
+    with (yield from redis) as conn:
+        ttl = yield from conn.ttl('AIOHTTP_SESSION_'+key)
+
+    assert ttl > 9
+    assert ttl <= 10
+
+
+@asyncio.coroutine
 def test_create_new_sesssion_if_key_doesnt_exists_in_redis(test_client, redis):
 
     @asyncio.coroutine

@@ -30,17 +30,17 @@ class EncryptedCookieStorage(AbstractStorage):
     def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            return Session(None, data=None, new=True)
+            return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             try:
                 data = json.loads(
                     self._fernet.decrypt(
                         cookie.encode('utf-8')).decode('utf-8'))
-                return Session(None, data=data, new=False)
+                return Session(None, data=data, new=False, max_age=self.max_age)
             except InvalidToken:
                 log.warning("Cannot decrypt cookie value, "
                             "create a new fresh session")
-                return Session(None, data=None, new=True)
+                return Session(None, data=None, new=True, max_age=self.max_age)
 
     @asyncio.coroutine
     def save_session(self, request, response, session):

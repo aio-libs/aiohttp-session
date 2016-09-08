@@ -23,16 +23,16 @@ class RedisStorage(AbstractStorage):
     def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            return Session(None, data=None, new=True)
+            return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             with (yield from self._redis) as conn:
                 key = str(cookie)
                 data = yield from conn.get(self.cookie_name + '_' + key)
                 if data is None:
-                    return Session(None, data=None, new=True)
+                    return Session(None, data=None, new=True, max_age=self.max_age)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
-                return Session(key, data=data, new=False)
+                return Session(key, data=data, new=False, max_age=self.max_age)
 
     @asyncio.coroutine
     def save_session(self, request, response, session):
@@ -48,7 +48,7 @@ class RedisStorage(AbstractStorage):
 
         data = self._encoder(self._get_session_data(session))
         with (yield from self._redis) as conn:
-            max_age = session.max_age if session.max_age else self.max_age
+            max_age = session.max_age
             expire = max_age if max_age is not None else 0
             yield from conn.set(self.cookie_name + '_' + key,
                                 data, expire=expire)

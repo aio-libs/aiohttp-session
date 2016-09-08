@@ -36,7 +36,8 @@ class EncryptedCookieStorage(AbstractStorage):
                 data = json.loads(
                     self._fernet.decrypt(
                         cookie.encode('utf-8')).decode('utf-8'))
-                return Session(None, data=data, new=False, max_age=self.max_age)
+                return Session(None, data=data,
+                               new=False, max_age=self.max_age)
             except InvalidToken:
                 log.warning("Cannot decrypt cookie value, "
                             "create a new fresh session")

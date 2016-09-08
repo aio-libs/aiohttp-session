@@ -29,7 +29,8 @@ class RedisStorage(AbstractStorage):
                 key = str(cookie)
                 data = yield from conn.get(self.cookie_name + '_' + key)
                 if data is None:
-                    return Session(None, data=None, new=True, max_age=self.max_age)
+                    return Session(None, data=None,
+                                   new=True, max_age=self.max_age)
                 data = data.decode('utf-8')
                 data = self._decoder(data)
                 return Session(key, data=data, new=False, max_age=self.max_age)

@@ -1,10 +1,14 @@
 Changes
 =======
 
-0.6.0 (XXXX-XX-XX)
+0.6.0 (2016-09-08)
 ------------------
 
 - Add expires field automatically to support older browsers #43
+
+- Respect session.max_age in redis storage #45
+
+- Always pass default max_age from storage into session #45
 
 0.5.0 (2016-02-21)
 ------------------

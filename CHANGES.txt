@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.7.0 (2016-09-24)
+------------------
+
+- Fix tests to be compatible with aiohttp upstream API for client cookies
+
 0.6.0 (2016-09-08)
 ------------------
 

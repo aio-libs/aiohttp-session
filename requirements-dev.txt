@@ -4,7 +4,7 @@ sphinx==1.4.6
 alabaster>=0.6.2
 pep257==0.7.0
 -e .
-aioredis
+aioredis==0.2.8
 cryptography
 pynacl==1.0.1
 pytest-aiohttp==0.1.2

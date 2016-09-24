@@ -8,4 +8,4 @@ aioredis
 cryptography
 pynacl==1.0.1
 pytest-aiohttp==0.1.2
-pytest-cov
+pytest-cov==2.3.1

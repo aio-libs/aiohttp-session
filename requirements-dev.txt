@@ -2,7 +2,7 @@ flake8
 coverage
 sphinx==1.4.6
 alabaster>=0.6.2
-pep257
+pep257==0.7.0
 -e .
 aioredis
 cryptography

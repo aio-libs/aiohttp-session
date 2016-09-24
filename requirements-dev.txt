@@ -7,5 +7,5 @@ pep257==0.7.0
 aioredis
 cryptography
 pynacl
-pytest-aiohttp
+pytest-aiohttp==0.1.2
 pytest-cov

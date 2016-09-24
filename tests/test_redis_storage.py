@@ -49,12 +49,13 @@ def make_cookie(client, redis, data):
     key = uuid.uuid4().hex
     with (yield from redis) as conn:
         yield from conn.set('AIOHTTP_SESSION_' + key, value)
-    client.session.cookies['AIOHTTP_SESSION'] = key
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': key})
 
 
 @asyncio.coroutine
 def load_cookie(client, redis):
-    key = client.session.cookies['AIOHTTP_SESSION']
+    cookies = client.session.cookie_jar.filter_cookies(client.make_url('/'))
+    key = cookies['AIOHTTP_SESSION']
     with (yield from redis) as conn:
         encoded = yield from conn.get('AIOHTTP_SESSION_' + key.value)
         s = encoded.decode('utf-8')
@@ -231,6 +232,7 @@ def test_create_new_sesssion_if_key_doesnt_exists_in_redis(test_client, redis):
         return web.Response(body=b'OK')
 
     client = yield from test_client(create_app, handler, redis)
-    client.session.cookies['AIOHTTP_SESSION'] = 'invalid_key'
+    client.session.cookie_jar.update_cookies(
+        {'AIOHTTP_SESSION': 'invalid_key'})
     resp = yield from client.get('/')
     assert resp.status == 200

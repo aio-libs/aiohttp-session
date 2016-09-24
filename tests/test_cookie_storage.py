@@ -14,7 +14,7 @@ def make_cookie(client, data):
     }
 
     value = json.dumps(session_data)
-    client.session.cookies['AIOHTTP_SESSION'] = value
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': value})
 
 
 def create_app(loop, handler):

@@ -28,7 +28,7 @@ def make_cookie(client, secretbox, data):
     data = secretbox.encrypt(cookie_data, nonce,
                              encoder=Base64Encoder).decode('utf-8')
 
-    client.session.cookies['AIOHTTP_SESSION'] = data
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': data})
 
 
 def create_app(loop, handler, key):

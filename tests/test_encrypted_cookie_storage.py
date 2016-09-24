@@ -21,7 +21,7 @@ def make_cookie(client, fernet, data):
     cookie_data = json.dumps(session_data).encode('utf-8')
     data = fernet.encrypt(cookie_data).decode('utf-8')
 
-    client.session.cookies['AIOHTTP_SESSION'] = data
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': data})
 
 
 def create_app(loop, handler, key):

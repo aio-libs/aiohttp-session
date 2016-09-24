@@ -6,6 +6,6 @@ pep257==0.7.0
 -e .
 aioredis
 cryptography
-pynacl
+pynacl==1.0.1
 pytest-aiohttp==0.1.2
 pytest-cov

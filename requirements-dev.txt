@@ -1,6 +1,6 @@
 flake8
 coverage
-sphinx
+sphinx==1.4.6
 alabaster>=0.6.2
 pep257
 -e .

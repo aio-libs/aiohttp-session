@@ -1,4 +1,4 @@
-flake8
+flake8==3.0.4
 coverage
 sphinx==1.4.6
 alabaster>=0.6.2

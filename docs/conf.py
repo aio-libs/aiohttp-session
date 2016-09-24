@@ -40,8 +40,6 @@ with codecs.open(_version_path, 'r', 'latin1') as fp:
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 
-import alabaster
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -144,8 +142,10 @@ html_theme_options = {
     'github_user': 'aio-libs',
     'github_repo': 'aiohttp_session',
     'github_button': True,
+    'github_type': 'star',
     'github_banner': True,
     'travis_button': True,
+    'codecov_button': True,
     'pre_bg': '#FFF6E5',
     'note_bg': '#E5ECD1',
     'note_border': '#BFCF8C',

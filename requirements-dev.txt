@@ -12,4 +12,4 @@ pytest-cov==2.3.1
 aiohttp
 multidict
 yarl
-chardet
+chardet==2.3.0

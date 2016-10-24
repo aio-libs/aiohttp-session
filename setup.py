@@ -24,7 +24,7 @@ extras_require = {
 }
 
 
-setup(name='aiohttp_session',
+setup(name='aiohttp-session',
       version=version,
       description=("sessions for aiohttp.web"),
       long_description='\n\n'.join((read('README.rst'), read('CHANGES.txt'))),

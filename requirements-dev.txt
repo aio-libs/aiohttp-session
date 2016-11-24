@@ -4,7 +4,7 @@ sphinx==1.4.9
 pep257==0.7.0
 -e .
 aioredis==0.2.9
-cryptography==1.5.3
+cryptography==1.6
 pynacl==1.0.1
 pytest-aiohttp==0.1.2
 pytest-cov==2.4.0

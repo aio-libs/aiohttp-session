@@ -212,7 +212,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
             params['max_age'] = max_age
             params['expires'] = time.strftime(
                 "%a, %d-%b-%Y %T GMT",
-                time.gmtime(time.monotonic() + max_age))
+                time.gmtime(time.time() + max_age))
         if not cookie_data:
             response.del_cookie(self._cookie_name)
         else:

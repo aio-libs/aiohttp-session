@@ -30,13 +30,13 @@ def test_max_age_also_returns_expires(test_client):
 
     @asyncio.coroutine
     def handler(request):
-        time.monotonic.return_value = 0.0
+        time.time.return_value = 0.0
         session = yield from get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    with mock.patch('time.monotonic') as m_monotonic:
-        m_monotonic.return_value = 0.0
+    with mock.patch('time.time') as m_clock:
+        m_clock.return_value = 0.0
 
         client = yield from test_client(create_app, handler)
         make_cookie(client, {'a': 1, 'b': 2})

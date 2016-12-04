@@ -9,7 +9,7 @@ import time
 from aiohttp import web
 
 
-__version__ = '0.7.1'
+__version__ = '0.8.0'
 
 
 class Session(MutableMapping):

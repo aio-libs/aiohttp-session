@@ -8,7 +8,7 @@ cryptography==1.7.1
 pynacl==1.0.1
 pytest-aiohttp==0.1.2
 pytest-cov==2.4.0
-aiohttp==1.1.6
+aiohttp==1.2.0
 multidict==2.1.4
 yarl==0.8.1
 chardet==2.3.0

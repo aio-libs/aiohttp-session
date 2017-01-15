@@ -64,8 +64,13 @@ Available session storages are:
       $ pip install aiohttp_session[secure]
 
 * :class:`~aiohttp_session.redis_storage.RedisStorage` -- stores
-  JSON-ed data into *redis*, keepeng into cookie only redis key
+  JSON-ed data into *redis*, keeping into cookie only redis key
   (random UUID).
+  
+  Inside redis the key will be saved as COOKIENAME_VALUEOFTHECOOKIE.
+  For example if inside the browser the cookie is saved with name 'AIOHTTP_SESSION' (default option)
+  and value e33b57c7ec6e425eb626610f811ab6ae (a random UUID) they key inside redis will be
+  AIOHTTP_SESSION_e33b57c7ec6e425eb626610f811ab6ae.
 
   Requires :term:`aioredis` library::
 

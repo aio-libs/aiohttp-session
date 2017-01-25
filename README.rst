@@ -6,6 +6,8 @@ aiohttp_session
     :target: https://codecov.io/github/aio-libs/aiohttp-session
 .. image:: https://readthedocs.org/projects/aiohttp-session/badge/?version=latest
     :target: https://aiohttp-session.readthedocs.io/
+.. image:: https://img.shields.io/pypi/v/aiohttp-session.svg
+    :target: https://pypi.python.org/pypi/aiohttp-session
 
 The library provides sessions for `aiohttp.web`__.
 

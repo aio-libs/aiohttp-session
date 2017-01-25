@@ -214,7 +214,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
                 "%a, %d-%b-%Y %T GMT",
                 time.gmtime(time.time() + max_age))
         if not cookie_data:
-            response.del_cookie(self._cookie_name)
+            response.del_cookie(self._cookie_name, domain=params['domain'], path=params['path'])
         else:
             response.set_cookie(self._cookie_name, cookie_data, **params)
 

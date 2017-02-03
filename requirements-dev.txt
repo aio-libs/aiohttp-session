@@ -3,7 +3,7 @@ coverage==4.3.4
 sphinx==1.5.2
 pep257==0.7.0
 -e .
-aioredis==0.2.9
+aioredis==0.3.0
 cryptography==1.7.2
 pynacl==1.0.1
 pytest-aiohttp==0.1.3

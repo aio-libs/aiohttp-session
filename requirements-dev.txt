@@ -1,6 +1,6 @@
 flake8==3.3.0
 coverage==4.3.4
-sphinx==1.5.3
+sphinx==1.5.4
 pep257==0.7.0
 -e .
 aioredis==0.3.0

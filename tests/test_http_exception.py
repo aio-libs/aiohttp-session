@@ -34,6 +34,6 @@ def test_exceptions(test_client):
 
     resp = yield from client.get('/save')
     assert resp.status == 200
-    assert resp.url[-5:] == '/show'
+    assert str(resp.url)[-5:] == '/show'
     text = yield from resp.text()
     assert text == 'works'

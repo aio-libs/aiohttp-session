@@ -1,5 +1,5 @@
 flake8==3.3.0
-coverage==4.3.4
+coverage==4.4.1
 sphinx==1.5.5
 pep257==0.7.0
 -e .

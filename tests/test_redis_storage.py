@@ -143,8 +143,9 @@ def test_clear_cookie_on_sesssion_invalidation(test_client, redis):
     value = yield from load_cookie(client, redis)
     assert {} == value
     morsel = resp.cookies['AIOHTTP_SESSION']
-    assert morsel['httponly']
     assert morsel['path'] == '/'
+    assert morsel['expires'] == "Thu, 01 Jan 1970 00:00:00 GMT"
+    assert morsel['max-age'] == "0"
 
 
 @asyncio.coroutine

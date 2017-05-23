@@ -145,7 +145,8 @@ def test_clear_cookie_on_sesssion_invalidation(test_client, redis):
     morsel = resp.cookies['AIOHTTP_SESSION']
     assert morsel['httponly']
     assert morsel['path'] == '/'
-    assert morsel['expires'] == 0
+    assert (morsel['expires'] == "Thu, 01 Jan 1970 00:00:00 GMT" or
+            morsel['expires'] == "")
     assert morsel['max-age'] == 0
 
 

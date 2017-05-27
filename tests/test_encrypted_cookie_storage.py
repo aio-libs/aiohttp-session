@@ -61,7 +61,7 @@ def test_invalid_key():
 
 
 @asyncio.coroutine
-def test_create_new_sesssion_broken_by_format(test_client, fernet, key):
+def test_create_new_session_broken_by_format(test_client, fernet, key):
 
     @asyncio.coroutine
     def handler(request):
@@ -80,7 +80,7 @@ def test_create_new_sesssion_broken_by_format(test_client, fernet, key):
 
 
 @asyncio.coroutine
-def test_load_existing_sesssion(test_client, fernet, key):
+def test_load_existing_session(test_client, fernet, key):
 
     @asyncio.coroutine
     def handler(request):
@@ -98,7 +98,7 @@ def test_load_existing_sesssion(test_client, fernet, key):
 
 
 @asyncio.coroutine
-def test_change_sesssion(test_client, fernet, key):
+def test_change_session(test_client, fernet, key):
 
     @asyncio.coroutine
     def handler(request):
@@ -126,7 +126,7 @@ def test_change_sesssion(test_client, fernet, key):
 
 
 @asyncio.coroutine
-def test_clear_cookie_on_sesssion_invalidation(test_client, fernet, key):
+def test_clear_cookie_on_session_invalidation(test_client, fernet, key):
 
     @asyncio.coroutine
     def handler(request):

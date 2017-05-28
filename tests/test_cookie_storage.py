@@ -25,7 +25,7 @@ def create_app(loop, handler):
 
 
 @asyncio.coroutine
-def test_create_new_sesssion(test_client):
+def test_create_new_session(test_client):
 
     @asyncio.coroutine
     def handler(request):
@@ -42,7 +42,7 @@ def test_create_new_sesssion(test_client):
 
 
 @asyncio.coroutine
-def test_load_existing_sesssion(test_client):
+def test_load_existing_session(test_client):
 
     @asyncio.coroutine
     def handler(request):
@@ -61,7 +61,7 @@ def test_load_existing_sesssion(test_client):
 
 
 @asyncio.coroutine
-def test_change_sesssion(test_client):
+def test_change_session(test_client):
 
     @asyncio.coroutine
     def handler(request):
@@ -89,7 +89,7 @@ def test_change_sesssion(test_client):
 
 
 @asyncio.coroutine
-def test_clear_cookie_on_sesssion_invalidation(test_client):
+def test_clear_cookie_on_session_invalidation(test_client):
 
     @asyncio.coroutine
     def handler(request):

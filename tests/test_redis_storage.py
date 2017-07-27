@@ -53,6 +53,14 @@ def make_cookie(client, redis, data):
 
 
 @asyncio.coroutine
+def make_cookie_with_bad_value(client, redis):
+    key = uuid.uuid4().hex
+    with (yield from redis) as conn:
+        yield from conn.set('AIOHTTP_SESSION_' + key, '')
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': key})
+
+
+@asyncio.coroutine
 def load_cookie(client, redis):
     cookies = client.session.cookie_jar.filter_cookies(client.make_url('/'))
     key = cookies['AIOHTTP_SESSION']
@@ -94,6 +102,23 @@ def test_load_existing_sesssion(test_client, redis):
 
     client = yield from test_client(create_app, handler, redis)
     yield from make_cookie(client, redis, {'a': 1, 'b': 12})
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+
+@asyncio.coroutine
+def test_load_bad_sesssion(test_client, redis):
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        assert isinstance(session, Session)
+        assert not session.new
+        assert not session._changed
+        assert {} == session
+        return web.Response(body=b'OK')
+
+    client = yield from test_client(create_app, handler, redis)
+    yield from make_cookie_with_bad_value(client, redis)
     resp = yield from client.get('/')
     assert resp.status == 200
 

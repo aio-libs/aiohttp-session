@@ -32,7 +32,10 @@ class RedisStorage(AbstractStorage):
                     return Session(None, data=None,
                                    new=True, max_age=self.max_age)
                 data = data.decode('utf-8')
-                data = self._decoder(data)
+                try:
+                    data = self._decoder(data)
+                except ValueError:
+                    data = None
                 return Session(key, data=data, new=False, max_age=self.max_age)
 
     @asyncio.coroutine

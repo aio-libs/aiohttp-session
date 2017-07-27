@@ -34,7 +34,7 @@ class RedisStorage(AbstractStorage):
                 data = data.decode('utf-8')
                 try:
                     data = self._decoder(data)
-                except (json.JSONDecodeError, ValueError):
+                except ValueError:
                     data = None
                 return Session(key, data=data, new=False, max_age=self.max_age)
 

@@ -46,7 +46,7 @@ class EncryptedCookieStorage(AbstractStorage):
     @asyncio.coroutine
     def save_session(self, request, response, session):
         if session.empty:
-            return self.save_cookie(response, session._mapping,
+            return self.save_cookie(response, '',
                                     max_age=session.max_age)
 
         cookie_data = json.dumps(

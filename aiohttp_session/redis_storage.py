@@ -44,7 +44,7 @@ class RedisStorage(AbstractStorage):
                              max_age=session.max_age)
         else:
             if session.empty:
-                self.save_cookie(response, session._mapping,
+                self.save_cookie(response, '',
                                  max_age=session.max_age)
             else:
                 key = str(key)

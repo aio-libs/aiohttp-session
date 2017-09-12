@@ -11,12 +11,14 @@ class RedisStorage(AbstractStorage):
     def __init__(self, redis_pool, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
-                 encoder=json.dumps, decoder=json.loads):
+                 encoder=json.dumps, decoder=json.loads,
+                 key_factory=lambda: uuid.uuid4().hex):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly)
         self._encoder = encoder
         self._decoder = decoder
+        self._key_factory = key_factory
         self._redis = redis_pool
 
     @asyncio.coroutine
@@ -42,7 +44,7 @@ class RedisStorage(AbstractStorage):
     def save_session(self, request, response, session):
         key = session.identity
         if key is None:
-            key = uuid.uuid4().hex
+            key = self._key_factory()
             self.save_cookie(response, key,
                              max_age=session.max_age)
         else:

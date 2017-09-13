@@ -3,7 +3,6 @@ import json
 import uuid
 import aioredis
 import time
-
 import pytest
 
 from aiohttp import web
@@ -31,9 +30,10 @@ def redis(request, loop):
         loop.run_until_complete(pool.clear())
 
 
-def create_app(loop, handler, redis, max_age=None):
+def create_app(loop, handler, redis, max_age=None,
+               key_factory=lambda: uuid.uuid4().hex):
     middleware = session_middleware(
-        RedisStorage(redis, max_age=max_age))
+        RedisStorage(redis, max_age=max_age, key_factory=key_factory))
     app = web.Application(middlewares=[middleware], loop=loop)
     app.router.add_route('GET', '/', handler)
     return app
@@ -262,3 +262,27 @@ def test_create_new_sesssion_if_key_doesnt_exists_in_redis(test_client, redis):
         {'AIOHTTP_SESSION': 'invalid_key'})
     resp = yield from client.get('/')
     assert resp.status == 200
+
+
+@asyncio.coroutine
+def test_create_storate_with_custom_key_factory(test_client, redis):
+
+    @asyncio.coroutine
+    def handler(request):
+        session = yield from get_session(request)
+        session['key'] = 'value'
+        assert session.new
+        return web.Response(body=b'OK')
+
+    def key_factory():
+        return 'test-key'
+
+    client = yield from test_client(create_app, handler, redis, 8, key_factory)
+    resp = yield from client.get('/')
+    assert resp.status == 200
+
+    assert resp.cookies['AIOHTTP_SESSION'].value == 'test-key'
+
+    value = yield from load_cookie(client, redis)
+    assert 'key' in value['session']
+    assert value['session']['key'] == 'value'

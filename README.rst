@@ -18,30 +18,39 @@ __ aiohttp_web_
 Usage
 -----
 
-The library allows to store user-specific data into session object.
+The library allows us to store user-specific data into a session object.
 
-The session object has dict-like interface (operations like
+The session object has a dict-like interface (operations like
 ``session[key] = value``, ``value = session[key]`` etc. are present).
 
 
-Before processing session in web-handler you have to register *session
-middleware* in ``aiohttp.web.Application``.
+Before processing the session in a web-handler, you have to register the
+*session middleware* in ``aiohttp.web.Application``.
 
 A trivial usage example::
 
-    import asyncio
     import time
     import base64
     from cryptography import fernet
     from aiohttp import web
-    from aiohttp_session import setup, get_session, session_middleware
+    from aiohttp_session import setup, get_session
     from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
-    async def handler(request):
+
+    async def root_handler(request):
         session = await get_session(request)
         last_visit = session['last_visit'] if 'last_visit' in session else None
+        session['last_visit'] = time.time()
         text = 'Last visited: {}'.format(last_visit)
-        return web.Response(body=text.encode('utf-8'))
+        # return web.Response(body=text.encode('utf-8'))
+        return web.Response(body=text)
+
+
+    async def name_handler(request):
+        name = request.match_info.get('name', "Anonymous")
+        text = "Hello, " + name
+        return web.Response(text=text)
+
 
     def make_app():
         app = web.Application()
@@ -49,22 +58,25 @@ A trivial usage example::
         fernet_key = fernet.Fernet.generate_key()
         secret_key = base64.urlsafe_b64decode(fernet_key)
         setup(app, EncryptedCookieStorage(secret_key))
-        app.router.add_route('GET', '/', handler)
+        app.router.add_get('/', root_handler)
+        app.router.add_get('/{name}', name_handler)
         return app
+
 
     web.run_app(make_app())
 
 
-All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
+All storages uses the HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing
+data.
 
 Available session storages are:
 
-* ``aiohttp_session.SimpleCookieStorage()`` -- keeps session data as
-  plain JSON string in cookie body. Use the storage only for testing
+* ``aiohttp_session.SimpleCookieStorage()`` -- keeps session data as a
+  plain JSON string in the cookie body. Use the storage only for testing
   purposes, it's very non-secure.
 
 * ``aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)``
-  -- stores session data into cookies as ``SimpleCookieStorage`` but
+  -- stores the session data into a cookie as ``SimpleCookieStorage`` but
   encodes it via AES cipher. ``secrect_key`` is a ``bytes`` key for AES
   encryption/decryption, the length should be 32 bytes.
 
@@ -73,8 +85,8 @@ Available session storages are:
       $ pip install aiohttp_session[secure]
 
 * ``aiohttp_session.redis_storage.RedisStorage(redis_pool)`` -- stores
-  JSON-ed data in *redis*, keeping only the redis key (random UUID) in
-  the cookie. ``redis_pool`` is ``aioredis`` pool object, created by
+  JSON encoded data in *redis*, keeping only the redis key (a random UUID) in
+  the cookie. ``redis_pool`` is a ``aioredis`` pool object, created by
   ``yield from aioredis.create_pool(...)`` call.
 
   Requires ``aioredis`` library::

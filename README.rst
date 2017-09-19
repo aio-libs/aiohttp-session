@@ -42,7 +42,7 @@ A trivial usage example::
         last_visit = session['last_visit'] if 'last_visit' in session else None
         session['last_visit'] = time.time()
         text = 'Last visited: {}'.format(last_visit)
-        return web.Response(body=text)
+        return web.Response(text=text)
 
 
     def make_app():

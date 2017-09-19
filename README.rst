@@ -66,8 +66,9 @@ A trivial usage example::
     web.run_app(make_app())
 
 
-All storages uses the HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing
-data.
+All storages use an HTTP Cookie named ``AIOHTTP_SESSION`` for storing
+data. This can be modified by passing the keyword argument ``cookie_name`` to
+the storage class of your choice.
 
 Available session storages are:
 

@@ -1,4 +1,4 @@
-flake8==3.4.1
+flake8==3.5.0
 coverage==4.4.1
 sphinx==1.6.4
 pep257==0.7.0

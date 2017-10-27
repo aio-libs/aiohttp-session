@@ -15,7 +15,7 @@ with codecs.open(os.path.join(os.path.abspath(os.path.dirname(
 def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
-install_requires = ['aiohttp>=1.0.2']
+install_requires = ['aiohttp>=2.3.0']
 extras_require = {
     'aioredis': ['aioredis>=0.1.4'],
     'pycrypto': ['cryptography'],
@@ -35,6 +35,7 @@ setup(name='aiohttp-session',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: AsyncIO',
       ],

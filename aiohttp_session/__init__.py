@@ -118,35 +118,31 @@ def session_middleware(storage):
 
     assert isinstance(storage, AbstractStorage), storage
 
+    @web.middleware
     @asyncio.coroutine
-    def factory(app, handler):
-
-        @asyncio.coroutine
-        def middleware(request):
-            request[STORAGE_KEY] = storage
-            raise_response = False
-            try:
-                response = yield from handler(request)
-            except web.HTTPException as exc:
-                response = exc
-                raise_response = True
-            if not isinstance(response, web.StreamResponse):
-                raise RuntimeError("Expect response, not {!r}", type(response))
-            if not isinstance(response, web.Response):
-                # likely got websoket or streaming
-                return response
-            if response.prepared:
-                raise RuntimeError(
-                    "Cannot save session data into prepared response")
-            session = request.get(SESSION_KEY)
-            if session is not None:
-                if session._changed:
-                    yield from storage.save_session(request, response, session)
-            if raise_response:
-                raise response
+    def factory(request, handler):
+        request[STORAGE_KEY] = storage
+        raise_response = False
+        try:
+            response = yield from handler(request)
+        except web.HTTPException as exc:
+            response = exc
+            raise_response = True
+        if not isinstance(response, web.StreamResponse):
+            raise RuntimeError("Expect response, not {!r}", type(response))
+        if not isinstance(response, web.Response):
+            # likely got websoket or streaming
             return response
-
-        return middleware
+        if response.prepared:
+            raise RuntimeError(
+                "Cannot save session data into prepared response")
+        session = request.get(SESSION_KEY)
+        if session is not None:
+            if session._changed:
+                yield from storage.save_session(request, response, session)
+        if raise_response:
+            raise response
+        return response
 
     return factory
 

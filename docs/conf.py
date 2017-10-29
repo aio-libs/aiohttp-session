@@ -17,6 +17,7 @@ import sys
 import os
 import codecs
 import re
+import alabaster
 
 _docs_path = os.path.dirname(__file__)
 _version_path = os.path.abspath(os.path.join(_docs_path,

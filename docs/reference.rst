@@ -106,12 +106,13 @@ Session
 
       .. note::
 
-         Keys and values of session data must be pickleable. This
+         Keys and values of session data must be JSON serializable
+         when using one of the included storage backends. This
          means, typically, that they are instances of basic types of
          objects, such as strings, lists, dictionaries, tuples,
          integers, etc. If you place an object in a session data key
-         or value that is not pickleable, an error will be raised when
-         the session is serialized.
+         or value that is not JSON serializable, an error will be raised
+         when the session is serialized.
 
          If you place a mutable value (for example, a list or a
          dictionary) in a session object, and you subsequently mutate

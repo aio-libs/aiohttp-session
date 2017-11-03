@@ -1,8 +1,10 @@
 Changes
 =======
 
-1.X.X (YYYY-MM-DD)
+1.1.0 (2017-11-03)
 ------------------
+
+- Upgrade middleware to new style from aiohttp 2.3+
 
 
 1.0.1 (2017-09-13)

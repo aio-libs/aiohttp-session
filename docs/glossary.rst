@@ -14,6 +14,12 @@
 
       https://aioredis.readthedocs.io/
 
+   aiomcache
+
+      :term:`asyncio` compatible Memcached client library
+
+      https://github.com/aio-libs/aiomcache
+
    asyncio
 
       The library for writing single-threaded concurrent code using

@@ -17,6 +17,7 @@ install:
 - pip install pytest-aiohttp
 - pip install pytest-cov
 - pip install codecov
+- pip install aiomcache
 - python setup.py develop
 
 script:
@@ -37,6 +38,8 @@ env:
   - PYTHONASYNCIODEBUG=
 services:
   - redis-server
+  - memcached
+
 sudo: false
 
 deploy:

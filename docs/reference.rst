@@ -224,8 +224,7 @@ so it's totally insecure.
 To use the storage you should push it into
 :func:`session_middleware`::
 
-   app = aiohttp.web.Application(
-       middlewares=[aiohttp_session.SimpleCookieStorage()])
+   aiohttp_session.setup(app, aiohttp_session.SimpleCookieStorage())
 
 .. class:: SimpleCookieStorage(*, \
                                cookie_name="AIOHTTP_SESSION", \
@@ -325,16 +324,18 @@ It operates with Redis database via :class:`aioredis.RedisPool`.
 
 To use the storage you need setup it first::
 
-   redis = yield from aioredis.create_pool(('localhost', 6379))
+   redis = await aioredis.create_pool(('localhost', 6379))
    storage = aiohttp_session.redis_storage.RedisStorage(redis)
-   session_middleware = aiohttp_session.session_middleware(storage)
-   app = aiohttp.web.Application(middlewares=[session_middleware])
+   aiohttp_session.setup(app, storage)
 
 
 .. class:: RedisStorage(redis_pool, *, \
-                              cookie_name="AIOHTTP_SESSION", \
-                              domain=None, max_age=None, path='/', \
-                              secure=None, httponly=True)
+                        cookie_name="AIOHTTP_SESSION", \
+                        domain=None, max_age=None, path='/', \
+                        secure=None, httponly=True, \
+                        encoder=json.dumps, \
+                        decoder=json.loads, \
+                        key_factory=lambda: uuid.uuid4().hex)
 
    Create Redis storage for user session data.
 
@@ -343,8 +344,45 @@ To use the storage you need setup it first::
    *redis_pool* is a :class:`~aioredis.RedisPool` which should be
    created by :func:`~aioredis.create_pool` call, e.g.::
 
-      redis = yield from aioredis.create_pool(('localhost', 6379))
+      redis = await aioredis.create_pool(('localhost', 6379))
       storage = aiohttp_session.redis_storage.RedisStorage(redis)
+
+   Other parameters are the same as for
+   :class:`~aiohttp_session.AbstractStorage` constructor.
+
+
+Memcahed Storage
+----------------
+
+The storage that stores session data in Memcached and
+keeps only keys (UUIDs actually) in HTTP cookies.
+
+It operates with Memcahed database via :class:`aiomecache.Client`.
+
+To use the storage you need setup it first::
+
+   mc = aiomchache.Client('localhost', 11211)
+   storage = aiohttp_session.memcached_storage.Client(mc)
+   aiohttp_session.setup(app, storage)
+
+.. versionadded:: 1.2
+
+.. class:: MemcachedStorage(memcached_conn, *, \
+                            cookie_name="AIOHTTP_SESSION", \
+                            domain=None, max_age=None, path='/', \
+                            secure=None, httponly=True, \
+                            encoder=json.dumps, \
+                            decoder=json.loads, \
+                            key_factory=lambda: uuid.uuid4().hex)
+
+   Create Memcached storage for user session data.
+
+   The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
+
+   *memcached_conn* is a :class:`~aiomcache.Client` instance::
+
+      mc = yield from aiomcache.Client('localhost', 6379)
+      storage = aiohttp_session.memcached_storage.MemcachedStorage(redis)
 
    Other parameters are the same as for
    :class:`~aiohttp_session.AbstractStorage` constructor.

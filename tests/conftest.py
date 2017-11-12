@@ -134,6 +134,6 @@ def memcached_params(memcached_server):
 
 @pytest.yield_fixture
 def memcached(loop, memcached_params):
-    conn = aiomcache.Client(**memcached_params, loop=loop)
+    conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
     conn.close()

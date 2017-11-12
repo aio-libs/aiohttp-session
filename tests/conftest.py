@@ -25,7 +25,7 @@ def loop(request):
 
 @pytest.fixture(scope='session')
 def session_id():
-    '''Unique session identifier, random string.'''
+    """Unique session identifier, random string."""
     return str(uuid.uuid4())
 
 

@@ -1,33 +1,11 @@
 import asyncio
 import json
 import uuid
-import aioredis
 import time
-import pytest
 
 from aiohttp import web
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.redis_storage import RedisStorage
-
-
-@pytest.yield_fixture
-def redis(request, loop):
-    pool = None
-
-    @asyncio.coroutine
-    def start():
-        nonlocal pool
-        pool = yield from aioredis.create_pool(('localhost', 6379),
-                                               minsize=5,
-                                               maxsize=10,
-                                               loop=loop)
-
-    request.addfinalizer(lambda: pool.close())
-
-    loop.run_until_complete(start())
-    yield pool
-    if pool is not None:
-        loop.run_until_complete(pool.clear())
 
 
 def create_app(loop, handler, redis, max_age=None,

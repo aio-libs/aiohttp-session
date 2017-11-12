@@ -3,14 +3,12 @@ import aioredis
 import asyncio
 import gc
 import pytest
-import redis as redisdb
 import time
 import uuid
 from docker import Client as DockerClient
-from pymemcache.client.base import Client
 
 
-@pytest.yield_fixture
+@pytest.yield_fixture(scope='session')
 def loop(request):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(None)
@@ -42,7 +40,7 @@ def pytest_addoption(parser):
 
 
 @pytest.yield_fixture(scope='session')
-def redis_server(docker, session_id, request):
+def redis_server(docker, session_id, loop, request):
     if not request.config.option.no_pull:
         docker.pull('redis:{}'.format('latest'))
     container = docker.create_container(
@@ -57,10 +55,12 @@ def redis_server(docker, session_id, request):
     delay = 0.001
     for i in range(100):
         try:
-            conn = redisdb.StrictRedis(host=host, port=6379, db=0)
-            conn.set('foo', 'bar')
+            conn = loop.run_until_complete(
+                aioredis.create_connection((host, 6379))
+            )
+            loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
             break
-        except redisdb.exceptions.ConnectionError as e:
+        except ConnectionRefusedError as e:
             time.sleep(delay)
             delay *= 2
     else:
@@ -77,7 +77,7 @@ def redis_params(redis_server):
     return dict(**redis_server['redis_params'])
 
 
-@pytest.yield_fixture()
+@pytest.yield_fixture
 def redis(loop, redis_params):
     pool = None
 
@@ -97,7 +97,7 @@ def redis(loop, redis_params):
 
 
 @pytest.yield_fixture(scope='session')
-def memcached_server(docker, session_id, request):
+def memcached_server(docker, session_id, loop, request):
     if not request.config.option.no_pull:
         docker.pull('memcached:{}'.format('latest'))
     container = docker.create_container(
@@ -112,8 +112,8 @@ def memcached_server(docker, session_id, request):
     delay = 0.001
     for i in range(100):
         try:
-            client = Client((host, 11211))
-            client.set('foo', 'bar')
+            conn = aiomcache.Client(host, 11211, loop=loop)
+            loop.run_until_complete(conn.set(b'foo', b'bar'))
             break
         except ConnectionRefusedError as e:
             time.sleep(delay)

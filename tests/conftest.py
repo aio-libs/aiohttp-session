@@ -56,7 +56,7 @@ def redis_server(docker, session_id, loop, request):
     for i in range(100):
         try:
             conn = loop.run_until_complete(
-                aioredis.create_connection((host, 6379))
+                aioredis.create_connection((host, 6379), loop=loop)
             )
             loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
             break

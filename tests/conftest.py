@@ -8,7 +8,7 @@ import uuid
 from docker import Client as DockerClient
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def loop(request):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(None)
@@ -39,7 +39,7 @@ def pytest_addoption(parser):
                      help="Don't perform docker images pulling")
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def redis_server(docker, session_id, loop, request):
     if not request.config.option.no_pull:
         docker.pull('redis:{}'.format('latest'))
@@ -77,7 +77,7 @@ def redis_params(redis_server):
     return dict(**redis_server['redis_params'])
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def redis(loop, redis_params):
     pool = None
 
@@ -96,7 +96,7 @@ def redis(loop, redis_params):
         loop.run_until_complete(pool.clear())
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def memcached_server(docker, session_id, loop, request):
     if not request.config.option.no_pull:
         docker.pull('memcached:{}'.format('latest'))
@@ -132,7 +132,7 @@ def memcached_params(memcached_server):
     return dict(**memcached_server['memcached_params'])
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def memcached(loop, memcached_params):
     conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn

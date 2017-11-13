@@ -1,20 +1,11 @@
 import asyncio
 import json
 import uuid
-import aiomcache
 import time
-import pytest
 
 from aiohttp import web
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.memcached_storage import MemcachedStorage
-
-
-@pytest.yield_fixture
-def memcached(loop):
-    conn = aiomcache.Client("127.0.0.1", 11211, loop=loop)
-    yield conn
-    conn.close()
 
 
 def create_app(loop, handler, memcached, max_age=None,

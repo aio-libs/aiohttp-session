@@ -1,4 +1,6 @@
+import aioredis
 import json
+import pytest
 import uuid
 import time
 
@@ -241,3 +243,22 @@ async def test_create_storate_with_custom_key_factory(test_client, redis):
     value = await load_cookie(client, redis)
     assert 'key' in value['session']
     assert value['session']['key'] == 'value'
+
+
+async def test_redis_from_create_pool(loop, redis_params):
+
+    async def handler(request):
+        pass
+
+    redis = await aioredis.create_pool(loop=loop, **redis_params)
+    with pytest.warns(DeprecationWarning):
+        create_app(loop=loop, handler=handler, redis=redis)
+
+
+async def test_not_redis_provided_to_storage(loop):
+
+    async def handler(request):
+        pass
+
+    with pytest.raises(TypeError):
+        create_app(loop=loop, handler=handler, redis=None)

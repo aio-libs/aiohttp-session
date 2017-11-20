@@ -4,6 +4,7 @@ except ImportError:
     aioredis = None
 import json
 import uuid
+import warnings
 
 from distutils.version import StrictVersion
 from . import AbstractStorage, Session
@@ -27,7 +28,16 @@ class RedisStorage(AbstractStorage):
         self._encoder = encoder
         self._decoder = decoder
         self._key_factory = key_factory
-        assert isinstance(redis_pool, aioredis.commands.Redis), redis_pool
+        if isinstance(redis_pool, aioredis.pool.ConnectionsPool):
+            warnings.warn(
+                "using a pool created with aioredis.create_pool is deprecated"
+                "please use a pool created with aioredis.create_redis_pool",
+                DeprecationWarning
+            )
+            redis_pool = aioredis.commands.Redis(redis_pool)
+        elif not isinstance(redis_pool, aioredis.commands.Redis):
+            raise TypeError("Expexted aioredis.commands.Redis got {}".format(
+                    type(redis_pool)))
         self._redis = redis_pool
 
     async def load_session(self, request):

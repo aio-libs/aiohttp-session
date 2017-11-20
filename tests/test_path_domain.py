@@ -1,4 +1,3 @@
-import asyncio
 from http import cookies
 import json
 import time
@@ -33,19 +32,17 @@ def create_app(loop, handler, path=None, domain=None):
     return app
 
 
-@asyncio.coroutine
-def test_with_same_path_domain(test_client):
+async def test_with_same_path_domain(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/anotherpath", domain="127.0.0.1")
-    resp = yield from client.get('/anotherpath')
+    resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
     cookie_data = json.loads(morsel.value)
@@ -62,19 +59,17 @@ def test_with_same_path_domain(test_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-@asyncio.coroutine
-def test_with_different_path(test_client):
+async def test_with_different_path(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/NotTheSame", domain="127.0.0.1")
-    resp = yield from client.get('/anotherpath')
+    resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
     cookie_data = json.loads(morsel.value)
@@ -89,19 +84,17 @@ def test_with_different_path(test_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-@asyncio.coroutine
-def test_with_different_domain(test_client):
+async def test_with_different_domain(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/anotherpath", domain="localhost")
-    resp = yield from client.get('/anotherpath')
+    resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
     cookie_data = json.loads(morsel.value)
@@ -116,20 +109,18 @@ def test_with_different_domain(test_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-@asyncio.coroutine
-def test_invalidate_with_same_path_domain(test_client):
+async def test_invalidate_with_same_path_domain(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session.invalidate()
 
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/anotherpath", domain="127.0.0.1")
-    resp = yield from client.get('/anotherpath')
+    resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
     cookie_data = json.loads(morsel.value)

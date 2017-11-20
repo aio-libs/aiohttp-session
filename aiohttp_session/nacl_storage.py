@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 import nacl.secret
@@ -21,8 +20,7 @@ class NaClCookieStorage(AbstractStorage):
 
         self._secretbox = nacl.secret.SecretBox(secret_key)
 
-    @asyncio.coroutine
-    def load_session(self, request):
+    async def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
@@ -33,8 +31,7 @@ class NaClCookieStorage(AbstractStorage):
             )
             return Session(None, data=data, new=False, max_age=self.max_age)
 
-    @asyncio.coroutine
-    def save_session(self, request, response, session):
+    async def save_session(self, request, response, session):
         if session.empty:
             return self.save_cookie(response, session._mapping,
                                     max_age=session.max_age)

@@ -115,7 +115,7 @@ Continious Integration.
 Dependencies
 ------------
 
-- Python 3.3 and :mod:`asyncio` or Python 3.4+
+- Python 3.5.3+
 - :term:`cryptography` for
   :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
 - :term:`aioredis` for

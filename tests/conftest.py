@@ -81,19 +81,19 @@ def redis_params(redis_server):
 def redis(loop, redis_params):
     pool = None
 
-    @asyncio.coroutine
-    def start(*args, no_loop=False, **kwargs):
+    async def start(*args, no_loop=False, **kwargs):
         nonlocal pool
         params = redis_params.copy()
         params.update(kwargs)
         useloop = None if no_loop else loop
-        pool = yield from aioredis.create_pool(loop=useloop, **params)
+        pool = await aioredis.create_redis_pool(loop=useloop, **params)
         return pool
 
     loop.run_until_complete(start())
     yield pool
     if pool is not None:
-        loop.run_until_complete(pool.clear())
+        pool.close()
+        loop.run_until_complete(pool.wait_closed())
 
 
 @pytest.fixture(scope='session')

@@ -1,4 +1,3 @@
-import asyncio
 from unittest import mock
 import json
 import time
@@ -25,22 +24,20 @@ def create_app(loop, handler):
     return app
 
 
-@asyncio.coroutine
-def test_max_age_also_returns_expires(test_client):
+async def test_max_age_also_returns_expires(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
+    async def handler(request):
         time.time.return_value = 0.0
-        session = yield from get_session(request)
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
     with mock.patch('time.time') as m_clock:
         m_clock.return_value = 0.0
 
-        client = yield from test_client(create_app, handler)
+        client = await test_client(create_app, handler)
         make_cookie(client, {'a': 1, 'b': 2})
-        resp = yield from client.get('/')
+        resp = await client.get('/')
         assert resp.status == 200
         assert 'expires=Thu, 01-Jan-1970 00:00:10 GMT' in \
                resp.headers['SET-COOKIE']

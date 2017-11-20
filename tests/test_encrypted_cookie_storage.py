@@ -1,4 +1,3 @@
-import asyncio
 import json
 import base64
 import time
@@ -60,12 +59,10 @@ def test_invalid_key():
         EncryptedCookieStorage(b'123')  # short key
 
 
-@asyncio.coroutine
-def test_create_new_session_broken_by_format(test_client, fernet, key):
+async def test_create_new_session_broken_by_format(test_client, fernet, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
@@ -73,42 +70,38 @@ def test_create_new_session_broken_by_format(test_client, fernet, key):
         return web.Response(body=b'OK')
 
     new_fernet = Fernet(Fernet.generate_key())
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, new_fernet, {'a': 1, 'b': 12})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
 
-@asyncio.coroutine
-def test_load_existing_session(test_client, fernet, key):
+async def test_load_existing_session(test_client, fernet, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
         assert {'a': 1, 'b': 12} == session
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, fernet, {'a': 1, 'b': 12})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
 
-@asyncio.coroutine
-def test_change_session(test_client, fernet, key):
+async def test_change_session(test_client, fernet, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, fernet, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
     morsel = resp.cookies['AIOHTTP_SESSION']
@@ -125,18 +118,16 @@ def test_change_session(test_client, fernet, key):
     assert '/' == morsel['path']
 
 
-@asyncio.coroutine
-def test_clear_cookie_on_session_invalidation(test_client, fernet, key):
+async def test_clear_cookie_on_session_invalidation(test_client, fernet, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, fernet, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
     morsel = resp.cookies['AIOHTTP_SESSION']

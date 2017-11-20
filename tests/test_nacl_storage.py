@@ -1,4 +1,3 @@
-import asyncio
 import json
 import time
 
@@ -56,53 +55,47 @@ def key():
     return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 
-@asyncio.coroutine
-def test_create_new_sesssion(test_client, secretbox, key):
+async def test_create_new_sesssion(test_client, secretbox, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
-    resp = yield from client.get('/')
+    client = await test_client(create_app, handler, key)
+    resp = await client.get('/')
     assert resp.status == 200
 
 
-@asyncio.coroutine
-def test_load_existing_sesssion(test_client, secretbox, key):
+async def test_load_existing_sesssion(test_client, secretbox, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
         assert {'a': 1, 'b': 12} == session
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, secretbox, {'a': 1, 'b': 12})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
 
-@asyncio.coroutine
-def test_change_session(test_client, secretbox, key):
+async def test_change_session(test_client, secretbox, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, secretbox, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
     morsel = resp.cookies['AIOHTTP_SESSION']
@@ -119,18 +112,16 @@ def test_change_session(test_client, secretbox, key):
     assert '/' == morsel['path']
 
 
-@asyncio.coroutine
-def test_clear_cookie_on_session_invalidation(test_client, secretbox, key):
+async def test_del_cookie_on_session_invalidation(test_client, secretbox, key):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler, key)
+    client = await test_client(create_app, handler, key)
     make_cookie(client, secretbox, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
     morsel = resp.cookies['AIOHTTP_SESSION']

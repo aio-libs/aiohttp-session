@@ -1,7 +1,6 @@
 """User sessions for aiohttp.web."""
 
 import abc
-import asyncio
 from collections import MutableMapping
 import json
 import time
@@ -94,8 +93,7 @@ SESSION_KEY = 'aiohttp_session'
 STORAGE_KEY = 'aiohttp_session_storage'
 
 
-@asyncio.coroutine
-def get_session(request):
+async def get_session(request):
     session = request.get(SESSION_KEY)
     if session is None:
         storage = request.get(STORAGE_KEY)
@@ -104,7 +102,7 @@ def get_session(request):
                 "Install aiohttp_session middleware "
                 "in your aiohttp.web.Application")
         else:
-            session = yield from storage.load_session(request)
+            session = await storage.load_session(request)
             if not isinstance(session, Session):
                 raise RuntimeError(
                     "Installed {!r} storage should return session instance "
@@ -119,12 +117,11 @@ def session_middleware(storage):
     assert isinstance(storage, AbstractStorage), storage
 
     @web.middleware
-    @asyncio.coroutine
-    def factory(request, handler):
+    async def factory(request, handler):
         request[STORAGE_KEY] = storage
         raise_response = False
         try:
-            response = yield from handler(request)
+            response = await handler(request)
         except web.HTTPException as exc:
             response = exc
             raise_response = True
@@ -139,7 +136,7 @@ def session_middleware(storage):
         session = request.get(SESSION_KEY)
         if session is not None:
             if session._changed:
-                yield from storage.save_session(request, response, session)
+                await storage.save_session(request, response, session)
         if raise_response:
             raise response
         return response
@@ -188,14 +185,12 @@ class AbstractStorage(metaclass=abc.ABCMeta):
             data = {}
         return data
 
-    @asyncio.coroutine
     @abc.abstractmethod
-    def load_session(self, request):
+    async def load_session(self, request):
         pass
 
-    @asyncio.coroutine
     @abc.abstractmethod
-    def save_session(self, request, response, session):
+    async def save_session(self, request, response, session):
         pass
 
     def load_cookie(self, request):
@@ -231,8 +226,7 @@ class SimpleCookieStorage(AbstractStorage):
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly)
 
-    @asyncio.coroutine
-    def load_session(self, request):
+    async def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
@@ -240,7 +234,6 @@ class SimpleCookieStorage(AbstractStorage):
             data = json.loads(cookie)
             return Session(None, data=data, new=False, max_age=self.max_age)
 
-    @asyncio.coroutine
-    def save_session(self, request, response, session):
+    async def save_session(self, request, response, session):
         cookie_data = json.dumps(self._get_session_data(session))
         self.save_cookie(response, cookie_data, max_age=session.max_age)

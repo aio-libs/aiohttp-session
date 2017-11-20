@@ -17,7 +17,7 @@ def read(f):
 
 install_requires = ['aiohttp>=2.3.0']
 extras_require = {
-    'aioredis': ['aioredis>=0.1.4'],
+    'aioredis': ['aioredis>=0.1.4, <1.0'],
     'aiomcache': ['aiomcache>=0.5.2'],
     'pycrypto': ['cryptography'],
     'secure': ['cryptography'],

@@ -11,19 +11,8 @@ python:
 install:
 # - pip install --upgrade setuptools
 - pip install wheel
-- pip install hiredis
-- pip install flake8
-- pip install aiohttp
-- pip install aioredis
-- pip install cryptography
-- pip install docker-py
-- pip install pynacl
-- pip install pytest
-- pip install pytest-aiohttp
-- pip install pytest-cov
+- pip install -r requirements-dev.txt
 - pip install codecov
-- pip install aiomcache
-- python setup.py develop
 
 script:
 - make cov
@@ -36,8 +25,6 @@ after_success:
 - codecov
 
 env:
-  global:
-  - REDIS_PORT=6379
   matrix:
   - PYTHONASYNCIODEBUG=x
   - PYTHONASYNCIODEBUG=

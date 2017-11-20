@@ -28,9 +28,6 @@ env:
   matrix:
   - PYTHONASYNCIODEBUG=x
   - PYTHONASYNCIODEBUG=
-services:
-  - redis-server
-  - memcached
 
 sudo: false
 

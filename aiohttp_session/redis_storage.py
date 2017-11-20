@@ -1,7 +1,11 @@
-import aioredis
+try:
+    import aioredis
+except ImportError:
+    aioredis = None
 import json
 import uuid
 
+from distutils.version import StrictVersion
 from . import AbstractStorage, Session
 
 
@@ -16,6 +20,10 @@ class RedisStorage(AbstractStorage):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly)
+        if aioredis is None:
+            raise RuntimeError("Please install aioredis")
+        if StrictVersion(aioredis.__version__).version < (1, 0):
+            raise RuntimeError("aioredis<1.0 is not supported")
         self._encoder = encoder
         self._decoder = decoder
         self._key_factory = key_factory

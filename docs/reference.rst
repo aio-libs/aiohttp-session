@@ -75,9 +75,8 @@ Session
 
       from aiohttp_session import get_session
 
-      @asyncio.coroutine
-      def handler(request):
-          session = yield from get_session(request)
+      async def handler(request):
+          session = await get_session(request)
           session['key1'] = 'value 1'
           assert 'key2' in session
           assert session['key2'] == 'value 2'
@@ -381,8 +380,8 @@ To use the storage you need setup it first::
 
    *memcached_conn* is a :class:`~aiomcache.Client` instance::
 
-      mc = yield from aiomcache.Client('localhost', 6379)
-      storage = aiohttp_session.memcached_storage.MemcachedStorage(redis)
+      mc = await aiomcache.Client('localhost', 6379)
+      storage = aiohttp_session.memcached_storage.MemcachedStorage(mc
 
    Other parameters are the same as for
    :class:`~aiohttp_session.AbstractStorage` constructor.

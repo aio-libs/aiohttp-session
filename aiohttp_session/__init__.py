@@ -114,7 +114,8 @@ async def get_session(request):
 
 def session_middleware(storage):
 
-    assert isinstance(storage, AbstractStorage), storage
+    if not isinstance(storage, AbstractStorage):
+        raise RuntimeError("Expected AbstractStorage got {}".format(storage))
 
     @web.middleware
     async def factory(request, handler):

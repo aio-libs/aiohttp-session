@@ -2,6 +2,12 @@ Changes
 =======
 
 
+2.0.0 (2017-11-21)
+------------------
+
+- Update to aioredis 1.0+. The aiohttp-session 2.0 is not compatible
+  with aioredis 0.X #234
+
 1.2.1 (2017-11-20)
 ------------------
 

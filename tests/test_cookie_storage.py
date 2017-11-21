@@ -1,4 +1,3 @@
-import asyncio
 import json
 import time
 
@@ -24,29 +23,25 @@ def create_app(loop, handler):
     return app
 
 
-@asyncio.coroutine
-def test_create_new_session(test_client):
+async def test_create_new_session(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
-    resp = yield from client.get('/')
+    client = await test_client(create_app, handler)
+    resp = await client.get('/')
     assert resp.status == 200
 
 
-@asyncio.coroutine
-def test_load_existing_session(test_client):
+async def test_load_existing_session(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
@@ -54,24 +49,22 @@ def test_load_existing_session(test_client):
         assert {'a': 1, 'b': 2} == session
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
 
-@asyncio.coroutine
-def test_change_session(test_client):
+async def test_change_session(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
 
     morsel = resp.cookies['AIOHTTP_SESSION']
@@ -88,33 +81,29 @@ def test_change_session(test_client):
     assert '/' == morsel['path']
 
 
-@asyncio.coroutine
-def test_clear_cookie_on_session_invalidation(test_client):
+async def test_clear_cookie_on_session_invalidation(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
-        session = yield from get_session(request)
+    async def handler(request):
+        session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
     assert ('Set-Cookie: AIOHTTP_SESSION="{}"; '
             'domain=127.0.0.1; httponly; Path=/'.upper()) == \
         resp.cookies['AIOHTTP_SESSION'].output().upper()
 
 
-@asyncio.coroutine
-def test_dont_save_not_requested_session(test_client):
+async def test_dont_save_not_requested_session(test_client):
 
-    @asyncio.coroutine
-    def handler(request):
+    async def handler(request):
         return web.Response(body=b'OK')
 
-    client = yield from test_client(create_app, handler)
+    client = await test_client(create_app, handler)
     make_cookie(client, {'a': 1, 'b': 2})
-    resp = yield from client.get('/')
+    resp = await client.get('/')
     assert resp.status == 200
     assert 'AIOHTTP_SESSION' not in resp.cookies

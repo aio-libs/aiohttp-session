@@ -1,4 +1,3 @@
-import asyncio
 import json
 import uuid
 
@@ -21,15 +20,14 @@ class MemcachedStorage(AbstractStorage):
         self._key_factory = key_factory
         self.conn = memcached_conn
 
-    @asyncio.coroutine
-    def load_session(self, request):
+    async def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             key = str(cookie)
             stored_key = (self.cookie_name + '_' + key).encode('utf-8')
-            data = yield from self.conn.get(stored_key)
+            data = await self.conn.get(stored_key)
             if data is None:
                 return Session(None, data=None,
                                new=True, max_age=self.max_age)
@@ -40,8 +38,7 @@ class MemcachedStorage(AbstractStorage):
                 data = None
             return Session(key, data=data, new=False, max_age=self.max_age)
 
-    @asyncio.coroutine
-    def save_session(self, request, response, session):
+    async def save_session(self, request, response, session):
         key = session.identity
         if key is None:
             key = self._key_factory()
@@ -60,6 +57,6 @@ class MemcachedStorage(AbstractStorage):
         max_age = session.max_age
         expire = max_age if max_age is not None else 0
         stored_key = (self.cookie_name + '_' + key).encode('utf-8')
-        yield from self.conn.set(
+        await self.conn.set(
                                 stored_key, data.encode('utf-8'),
                                 exptime=expire)

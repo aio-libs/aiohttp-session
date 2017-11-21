@@ -17,10 +17,7 @@ async def handler(request):
 
 async def make_redis_pool():
     redis_address = ('127.0.0.1', '6379')
-    return await aioredis.create_pool(
-        redis_address,
-        create_connection_timeout=1,
-    )
+    return await aioredis.create_redis_pool(redis_address, timeout=1)
 
 
 def make_app():

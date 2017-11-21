@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 
 from aiohttp import web
@@ -15,46 +14,39 @@ def create_app(loop, *handlers):
     return app
 
 
-@asyncio.coroutine
-def test_stream_response(test_client):
+async def test_stream_response(test_client):
 
-    @asyncio.coroutine
-    def stream_response(request):
-        session = yield from get_session(request)
+    async def stream_response(request):
+        session = await get_session(request)
         session['will_not'] = 'show up'
         return web.StreamResponse()
 
-    client = yield from test_client(create_app,
-                                    ('/stream', stream_response))
+    client = await test_client(create_app, ('/stream', stream_response))
 
-    resp = yield from client.get('/stream')
+    resp = await client.get('/stream')
     assert resp.status == 200
     assert SESSION_KEY.upper() not in resp.cookies
 
 
-@asyncio.coroutine
-def test_bad_response_type(test_client):
+async def test_bad_response_type(test_client):
 
-    @asyncio.coroutine
-    def bad_response(request):
+    async def bad_response(request):
         return ''
 
     middleware = session_middleware(SimpleCookieStorage())
     req = make_mocked_request('GET', '/')
     with pytest.raises(RuntimeError):
-        yield from middleware(req, bad_response)
+        await middleware(req, bad_response)
 
 
-@asyncio.coroutine
-def test_prepared_response_type(test_client):
+async def test_prepared_response_type(test_client):
 
-    @asyncio.coroutine
-    def prepared_response(request):
+    async def prepared_response(request):
         resp = web.Response()
-        yield from resp.prepare(request)
+        await resp.prepare(request)
         return resp
 
     middleware = session_middleware(SimpleCookieStorage())
     req = make_mocked_request('GET', '/')
     with pytest.raises(RuntimeError):
-        yield from middleware(req, prepared_response)
+        await middleware(req, prepared_response)

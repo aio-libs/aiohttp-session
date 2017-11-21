@@ -17,7 +17,7 @@ def read(f):
 
 install_requires = ['aiohttp>=2.3.0']
 extras_require = {
-    'aioredis': ['aioredis>=0.1.4, <1.0'],
+    'aioredis': ['aioredis>=1.0.0'],
     'aiomcache': ['aiomcache>=0.5.2'],
     'pycrypto': ['cryptography'],
     'secure': ['cryptography'],
@@ -34,7 +34,6 @@ setup(name='aiohttp-session',
           'Intended Audience :: Developers',
           'Programming Language :: Python',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Topic :: Internet :: WWW/HTTP',

@@ -1,4 +1,3 @@
-import asyncio
 import json
 import base64
 
@@ -26,8 +25,7 @@ class EncryptedCookieStorage(AbstractStorage):
             secret_key = base64.urlsafe_b64encode(secret_key)
         self._fernet = fernet.Fernet(secret_key)
 
-    @asyncio.coroutine
-    def load_session(self, request):
+    async def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
@@ -43,8 +41,7 @@ class EncryptedCookieStorage(AbstractStorage):
                             "create a new fresh session")
                 return Session(None, data=None, new=True, max_age=self.max_age)
 
-    @asyncio.coroutine
-    def save_session(self, request, response, session):
+    async def save_session(self, request, response, session):
         if session.empty:
             return self.save_cookie(response, '',
                                     max_age=session.max_age)

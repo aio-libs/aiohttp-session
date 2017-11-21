@@ -262,3 +262,27 @@ async def test_not_redis_provided_to_storage(loop):
 
     with pytest.raises(TypeError):
         create_app(loop=loop, handler=handler, redis=None)
+
+
+async def test_no_aioredis_installed(loop, mocker):
+
+    async def handler(request):
+        pass
+
+    mocker.patch('aiohttp_session.redis_storage.aioredis', None)
+    with pytest.raises(RuntimeError):
+        create_app(loop=loop, handler=handler, redis=None)
+
+
+async def test_old_aioredis_version(loop, mocker):
+
+    async def handler(request):
+        pass
+
+    class Dummy(object):
+        def __init__(self, *args, **kwargs):
+            self.version = (0, 3)
+
+    mocker.patch('aiohttp_session.redis_storage.StrictVersion', Dummy)
+    with pytest.raises(RuntimeError):
+        create_app(loop=loop, handler=handler, redis=None)

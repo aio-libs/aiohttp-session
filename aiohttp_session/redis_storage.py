@@ -1,6 +1,6 @@
 try:
     import aioredis
-except ImportError:
+except ImportError:  # pragma: no cover
     aioredis = None
 import json
 import uuid

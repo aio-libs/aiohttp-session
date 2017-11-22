@@ -4,7 +4,7 @@ Changes
 2.0.1 (2017-11-22)
 ------------------
 
-- Replace assertiions in aioredis installation checks by `RuntimeError` #235
+- Replace assertions in aioredis installation checks by `RuntimeError` #235
 
 2.0.0 (2017-11-21)
 ------------------

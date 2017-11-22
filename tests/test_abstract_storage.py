@@ -3,8 +3,8 @@ import json
 import time
 
 from aiohttp import web
-from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage)
+from aiohttp_session import get_session, SimpleCookieStorage
+from aiohttp_session import setup as setup_middleware
 
 
 def make_cookie(client, data):
@@ -18,8 +18,8 @@ def make_cookie(client, data):
 
 
 def create_app(loop, handler):
-    middleware = session_middleware(SimpleCookieStorage(max_age=10))
-    app = web.Application(middlewares=[middleware], loop=loop)
+    app = web.Application(loop=loop)
+    setup_middleware(app, SimpleCookieStorage(max_age=10))
     app.router.add_route('GET', '/', handler)
     return app
 

@@ -90,7 +90,7 @@ Session
    .. attribute:: identity
 
       Client's identity. It may be cookie name or database
-      key. Read-only property.
+      key. Read-only property. For change use :func:`Session.set_new_identity`.
 
    .. attribute:: new
 
@@ -130,6 +130,13 @@ Session
       Call this when you want to invalidate the session (dump all
       data, and -- perhaps -- set a clearing cookie).
 
+   .. method:: set_new_identity(identity)
+
+      Call this when you want to change the :py:attr:`identity`.
+
+      .. warning::
+
+         Never change :py:attr:`identity` of a session which is not new.
 
 .. _aiohttp-session-storage:
 

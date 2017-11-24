@@ -1,3 +1,4 @@
+import pytest
 import time
 
 from aiohttp_session import Session
@@ -29,6 +30,22 @@ def test_create3():
     assert s.identity == 1
     assert not s._changed
     assert s.created is not None
+
+
+def test_set_new_identity_ok():
+    s = Session(identity=1, data=None, new=True)
+    assert s.new
+    assert s.identity == 1
+
+    s.set_new_identity(2)
+    assert s.new
+    assert s.identity == 2
+
+
+def test_set_new_identity_for_not_new_session():
+    s = Session(identity=1, data=None, new=False)
+    with pytest.raises(RuntimeError):
+        s.set_new_identity(2)
 
 
 def test__repr__():

@@ -1,6 +1,12 @@
 Changes
 =======
 
+2.1.0 (2017-11-24)
+------------------
+
+- Add `session.set_new_identity()` method for changing identity for a
+  new session #236
+
 2.0.1 (2017-11-22)
 ------------------
 

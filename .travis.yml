@@ -24,11 +24,6 @@ script:
 after_success:
 - codecov
 
-env:
-  matrix:
-  - PYTHONASYNCIODEBUG=x
-  - PYTHONASYNCIODEBUG=
-
 sudo: false
 
 deploy:

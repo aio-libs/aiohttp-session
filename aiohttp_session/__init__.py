@@ -68,6 +68,13 @@ class Session(MutableMapping):
         self._changed = True
         self._mapping = {}
 
+    def set_new_identity(self, identity):
+        if not self._new:
+            raise RuntimeError(
+                "Can't change identity for a session which is not new")
+
+        self._identity = identity
+
     def __len__(self):
         return len(self._mapping)
 

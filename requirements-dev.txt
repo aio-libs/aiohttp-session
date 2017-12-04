@@ -14,4 +14,4 @@ aiohttp==2.3.5
 multidict==3.3.2
 chardet==3.0.4
 yarl==0.15.0
-aiomcache==0.5.2
+aiomcache==0.6.0

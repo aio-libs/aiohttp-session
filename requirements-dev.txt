@@ -13,5 +13,5 @@ pytest-mock==1.6.3
 aiohttp==2.3.6
 multidict==3.3.2
 chardet==3.0.4
-yarl==0.15.0
+yarl==0.16.0
 aiomcache==0.6.0

@@ -10,8 +10,8 @@ pynacl==1.2.1
 pytest-aiohttp==0.3.0
 pytest-cov==2.5.1
 pytest-mock==1.6.3
-aiohttp==2.3.6
+aiohttp==2.3.7
 multidict==3.3.2
 chardet==3.0.4
-yarl==0.16.0
+yarl==0.17.0
 aiomcache==0.6.0

@@ -7,11 +7,12 @@ aioredis==1.0.0
 cryptography==2.1.4
 docker-py==1.10.6
 pynacl==1.2.1
+pytest==3.3.2
 pytest-aiohttp==0.3.0
 pytest-cov==2.5.1
 pytest-mock==1.6.3
-aiohttp==2.3.7
-multidict==3.3.2
+aiohttp==2.3.9
+multidict==4.0.0
 chardet==3.0.4
-yarl==0.17.0
+yarl==1.0.0
 aiomcache==0.6.0

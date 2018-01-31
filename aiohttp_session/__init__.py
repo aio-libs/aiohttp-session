@@ -134,7 +134,8 @@ def session_middleware(storage):
             response = exc
             raise_response = True
         if not isinstance(response, web.StreamResponse):
-            raise RuntimeError("Expect response, not {!r}", type(response))
+            raise RuntimeError(
+                "Expect response, not {!r}".format(type(response)))
         if not isinstance(response, web.Response):
             # likely got websoket or streaming
             return response

@@ -8,8 +8,9 @@ python:
 - 3.6
 - nightly
 
-allow_failures:
-- python: nightly
+matrix:
+  allow_failures:
+  - python: nightly
 
 install:
 # - pip install --upgrade setuptools

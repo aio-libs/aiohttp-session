@@ -44,6 +44,7 @@ setup(name='aiohttp-session',
       url='https://github.com/aio-libs/aiohttp_session/',
       license='Apache 2',
       packages=['aiohttp_session'],
+      python_requires=">=3.5",
       install_requires=install_requires,
       include_package_data=True,
       extras_require=extras_require)

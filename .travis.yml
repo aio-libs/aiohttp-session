@@ -4,9 +4,13 @@ services:
 - docker
 
 python:
-  - 3.5
-  - 3.6
-  - nightly
+- 3.5
+- 3.6
+- nightly
+
+matrix:
+  allow_failures:
+  - python: nightly
 
 install:
 # - pip install --upgrade setuptools

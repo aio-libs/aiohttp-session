@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.2.0 (2018-01-31)
+------------------
+
+- Fixed the formatting of an error handling bad middleware return types. #249
+
 2.1.0 (2017-11-24)
 ------------------
 

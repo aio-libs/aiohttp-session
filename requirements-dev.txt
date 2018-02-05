@@ -12,7 +12,7 @@ pytest-aiohttp==0.3.0
 pytest-cov==2.5.1
 pytest-mock==1.6.3
 aiohttp==2.3.10
-multidict==4.0.0
+multidict==4.1.0
 chardet==3.0.4
 yarl==1.0.0
 aiomcache==0.6.0

@@ -1,18 +1,18 @@
 flake8==3.5.0
-coverage==4.4.2
-sphinx==1.6.6
+coverage==4.5
+sphinx==1.6.7
 pep257==0.7.0
 -e .
 aioredis==1.0.0
 cryptography==2.1.4
 docker-py==1.10.6
 pynacl==1.2.1
-pytest==3.3.2
+pytest==3.4.0
 pytest-aiohttp==0.3.0
 pytest-cov==2.5.1
 pytest-mock==1.6.3
-aiohttp==2.3.9
-multidict==4.0.0
+aiohttp==2.3.10
+multidict==4.1.0
 chardet==3.0.4
-yarl==1.0.0
+yarl==1.1.0
 aiomcache==0.6.0

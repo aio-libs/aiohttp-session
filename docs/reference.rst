@@ -176,9 +176,13 @@ implement both :meth:`~AbstractStorage.load_session` and
    *httponly* -- cookie's http-only flag, :class:`bool` or ``None`` (the
    same as ``False``).
 
-   *encoder* -- json serializer, :class:`func`
+   *encoder* -- session serializer.
+   A callable with the following signature: `def encode(param: Any) -> str: ...`.
+   Default is :func:`json.dumps`.
 
-   *decoder* -- json deserializer, :class:`func`
+   *decoder* -- session deserializer. A callable with the following signature:
+   `def decode(param: str) -> Any: ...`.
+   Default is :func:`json.loads`.
 
    .. attribute:: max_age
 
@@ -196,11 +200,14 @@ implement both :meth:`~AbstractStorage.load_session` and
 
    .. attribute:: encoder
 
-      The JSON serializer that will be used to dump session cookie data.
+      .. versionadded:: 2.3.0 
 
+      The JSON serializer that will be used to dump session cookie data.
 
    .. attribute:: decoder
 
+      .. versionadded:: 2.3.0 
+      
       The JSON deserializer that will be used to load session cookie data.
 
    .. method:: load_session(request)
@@ -230,7 +237,6 @@ implement both :meth:`~AbstractStorage.load_session` and
 
       *max_age* is cookie lifetime given from session. Storage defailt
       is used if the value is ``None``.
-
 
 Simple Storage
 --------------

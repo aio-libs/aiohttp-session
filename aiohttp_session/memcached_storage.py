@@ -1,6 +1,5 @@
-import json
 import uuid
-
+import json
 from . import AbstractStorage, Session
 
 
@@ -10,13 +9,12 @@ class MemcachedStorage(AbstractStorage):
     def __init__(self, memcached_conn, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
-                 encoder=json.dumps, decoder=json.loads,
-                 key_factory=lambda: uuid.uuid4().hex):
+                 key_factory=lambda: uuid.uuid4().hex,
+                 encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly)
-        self._encoder = encoder
-        self._decoder = decoder
+                         httponly=httponly,
+                         encoder=encoder, decoder=decoder)
         self._key_factory = key_factory
         self.conn = memcached_conn
 

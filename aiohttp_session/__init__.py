@@ -163,7 +163,8 @@ class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True):
+                 secure=None, httponly=True,
+                 encoder=json.dumps, decoder=json.loads):
         self._cookie_name = cookie_name
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,
@@ -171,6 +172,8 @@ class AbstractStorage(metaclass=abc.ABCMeta):
                                    secure=secure,
                                    httponly=httponly)
         self._max_age = max_age
+        self._encoder = encoder
+        self._decoder = decoder
 
     @property
     def cookie_name(self):
@@ -230,19 +233,21 @@ class SimpleCookieStorage(AbstractStorage):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True):
+                 secure=None, httponly=True,
+                 encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly)
+                         httponly=httponly,
+                         encoder=encoder, decoder=decoder)
 
     async def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
-            data = json.loads(cookie)
+            data = self._decoder(cookie)
             return Session(None, data=data, new=False, max_age=self.max_age)
 
     async def save_session(self, request, response, session):
-        cookie_data = json.dumps(self._get_session_data(session))
+        cookie_data = self._encoder(self._get_session_data(session))
         self.save_cookie(response, cookie_data, max_age=session.max_age)

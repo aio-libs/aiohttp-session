@@ -154,7 +154,8 @@ implement both :meth:`~AbstractStorage.load_session` and
 
 .. class:: AbstractStorage(cookie_name="AIOHTTP_SESSION", *, \
                            domain=None, max_age=None, path='/', \
-                           secure=None, httponly=True)
+                           secure=None, httponly=True, \
+                           encoder=json.parse, decoder=json.loads)
 
    Base class for session storage implementations.
 
@@ -175,6 +176,10 @@ implement both :meth:`~AbstractStorage.load_session` and
    *httponly* -- cookie's http-only flag, :class:`bool` or ``None`` (the
    same as ``False``).
 
+   *encoder* -- json serializer, :class:`func`
+
+   *decoder* -- json deserializer, :class:`func`
+
    .. attribute:: max_age
 
       Maximum age for session data, :class:`int` seconds or ``None``
@@ -188,6 +193,15 @@ implement both :meth:`~AbstractStorage.load_session` and
 
       :class:`dict` of cookie params: *domain*, *max_age*, *path*,
       *secure* and *httponly*.
+
+   .. attribute:: encoder
+
+      The JSON serializer that will be used to parse session cookie data.
+      
+
+   .. attribute:: decoder
+
+      The JSON deserializer that will be used to load session cookie data.
 
    .. method:: load_session(request)
 
@@ -235,7 +249,8 @@ To use the storage you should push it into
 .. class:: SimpleCookieStorage(*, \
                                cookie_name="AIOHTTP_SESSION", \
                                domain=None, max_age=None, path='/', \
-                               secure=None, httponly=True)
+                               secure=None, httponly=True, \
+                               encoder=json.parse, decoder=json.loads)
 
    Create unencrypted cookie storage.
 
@@ -265,7 +280,8 @@ To use the storage you should push it into
 .. class:: EncryptedCookieStorage(secret_key, *, \
                                   cookie_name="AIOHTTP_SESSION", \
                                   domain=None, max_age=None, path='/', \
-                                  secure=None, httponly=True)
+                                  secure=None, httponly=True, \
+                                  encoder=json.parse, decoder=json.loads)
 
    Create encryted cookies storage.
 
@@ -303,7 +319,8 @@ To use the storage you should push it into
 .. class:: NaClCookieStorage(secret_key, *, \
                                   cookie_name="AIOHTTP_SESSION", \
                                   domain=None, max_age=None, path='/', \
-                                  secure=None, httponly=True)
+                                  secure=None, httponly=True, \
+                                  encoder=json.parse, decoder=json.loads)
 
    Create encryted cookies storage.
 
@@ -339,9 +356,8 @@ To use the storage you need setup it first::
                         cookie_name="AIOHTTP_SESSION", \
                         domain=None, max_age=None, path='/', \
                         secure=None, httponly=True, \
-                        encoder=json.dumps, \
-                        decoder=json.loads, \
-                        key_factory=lambda: uuid.uuid4().hex)
+                        key_factory=lambda: uuid.uuid4().hex, \
+                        encoder=json.parse, decoder=json.loads)
 
    Create Redis storage for user session data.
 
@@ -377,9 +393,8 @@ To use the storage you need setup it first::
                             cookie_name="AIOHTTP_SESSION", \
                             domain=None, max_age=None, path='/', \
                             secure=None, httponly=True, \
-                            encoder=json.dumps, \
-                            decoder=json.loads, \
-                            key_factory=lambda: uuid.uuid4().hex)
+                            key_factory=lambda: uuid.uuid4().hex, \
+                            encoder=json.parse, decoder=json.loads)
 
    Create Memcached storage for user session data.
 

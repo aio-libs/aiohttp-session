@@ -155,7 +155,7 @@ implement both :meth:`~AbstractStorage.load_session` and
 .. class:: AbstractStorage(cookie_name="AIOHTTP_SESSION", *, \
                            domain=None, max_age=None, path='/', \
                            secure=None, httponly=True, \
-                           encoder=json.parse, decoder=json.loads)
+                           encoder=json.dumps, decoder=json.loads)
 
    Base class for session storage implementations.
 
@@ -196,8 +196,8 @@ implement both :meth:`~AbstractStorage.load_session` and
 
    .. attribute:: encoder
 
-      The JSON serializer that will be used to parse session cookie data.
-      
+      The JSON serializer that will be used to dump session cookie data.
+
 
    .. attribute:: decoder
 
@@ -250,7 +250,7 @@ To use the storage you should push it into
                                cookie_name="AIOHTTP_SESSION", \
                                domain=None, max_age=None, path='/', \
                                secure=None, httponly=True, \
-                               encoder=json.parse, decoder=json.loads)
+                               encoder=json.dumps, decoder=json.loads)
 
    Create unencrypted cookie storage.
 
@@ -281,7 +281,7 @@ To use the storage you should push it into
                                   cookie_name="AIOHTTP_SESSION", \
                                   domain=None, max_age=None, path='/', \
                                   secure=None, httponly=True, \
-                                  encoder=json.parse, decoder=json.loads)
+                                  encoder=json.dumps, decoder=json.loads)
 
    Create encryted cookies storage.
 
@@ -320,7 +320,7 @@ To use the storage you should push it into
                                   cookie_name="AIOHTTP_SESSION", \
                                   domain=None, max_age=None, path='/', \
                                   secure=None, httponly=True, \
-                                  encoder=json.parse, decoder=json.loads)
+                                  encoder=json.dumps, decoder=json.loads)
 
    Create encryted cookies storage.
 
@@ -357,7 +357,7 @@ To use the storage you need setup it first::
                         domain=None, max_age=None, path='/', \
                         secure=None, httponly=True, \
                         key_factory=lambda: uuid.uuid4().hex, \
-                        encoder=json.parse, decoder=json.loads)
+                        encoder=json.dumps, decoder=json.loads)
 
    Create Redis storage for user session data.
 
@@ -394,7 +394,7 @@ To use the storage you need setup it first::
                             domain=None, max_age=None, path='/', \
                             secure=None, httponly=True, \
                             key_factory=lambda: uuid.uuid4().hex, \
-                            encoder=json.parse, decoder=json.loads)
+                            encoder=json.dumps, decoder=json.loads)
 
    Create Memcached storage for user session data.
 

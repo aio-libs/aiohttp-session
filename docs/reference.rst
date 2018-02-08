@@ -180,8 +180,8 @@ implement both :meth:`~AbstractStorage.load_session` and
    A callable with the following signature: `def encode(param: Any) -> str: ...`.
    Default is :func:`json.dumps`.
 
-   *decoder* -- session deserializer. A callable with the following signature:
-   `def decode(param: str) -> Any: ...`.
+   *decoder* -- session deserializer.
+   A callable with the following signature: `def decode(param: str) -> Any: ...`.
    Default is :func:`json.loads`.
 
    .. attribute:: max_age
@@ -200,15 +200,15 @@ implement both :meth:`~AbstractStorage.load_session` and
 
    .. attribute:: encoder
 
-      .. versionadded:: 2.3.0 
-
       The JSON serializer that will be used to dump session cookie data.
+
+      .. versionadded:: 2.3
 
    .. attribute:: decoder
 
-      .. versionadded:: 2.3.0 
-      
       The JSON deserializer that will be used to load session cookie data.
+
+      .. versionadded:: 2.3
 
    .. method:: load_session(request)
 

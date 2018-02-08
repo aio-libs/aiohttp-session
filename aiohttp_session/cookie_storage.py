@@ -33,7 +33,7 @@ class EncryptedCookieStorage(AbstractStorage):
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             try:
-                data = json.loads(
+                data = self._decoder(
                     self._fernet.decrypt(
                         cookie.encode('utf-8')).decode('utf-8'))
                 return Session(None, data=data,
@@ -48,7 +48,7 @@ class EncryptedCookieStorage(AbstractStorage):
             return self.save_cookie(response, '',
                                     max_age=session.max_age)
 
-        cookie_data = json.dumps(
+        cookie_data = self._encoder(
             self._get_session_data(session)
         ).encode('utf-8')
         self.save_cookie(

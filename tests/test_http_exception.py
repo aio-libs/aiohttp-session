@@ -11,7 +11,7 @@ def create_app(loop, *handlers):
     return app
 
 
-async def test_exceptions(test_client):
+async def test_exceptions(aiohttp_client):
 
     async def save(request):
         session = await get_session(request)
@@ -23,7 +23,7 @@ async def test_exceptions(test_client):
         message = session.get('message')
         return web.Response(text=str(message))
 
-    client = await test_client(create_app, ('/save', save), ('/show', show))
+    client = await aiohttp_client(create_app, ('/save', save), ('/show', show))
 
     resp = await client.get('/save')
     assert resp.status == 200

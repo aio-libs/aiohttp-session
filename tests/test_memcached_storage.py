@@ -45,7 +45,7 @@ async def load_cookie(client, memcached):
     return value
 
 
-async def test_create_new_sesssion(test_client, memcached):
+async def test_create_new_sesssion(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -55,12 +55,12 @@ async def test_create_new_sesssion(test_client, memcached):
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_existing_sesssion(test_client, memcached):
+async def test_load_existing_sesssion(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -70,13 +70,13 @@ async def test_load_existing_sesssion(test_client, memcached):
         assert {'a': 1, 'b': 12} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     await make_cookie(client, memcached, {'a': 1, 'b': 12})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_bad_sesssion(test_client, memcached):
+async def test_load_bad_sesssion(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -86,20 +86,20 @@ async def test_load_bad_sesssion(test_client, memcached):
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     await make_cookie_with_bad_value(client, memcached)
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_change_sesssion(test_client, memcached):
+async def test_change_sesssion(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     await make_cookie(client, memcached, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -118,14 +118,15 @@ async def test_change_sesssion(test_client, memcached):
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_sesssion_invalidation(test_client, memcached):
+async def test_clear_cookie_on_sesssion_invalidation(aiohttp_client,
+                                                     memcached):
 
     async def handler(request):
         session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     await make_cookie(client, memcached, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -138,7 +139,7 @@ async def test_clear_cookie_on_sesssion_invalidation(test_client, memcached):
     assert morsel['max-age'] == "0"
 
 
-async def test_create_cookie_in_handler(test_client, memcached):
+async def test_create_cookie_in_handler(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -146,7 +147,7 @@ async def test_create_cookie_in_handler(test_client, memcached):
         session['b'] = 2
         return web.Response(body=b'OK', headers={'HOST': 'example.com'})
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     resp = await client.get('/')
     assert resp.status == 200
 
@@ -166,21 +167,22 @@ async def test_create_cookie_in_handler(test_client, memcached):
 
 
 async def test_create_new_sesssion_if_key_doesnt_exists_in_memcached(
-        test_client, memcached):
+        aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
         assert session.new
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, memcached)
+    client = await aiohttp_client(create_app, handler, memcached)
     client.session.cookie_jar.update_cookies(
         {'AIOHTTP_SESSION': 'invalid_key'})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_create_storate_with_custom_key_factory(test_client, memcached):
+async def test_create_storate_with_custom_key_factory(aiohttp_client,
+                                                      memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -191,7 +193,8 @@ async def test_create_storate_with_custom_key_factory(test_client, memcached):
     def key_factory():
         return 'test-key'
 
-    client = await test_client(create_app, handler, memcached, 8, key_factory)
+    client = await aiohttp_client(create_app, handler, memcached, 8,
+                                  key_factory)
     resp = await client.get('/')
     assert resp.status == 200
 

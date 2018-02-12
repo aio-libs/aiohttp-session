@@ -47,7 +47,7 @@ async def load_cookie(client, redis):
         return value
 
 
-async def test_create_new_sesssion(test_client, redis):
+async def test_create_new_sesssion(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -57,12 +57,12 @@ async def test_create_new_sesssion(test_client, redis):
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_existing_sesssion(test_client, redis):
+async def test_load_existing_sesssion(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -72,13 +72,13 @@ async def test_load_existing_sesssion(test_client, redis):
         assert {'a': 1, 'b': 12} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     await make_cookie(client, redis, {'a': 1, 'b': 12})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_bad_sesssion(test_client, redis):
+async def test_load_bad_sesssion(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -88,20 +88,20 @@ async def test_load_bad_sesssion(test_client, redis):
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     await make_cookie_with_bad_value(client, redis)
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_change_sesssion(test_client, redis):
+async def test_change_sesssion(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     await make_cookie(client, redis, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -120,14 +120,14 @@ async def test_change_sesssion(test_client, redis):
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_sesssion_invalidation(test_client, redis):
+async def test_clear_cookie_on_sesssion_invalidation(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     await make_cookie(client, redis, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -140,7 +140,7 @@ async def test_clear_cookie_on_sesssion_invalidation(test_client, redis):
     assert morsel['max-age'] == "0"
 
 
-async def test_create_cookie_in_handler(test_client, redis):
+async def test_create_cookie_in_handler(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -148,7 +148,7 @@ async def test_create_cookie_in_handler(test_client, redis):
         session['b'] = 2
         return web.Response(body=b'OK', headers={'HOST': 'example.com'})
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     resp = await client.get('/')
     assert resp.status == 200
 
@@ -167,14 +167,14 @@ async def test_create_cookie_in_handler(test_client, redis):
         assert exists
 
 
-async def test_set_ttl_on_session_saving(test_client, redis):
+async def test_set_ttl_on_session_saving(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
         session['a'] = 1
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis, max_age=10)
+    client = await aiohttp_client(create_app, handler, redis, max_age=10)
     resp = await client.get('/')
     assert resp.status == 200
 
@@ -187,7 +187,7 @@ async def test_set_ttl_on_session_saving(test_client, redis):
     assert ttl <= 10
 
 
-async def test_set_ttl_manually_set(test_client, redis):
+async def test_set_ttl_manually_set(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -195,7 +195,7 @@ async def test_set_ttl_manually_set(test_client, redis):
         session['a'] = 1
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     resp = await client.get('/')
     assert resp.status == 200
 
@@ -208,22 +208,22 @@ async def test_set_ttl_manually_set(test_client, redis):
     assert ttl <= 10
 
 
-async def test_create_new_sesssion_if_key_doesnt_exists_in_redis(test_client,
-                                                                 redis):
+async def test_create_new_sesssion_if_key_doesnt_exists_in_redis(
+        aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
         assert session.new
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, redis)
+    client = await aiohttp_client(create_app, handler, redis)
     client.session.cookie_jar.update_cookies(
         {'AIOHTTP_SESSION': 'invalid_key'})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_create_storate_with_custom_key_factory(test_client, redis):
+async def test_create_storate_with_custom_key_factory(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -234,7 +234,7 @@ async def test_create_storate_with_custom_key_factory(test_client, redis):
     def key_factory():
         return 'test-key'
 
-    client = await test_client(create_app, handler, redis, 8, key_factory)
+    client = await aiohttp_client(create_app, handler, redis, 8, key_factory)
     resp = await client.get('/')
     assert resp.status == 200
 

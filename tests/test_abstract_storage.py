@@ -24,7 +24,7 @@ def create_app(loop, handler):
     return app
 
 
-async def test_max_age_also_returns_expires(test_client):
+async def test_max_age_also_returns_expires(aiohttp_client):
 
     async def handler(request):
         time.time.return_value = 0.0
@@ -35,7 +35,7 @@ async def test_max_age_also_returns_expires(test_client):
     with mock.patch('time.time') as m_clock:
         m_clock.return_value = 0.0
 
-        client = await test_client(create_app, handler)
+        client = await aiohttp_client(create_app, handler)
         make_cookie(client, {'a': 1, 'b': 2})
         resp = await client.get('/')
         assert resp.status == 200

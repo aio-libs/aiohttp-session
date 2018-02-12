@@ -1,6 +1,6 @@
 flake8==3.5.0
-coverage==4.5
-sphinx==1.6.7
+coverage==4.5.1
+sphinx==1.7.0
 pep257==0.7.0
 -e .
 aioredis==1.0.0
@@ -11,7 +11,7 @@ pytest==3.4.0
 pytest-aiohttp==0.3.0
 pytest-cov==2.5.1
 pytest-mock==1.6.3
-aiohttp==2.3.10
+aiohttp==3.0.1
 multidict==4.1.0
 chardet==3.0.4
 yarl==1.1.0

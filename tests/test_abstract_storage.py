@@ -17,8 +17,8 @@ def make_cookie(client, data):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': value})
 
 
-def create_app(loop, handler):
-    app = web.Application(loop=loop)
+def create_app(handler):
+    app = web.Application()
     setup_middleware(app, SimpleCookieStorage(max_age=10))
     app.router.add_route('GET', '/', handler)
     return app
@@ -35,7 +35,7 @@ async def test_max_age_also_returns_expires(aiohttp_client):
     with mock.patch('time.time') as m_clock:
         m_clock.return_value = 0.0
 
-        client = await aiohttp_client(create_app, handler)
+        client = await aiohttp_client(create_app(handler))
         make_cookie(client, {'a': 1, 'b': 2})
         resp = await client.get('/')
         assert resp.status == 200

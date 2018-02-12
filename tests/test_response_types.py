@@ -6,9 +6,9 @@ from aiohttp_session import (session_middleware,
                              get_session, SimpleCookieStorage, SESSION_KEY)
 
 
-def create_app(loop, *handlers):
+def create_app(*handlers):
     middleware = session_middleware(SimpleCookieStorage())
-    app = web.Application(middlewares=[middleware], loop=loop)
+    app = web.Application(middlewares=[middleware])
     for url, handler in handlers:
         app.router.add_route('GET', url, handler)
     return app
@@ -21,7 +21,7 @@ async def test_stream_response(aiohttp_client):
         session['will_not'] = 'show up'
         return web.StreamResponse()
 
-    client = await aiohttp_client(create_app, ('/stream', stream_response))
+    client = await aiohttp_client(create_app(('/stream', stream_response)))
 
     resp = await client.get('/stream')
     assert resp.status == 200

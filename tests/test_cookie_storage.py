@@ -16,14 +16,14 @@ def make_cookie(client, data):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': value})
 
 
-def create_app(loop, handler):
+def create_app(handler):
     middleware = session_middleware(SimpleCookieStorage())
-    app = web.Application(middlewares=[middleware], loop=loop)
+    app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     return app
 
 
-async def test_create_new_session(test_client):
+async def test_create_new_session(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
@@ -33,12 +33,12 @@ async def test_create_new_session(test_client):
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_existing_session(test_client):
+async def test_load_existing_session(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
@@ -49,20 +49,20 @@ async def test_load_existing_session(test_client):
         assert {'a': 1, 'b': 2} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_change_session(test_client):
+async def test_change_session(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -81,14 +81,14 @@ async def test_change_session(test_client):
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_session_invalidation(test_client):
+async def test_clear_cookie_on_session_invalidation(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -97,12 +97,12 @@ async def test_clear_cookie_on_session_invalidation(test_client):
         resp.cookies['AIOHTTP_SESSION'].output().upper()
 
 
-async def test_dont_save_not_requested_session(test_client):
+async def test_dont_save_not_requested_session(aiohttp_client):
 
     async def handler(request):
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200

@@ -30,9 +30,9 @@ def make_cookie(client, secretbox, data):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': data})
 
 
-def create_app(loop, handler, key):
+def create_app(handler, key):
     middleware = session_middleware(NaClCookieStorage(key))
-    app = web.Application(middlewares=[middleware], loop=loop)
+    app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     return app
 
@@ -55,7 +55,7 @@ def key():
     return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 
-async def test_create_new_sesssion(test_client, secretbox, key):
+async def test_create_new_sesssion(aiohttp_client, secretbox, key):
 
     async def handler(request):
         session = await get_session(request)
@@ -65,12 +65,12 @@ async def test_create_new_sesssion(test_client, secretbox, key):
         assert {} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_existing_sesssion(test_client, secretbox, key):
+async def test_load_existing_sesssion(aiohttp_client, secretbox, key):
 
     async def handler(request):
         session = await get_session(request)
@@ -80,20 +80,20 @@ async def test_load_existing_sesssion(test_client, secretbox, key):
         assert {'a': 1, 'b': 12} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, secretbox, {'a': 1, 'b': 12})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_change_session(test_client, secretbox, key):
+async def test_change_session(aiohttp_client, secretbox, key):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, secretbox, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -112,14 +112,15 @@ async def test_change_session(test_client, secretbox, key):
     assert '/' == morsel['path']
 
 
-async def test_del_cookie_on_session_invalidation(test_client, secretbox, key):
+async def test_del_cookie_on_session_invalidation(aiohttp_client,
+                                                  secretbox, key):
 
     async def handler(request):
         session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, secretbox, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200

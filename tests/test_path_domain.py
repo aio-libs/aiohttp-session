@@ -20,26 +20,26 @@ def make_cookie(client, data, path=None, domain=None):
     client.session.cookie_jar.update_cookies(C)
 
 
-def create_app(loop, handler, path=None, domain=None):
+def create_app(handler, path=None, domain=None):
     middleware = session_middleware(
         SimpleCookieStorage(
             max_age=10, path="/anotherpath", domain="127.0.0.1",
             )
         )
-    app = web.Application(middlewares=[middleware], loop=loop)
+    app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     app.router.add_route('GET', '/anotherpath', handler)
     return app
 
 
-async def test_with_same_path_domain(test_client):
+async def test_with_same_path_domain(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/anotherpath", domain="127.0.0.1")
     resp = await client.get('/anotherpath')
@@ -59,14 +59,14 @@ async def test_with_same_path_domain(test_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_with_different_path(test_client):
+async def test_with_different_path(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/NotTheSame", domain="127.0.0.1")
     resp = await client.get('/anotherpath')
@@ -84,14 +84,14 @@ async def test_with_different_path(test_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_with_different_domain(test_client):
+async def test_with_different_domain(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/anotherpath", domain="localhost")
     resp = await client.get('/anotherpath')
@@ -109,7 +109,7 @@ async def test_with_different_domain(test_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_invalidate_with_same_path_domain(test_client):
+async def test_invalidate_with_same_path_domain(aiohttp_client):
 
     async def handler(request):
         session = await get_session(request)
@@ -117,7 +117,7 @@ async def test_invalidate_with_same_path_domain(test_client):
 
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler)
+    client = await aiohttp_client(create_app(handler))
     make_cookie(client, {'a': 1, 'b': 2},
                 path="/anotherpath", domain="127.0.0.1")
     resp = await client.get('/anotherpath')

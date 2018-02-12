@@ -23,9 +23,9 @@ def make_cookie(client, fernet, data):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': data})
 
 
-def create_app(loop, handler, key):
+def create_app(handler, key):
     middleware = session_middleware(EncryptedCookieStorage(key))
-    app = web.Application(middlewares=[middleware], loop=loop)
+    app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     return app
 
@@ -59,7 +59,8 @@ def test_invalid_key():
         EncryptedCookieStorage(b'123')  # short key
 
 
-async def test_create_new_session_broken_by_format(test_client, fernet, key):
+async def test_create_new_session_broken_by_format(aiohttp_client,
+                                                   fernet, key):
 
     async def handler(request):
         session = await get_session(request)
@@ -70,13 +71,13 @@ async def test_create_new_session_broken_by_format(test_client, fernet, key):
         return web.Response(body=b'OK')
 
     new_fernet = Fernet(Fernet.generate_key())
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, new_fernet, {'a': 1, 'b': 12})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_load_existing_session(test_client, fernet, key):
+async def test_load_existing_session(aiohttp_client, fernet, key):
 
     async def handler(request):
         session = await get_session(request)
@@ -86,20 +87,20 @@ async def test_load_existing_session(test_client, fernet, key):
         assert {'a': 1, 'b': 12} == session
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, fernet, {'a': 1, 'b': 12})
     resp = await client.get('/')
     assert resp.status == 200
 
 
-async def test_change_session(test_client, fernet, key):
+async def test_change_session(aiohttp_client, fernet, key):
 
     async def handler(request):
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, fernet, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200
@@ -118,14 +119,15 @@ async def test_change_session(test_client, fernet, key):
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_session_invalidation(test_client, fernet, key):
+async def test_clear_cookie_on_session_invalidation(aiohttp_client,
+                                                    fernet, key):
 
     async def handler(request):
         session = await get_session(request)
         session.invalidate()
         return web.Response(body=b'OK')
 
-    client = await test_client(create_app, handler, key)
+    client = await aiohttp_client(create_app(handler, key))
     make_cookie(client, fernet, {'a': 1, 'b': 2})
     resp = await client.get('/')
     assert resp.status == 200

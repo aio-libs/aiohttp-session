@@ -14,10 +14,12 @@ class EncryptedCookieStorage(AbstractStorage):
 
     def __init__(self, secret_key, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True):
+                 secure=None, httponly=True,
+                 encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly)
+                         httponly=httponly,
+                         encoder=encoder, decoder=decoder)
 
         if isinstance(secret_key, str):
             pass
@@ -31,7 +33,7 @@ class EncryptedCookieStorage(AbstractStorage):
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             try:
-                data = json.loads(
+                data = self._decoder(
                     self._fernet.decrypt(
                         cookie.encode('utf-8')).decode('utf-8'))
                 return Session(None, data=data,
@@ -46,7 +48,7 @@ class EncryptedCookieStorage(AbstractStorage):
             return self.save_cookie(response, '',
                                     max_age=session.max_age)
 
-        cookie_data = json.dumps(
+        cookie_data = self._encoder(
             self._get_session_data(session)
         ).encode('utf-8')
         self.save_cookie(

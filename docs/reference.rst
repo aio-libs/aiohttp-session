@@ -154,7 +154,8 @@ implement both :meth:`~AbstractStorage.load_session` and
 
 .. class:: AbstractStorage(cookie_name="AIOHTTP_SESSION", *, \
                            domain=None, max_age=None, path='/', \
-                           secure=None, httponly=True)
+                           secure=None, httponly=True, \
+                           encoder=json.dumps, decoder=json.loads)
 
    Base class for session storage implementations.
 
@@ -175,6 +176,14 @@ implement both :meth:`~AbstractStorage.load_session` and
    *httponly* -- cookie's http-only flag, :class:`bool` or ``None`` (the
    same as ``False``).
 
+   *encoder* -- session serializer.
+   A callable with the following signature: `def encode(param: Any) -> str: ...`.
+   Default is :func:`json.dumps`.
+
+   *decoder* -- session deserializer.
+   A callable with the following signature: `def decode(param: str) -> Any: ...`.
+   Default is :func:`json.loads`.
+
    .. attribute:: max_age
 
       Maximum age for session data, :class:`int` seconds or ``None``
@@ -188,6 +197,18 @@ implement both :meth:`~AbstractStorage.load_session` and
 
       :class:`dict` of cookie params: *domain*, *max_age*, *path*,
       *secure* and *httponly*.
+
+   .. attribute:: encoder
+
+      The JSON serializer that will be used to dump session cookie data.
+
+      .. versionadded:: 2.3
+
+   .. attribute:: decoder
+
+      The JSON deserializer that will be used to load session cookie data.
+
+      .. versionadded:: 2.3
 
    .. method:: load_session(request)
 
@@ -217,7 +238,6 @@ implement both :meth:`~AbstractStorage.load_session` and
       *max_age* is cookie lifetime given from session. Storage defailt
       is used if the value is ``None``.
 
-
 Simple Storage
 --------------
 
@@ -235,7 +255,8 @@ To use the storage you should push it into
 .. class:: SimpleCookieStorage(*, \
                                cookie_name="AIOHTTP_SESSION", \
                                domain=None, max_age=None, path='/', \
-                               secure=None, httponly=True)
+                               secure=None, httponly=True, \
+                               encoder=json.dumps, decoder=json.loads)
 
    Create unencrypted cookie storage.
 
@@ -265,7 +286,8 @@ To use the storage you should push it into
 .. class:: EncryptedCookieStorage(secret_key, *, \
                                   cookie_name="AIOHTTP_SESSION", \
                                   domain=None, max_age=None, path='/', \
-                                  secure=None, httponly=True)
+                                  secure=None, httponly=True, \
+                                  encoder=json.dumps, decoder=json.loads)
 
    Create encryted cookies storage.
 
@@ -303,7 +325,8 @@ To use the storage you should push it into
 .. class:: NaClCookieStorage(secret_key, *, \
                                   cookie_name="AIOHTTP_SESSION", \
                                   domain=None, max_age=None, path='/', \
-                                  secure=None, httponly=True)
+                                  secure=None, httponly=True, \
+                                  encoder=json.dumps, decoder=json.loads)
 
    Create encryted cookies storage.
 
@@ -339,9 +362,8 @@ To use the storage you need setup it first::
                         cookie_name="AIOHTTP_SESSION", \
                         domain=None, max_age=None, path='/', \
                         secure=None, httponly=True, \
-                        encoder=json.dumps, \
-                        decoder=json.loads, \
-                        key_factory=lambda: uuid.uuid4().hex)
+                        key_factory=lambda: uuid.uuid4().hex, \
+                        encoder=json.dumps, decoder=json.loads)
 
    Create Redis storage for user session data.
 
@@ -377,9 +399,8 @@ To use the storage you need setup it first::
                             cookie_name="AIOHTTP_SESSION", \
                             domain=None, max_age=None, path='/', \
                             secure=None, httponly=True, \
-                            encoder=json.dumps, \
-                            decoder=json.loads, \
-                            key_factory=lambda: uuid.uuid4().hex)
+                            key_factory=lambda: uuid.uuid4().hex, \
+                            encoder=json.dumps, decoder=json.loads)
 
    Create Memcached storage for user session data.
 

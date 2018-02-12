@@ -71,8 +71,7 @@ def redis_server(docker, session_id, loop, request):
     container = docker.create_container(**container_args)
 
     docker.start(container=container['Id'])
-    # inspection = docker.inspect_container(container['Id'])
-    # host = inspection['NetworkSettings']['IPAddress']
+
     delay = 0.001
     for i in range(100):
         try:

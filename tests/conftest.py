@@ -55,15 +55,6 @@ def redis_server(docker, session_id, loop, request):
     if not request.config.option.no_pull:
         docker.pull('redis:{}'.format('latest'))
 
-    """
-    container = docker.create_container(
-        image='redis:{}'.format('latest'),
-        name='redis-test-server-{}-{}'.format('latest', session_id),
-        ports=[6379],
-        detach=True,
-    )
-    """
-
     container_args = dict(
         image='redis:{}'.format('latest'),
         name='redis-test-server-{}-{}'.format('latest', session_id),

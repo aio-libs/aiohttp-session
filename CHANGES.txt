@@ -3,6 +3,7 @@ Changes
 
 2.3.0 (2018-02-13)
 ------------------
+
 - Support custom encoder and decoder by all storages #252
 - Bump to aiohttp 3.0
 

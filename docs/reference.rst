@@ -176,13 +176,17 @@ implement both :meth:`~AbstractStorage.load_session` and
    *httponly* -- cookie's http-only flag, :class:`bool` or ``None`` (the
    same as ``False``).
 
-   *encoder* -- session serializer.
-   A callable with the following signature: `def encode(param: Any) -> str: ...`.
-   Default is :func:`json.dumps`.
+   *encoder* -- session serializer.  A callable with the following
+   signature: `def encode(param: Any) -> str: ...`.  Default is
+   :func:`json.dumps`.
 
-   *decoder* -- session deserializer.
-   A callable with the following signature: `def decode(param: str) -> Any: ...`.
-   Default is :func:`json.loads`.
+   *decoder* -- session deserializer.  A callable with the following
+   signature: `def decode(param: str) -> Any: ...`.  Default is
+   :func:`json.loads`.
+
+   .. versionadded:: 2.3
+
+      Added *encoder* and *decoder* parameters.
 
    .. attribute:: max_age
 

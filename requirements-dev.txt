@@ -3,7 +3,7 @@ flake8==3.5.0
 sphinx==1.7.0
 pep257==0.7.0
 -e .
-aioredis==1.0.0
+aioredis==1.1.0
 cryptography==2.1.4
 docker==2.5.1
 pynacl==1.2.1

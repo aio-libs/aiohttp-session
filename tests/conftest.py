@@ -1,5 +1,7 @@
 import aiomcache
 import aioredis
+import asyncpg
+import aiopg
 import asyncio
 import gc
 import pytest
@@ -184,3 +186,86 @@ def memcached(loop, memcached_params):
     conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
     conn.close()
+
+
+@pytest.fixture(scope='session')
+def postgresql_server(docker, session_id, loop, request):
+
+    image = 'postgres:{}'.format('latest')
+
+    if sys.platform.startswith('darwin'):
+        port = unused_port()
+    else:
+        port = None
+
+    container = docker.containers.run(
+        image=image,
+        detach=True,
+        name='postgresql-test-server-{}-{}'.format('latest', session_id),
+        ports={
+            '5432/tcp': port,
+        },
+        environment={
+            'http.host': '0.0.0.0',
+            'transport.host': '127.0.0.1',
+        },
+    )
+
+    if sys.platform.startswith('darwin'):
+        host = '0.0.0.0'
+    else:
+        inspection = docker.api.inspect_container(container.id)
+        host = inspection['NetworkSettings']['IPAddress']
+        port = 5432
+
+    delay = 0.1
+    for i in range(20):
+        try:
+            conn = loop.run_until_complete(
+                asyncpg.connect(host=host, port=port, user='postgres',
+                                database='postgres', loop=loop))
+            loop.run_until_complete(conn.execute('SELECT now()'))
+            loop.run_until_complete(conn.close())
+            break
+        except (ConnectionRefusedError,
+                asyncpg.exceptions.CannotConnectNowError) as e:
+            time.sleep(delay)
+            delay *= 2
+    else:
+        pytest.fail("Cannot start postgresql server")
+
+    yield {'host': host,
+           'port': port,
+           'container': container}
+
+    container.kill(signal=9)
+    container.remove(force=True)
+
+
+@pytest.fixture
+def postgresql_params(postgresql_server):
+    return dict(host=postgresql_server['host'],
+                port=postgresql_server['port'])
+
+
+@pytest.fixture
+def asyncpg_pool(loop, postgresql_params):
+    pool = loop.run_until_complete(
+        asyncpg.create_pool(host=postgresql_params['host'],
+                            port=postgresql_params['port'],
+                            database='postgres', user='postgres',
+                            loop=loop))
+    yield pool
+    loop.run_until_complete(pool.close())
+
+
+@pytest.fixture
+def aiopg_pool(loop, postgresql_params):
+    pool = loop.run_until_complete(
+        aiopg.create_pool(host=postgresql_params['host'],
+                          port=postgresql_params['port'],
+                          database='postgres', user='postgres',
+                          loop=loop))
+    yield pool
+    pool.terminate()
+    loop.run_until_complete(pool.wait_closed())

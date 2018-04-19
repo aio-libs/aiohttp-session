@@ -94,7 +94,7 @@ class PostgresqlAbstractStorage(AbstractStorage):
         self._query_load_session = '''
             SELECT {data} FROM {schema_name}.{table_name} WHERE
                 {key} = $1 AND
-                {expire} > $2 ;
+                ({expire} > $2 OR {expire} IS NULL);
             '''.format(
                     schema_name=self._schema_name,
                     table_name=self._table_name,
@@ -122,7 +122,7 @@ class PostgresqlAbstractStorage(AbstractStorage):
 
     async def _delete_expired_sessions(self):
         await self._execute_query(self._query_delete_expired_sessions,
-                                  *(datetime.utcnow()))
+                                  *(datetime.utcnow(),))
         await asyncio.sleep(self._delete_expired_every)
         self._task_delete_expired = asyncio.ensure_future(
             self._delete_expired_sessions())
@@ -131,11 +131,12 @@ class PostgresqlAbstractStorage(AbstractStorage):
         if setup_table:
             await self._execute_query(self._query_setup_table_if_not_exists)
         if delete_expired_every:
+            self._delete_expired_every = delete_expired_every
             self._task_delete_expired = asyncio.ensure_future(
                 self._delete_expired_sessions())
 
     def finalize(self):
-        if self._task_delete_expired is not None:
+        if hasattr(self, '_task_delete_expired'):
             self._task_delete_expired.cancel()
 
     async def load_session(self, request):

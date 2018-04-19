@@ -196,13 +196,12 @@ class PostgresqlAsyncpgStorage(PostgresqlAbstractStorage):
 
     async def _execute_query(self, query, *params, fetchrow=False):
         async with self._driver_pool.acquire() as conn:
-            async with conn.transaction():
-                if fetchrow:
-                    record = await conn.fetchrow(query, *params,
-                                                 timeout=self._timeout)
-                    return tuple(record.values()) if record else None
-                else:
-                    await conn.execute(query, *params, timeout=self._timeout)
+            if fetchrow:
+                record = await conn.fetchrow(query, *params,
+                                             timeout=self._timeout)
+                return tuple(record.values()) if record else None
+            else:
+                await conn.execute(query, *params, timeout=self._timeout)
 
 
 class PostgresqlAiopgStorage(PostgresqlAbstractStorage):

@@ -191,7 +191,7 @@ class PostgresqlAsyncpgStorage(PostgresqlAbstractStorage):
             raise TypeError("Expexted asyncpg.pool.Pool got {}".format(
                                 type(asyncpg_pool)))
         if self._data_type == 'jsonb':
-            self._encoder = json.dumps
+            self._encoder = lambda x: x
             self._decoder = json.loads
 
     async def _execute_query(self, query, *params, fetchrow=False):

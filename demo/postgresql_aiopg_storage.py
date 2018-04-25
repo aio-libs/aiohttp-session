@@ -7,7 +7,7 @@ from aiohttp_session import setup, get_session
 from aiohttp_session.postgresql_storage import PostgresqlAiopgStorage
 
 
-POSTGRES_DSN = 'postgresql://user:pass@host/dbname'
+POSTGRES_DSN = 'postgresql://user:pass@host:port/dbname'
 
 
 async def handler(request):

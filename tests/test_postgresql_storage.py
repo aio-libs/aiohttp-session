@@ -402,6 +402,32 @@ async def test_postgresql_remove_exipred_row(aiohttp_client,
         storage.finalize()
 
 
+async def test_postgresql_jsonb_session_storage(
+        aiohttp_client, asyncpg_pool, aiopg_pool):
+
+    async def handler(request):
+        session = await get_session(request)
+        session['a'] = 123
+        return web.Response(body=b'OK')
+
+    for pgpool, PGStorage, data_type in psql_cases(asyncpg_pool, aiopg_pool):
+        if data_type == 'jsonb':
+            app, storage = await create_app(
+                handler, pgpool, PGStorage, data_type)
+            client = await aiohttp_client(app)
+            await make_cookie(client, storage, {'a': 1})
+            resp = await client.get('/')
+            assert resp.status == 200
+            async with asyncpg_pool.acquire() as conn:
+                val = await conn.fetchval('''
+                    SELECT data->'session'->$1 FROM {table}
+                        WHERE key = $2;'''.format(
+                            table=table_name(PGStorage, data_type)),
+                    *('a', list(client.session.cookie_jar)[0].value))
+            assert val == 123
+            storage.finalize()
+
+
 async def test_asyncpg_pool_not_provided_to_storage():
     with pytest.raises(TypeError):
         PostgresqlAsyncpgStorage(None)

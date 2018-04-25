@@ -8,6 +8,7 @@ import pytest
 import sys
 import time
 import uuid
+import json
 from docker import from_env as docker_from_env
 import socket
 
@@ -250,10 +251,18 @@ def postgresql_params(postgresql_server):
 
 @pytest.fixture
 def asyncpg_pool(loop, postgresql_params):
+
+    async def asyncpg_connection_init(conn):
+        await conn.set_type_codec('jsonb',
+                                  encoder=json.dumps,
+                                  decoder=json.loads,
+                                  schema='pg_catalog')
+
     pool = loop.run_until_complete(
         asyncpg.create_pool(host=postgresql_params['host'],
                             port=postgresql_params['port'],
                             database='postgres', user='postgres',
+                            init=asyncpg_connection_init,
                             loop=loop))
     yield pool
     loop.run_until_complete(pool.close())

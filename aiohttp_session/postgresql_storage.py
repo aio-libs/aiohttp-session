@@ -60,11 +60,11 @@ class PostgresqlAbstractStorage(AbstractStorage):
         if not RE_PG_IDENTIFIERS.fullmatch(self._column_name_expire):
             raise ValueError('Column name "{}" is invalid Postgresql name'
                              .format(column_name_expire))
-        if data_type not in ('jsonb', 'text'):
+        self._data_type = str(data_type).lower()
+        if self._data_type not in ('jsonb', 'text'):
             raise ValueError('Data type must be one of values: '
                              '"text", "jsonb", got {}'
                              .format(data_type))
-        self._data_type = data_type
         self._prepare_queries()
 
     def _prepare_queries(self):
@@ -192,7 +192,7 @@ class PostgresqlAsyncpgStorage(PostgresqlAbstractStorage):
                                 type(asyncpg_pool)))
         if self._data_type == 'jsonb':
             self._encoder = lambda x: x
-            self._decoder = json.loads
+            self._decoder = lambda x: x
 
     async def _execute_query(self, query, *params, fetchrow=False):
         async with self._driver_pool.acquire() as conn:

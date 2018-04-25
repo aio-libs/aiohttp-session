@@ -6,7 +6,10 @@ from aiohttp import web
 from aiohttp_session import setup, get_session
 from aiohttp_session.postgresql_storage import PostgresqlAiopgStorage
 
-
+#
+# before running this example, set up valid DSN
+# for access your Postgresql database
+#
 POSTGRES_DSN = 'postgresql://user:pass@host:port/dbname'
 
 

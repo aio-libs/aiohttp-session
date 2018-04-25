@@ -479,5 +479,5 @@ async def test_initialize_with_non_default_parameters(
         storage = PGStorage(pgpool,
                             table_name=table_name(PGStorage, data_type),
                             data_type=data_type)
-    await storage.initialize(setup_table=False, delete_expired_every=0)
-    storage.finalize()
+        await storage.initialize(setup_table=False, delete_expired_every=0)
+        storage.finalize()

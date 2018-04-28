@@ -86,6 +86,19 @@ Available session storages are:
 
       $ pip install aiohttp_session[aioredis]
 
+
+Developing
+----------
+
+Install for local development::
+
+    $ pip install -r requirements-dev.txt
+
+Run tests with::
+
+    $ pytest -sv tests/
+
+
 License
 -------
 

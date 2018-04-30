@@ -245,6 +245,30 @@ async def test_create_storate_with_custom_key_factory(aiohttp_client, redis):
     assert value['session']['key'] == 'value'
 
 
+async def test_redis_session_fixation(aiohttp_client, redis):
+    async def login(request):
+        session = await get_session(request)
+        session['k'] = 'v'
+        return web.Response()
+
+    async def logout(request):
+        session = await get_session(request)
+        session.invalidate()
+        return web.Response()
+
+    app = create_app(login, redis)
+    app.router.add_route('DELETE', '/', logout)
+    client = await aiohttp_client(app)
+    resp = await client.get('/')
+    assert 'AIOHTTP_SESSION' in resp.cookies
+    evil_cookie = resp.cookies['AIOHTTP_SESSION'].value
+    resp = await client.delete('/')
+    assert resp.cookies['AIOHTTP_SESSION'].value == ""
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': evil_cookie})
+    resp = await client.get('/')
+    assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie
+
+
 async def test_redis_from_create_pool(redis_params):
 
     async def handler(request):

@@ -8,6 +8,20 @@
 
 .. glossary::
 
+   asyncpg
+
+      :term:`asyncpg` is a database interface library designed specifically
+      for PostgreSQL and Python/asyncio
+
+      https://magicstack.github.io/asyncpg/
+
+   aiopg
+
+      :term:`aiopg` is a library for accessing a PostgreSQL database from the
+      asyncio framework
+      
+      https://aiopg.readthedocs.io/
+
    aioredis
 
       :term:`asyncio` compatible Redis client library

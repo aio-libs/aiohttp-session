@@ -90,6 +90,31 @@ Available session storages are:
 
       $ pip install aiohttp_session[aiomcache]
 
+* :class:`~aiohttp_session.postgresql_storage.PostgresqlAsyncpgStorage` -- stores session
+  data in *Postgresql* table using *asyncpg* driver. Supports Postgresql 9.5 or
+  later. 
+
+  It provides own SQL table definition or can be easily integrated with existing, 
+  user provided SQL table. Session data can be stored in *TEXT* or *JSONB* column data 
+  type. The latter can be used for an advanced query for specific session data directly from SQL.
+
+  Requires :term:`asyncpg` library:
+
+  .. code-block:: bash
+
+      $ pip install aiohttp_session[asyncpg]
+
+* :class:`~aiohttp_session.postgresql_storage.PostgresqlAiopgStorage` -- the same
+  as PostgresqlAiopgStorage, it stores session data in *Postgresql* table but using *aiopg* 
+  driver. Has the same capabilities as PostgresqlAsyncpgStorage.
+
+  Requires :term:`aiopg` library:
+
+  .. code-block:: bash
+
+      $ pip install aiohttp_session[aiopg]
+
+ 
 Installation
 --------------------
 
@@ -120,6 +145,10 @@ Dependencies
   :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
 - :term:`aioredis` for
   :class:`~aiohttp_session.redis_storage.RedisStorage`.
+- :term:`asyncpg` for
+  :class:`~aiohttp_session.postgresql_storage.PostgresqlAsyncpgStorage`.
+- :term:`aiopg` for
+  :class:`~aiohttp_session.postgresql_storage.PostgresqlAiopgStorage`.
 
 
 License

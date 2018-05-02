@@ -88,6 +88,25 @@ Available session storages are:
 
       $ pip install aiohttp_session[aioredis]
 
+* ``aiohttp_session.postgresql_storage.PostgresqlAsyncpgStorage(asyncpg_pool)`` -- stores
+  data in *Postgresql* table using *asyncpg* driver. Session data can be stored 
+  in *TEXT* or *JSONB* column data type. ``asyncpg_pool`` is pool created by 
+  ``await asyncpg.create_pool(...)`` call.
+  
+  Requires ``asyncpg`` library and *Postgresql* 9.5+::
+
+      $ pip install aiohttp_session[asyncpg]
+
+* ``aiohttp_session.postgresql_storage.PostgresqlAiopgStorage(aiopg_pool)`` -- stores
+  data in *Postgresql* table using *aiopg* driver. Session data can be stored 
+  in *TEXT* or *JSONB* column data type. ``aiopg_pool`` is pool created by 
+  ``await aiopg.create_pool(...)`` call.
+  
+  Requires ``aiopg`` library and *Postgresql* 9.5+::
+
+      $ pip install aiohttp_session[aiopg]
+
+
 License
 -------
 

@@ -309,8 +309,8 @@ To use the storage you should push it into
       :meth:`cryptography.fernet.Fernet.generate_key` method.
 
 
-.. module:: aiohttp_session.cookie_storage
-.. currentmodule:: aiohttp_session.cookie_storage
+.. module:: aiohttp_session.nacl_storage
+.. currentmodule:: aiohttp_session.nacl_storage
 
 
 NaCl Storage
@@ -383,13 +383,17 @@ To use the storage you need setup it first::
    :class:`~aiohttp_session.AbstractStorage` constructor.
 
 
-Memcahed Storage
-----------------
+.. module:: aiohttp_session.memcached_storage
+.. currentmodule:: aiohttp_session.memcached_storage
+
+
+Memcached Storage
+-----------------
 
 The storage that stores session data in Memcached and
 keeps only keys (UUIDs actually) in HTTP cookies.
 
-It operates with Memcahed database via :class:`aiomecache.Client`.
+It operates with Memcached database via :class:`aiomecache.Client`.
 
 To use the storage you need setup it first::
 
@@ -417,3 +421,194 @@ To use the storage you need setup it first::
 
    Other parameters are the same as for
    :class:`~aiohttp_session.AbstractStorage` constructor.
+
+
+.. module:: aiohttp_session.postgresql_storage
+.. currentmodule:: aiohttp_session.postgresql_storage
+
+
+Postgresql Abstract Storage
+---------------------------
+
+All *Postgresql* storages should derive from this class. 
+This class is derived from :class:`AbstractStorage`.
+
+   .. warning::
+    Do not use this class directly. This is abstract class with general 
+    methods for accessing *Postgresql* database. For access *Postgresql* storage 
+    use :class:`PostgresqlAsyncpgStorage` or :class:`PostgresqlAiopgStorage`.
+
+The storage that stores session data in *Postgresql* database and
+keeps only session keys in HTTP cookies. Supports Postgresql 9.5 or later.
+
+Provides own SQL table definition or can be easily integrated with existing, 
+user provided SQL table. Session data can be stored in *TEXT* or *JSONB* column data 
+type. The latter can be used for an advanced query for specific session data directly
+from SQL, for example:
+
+.. code-block:: sql
+
+    SELECT data->'session'->'some_session_key' FROM aiohttp_session 
+        WHERE key = '6c4caeb867f240d59dd9d95c0f27655a';
+
+    SELECT users.name FROM aiohttp_session, users 
+        WHERE CAST(
+            ((aiohttp_session.data -> 'session') ->> 'user_id') 
+                AS INTEGER) = users.id;
+        AND
+            aiohttp_session.key = '6c4caeb867f240d59dd9d95c0f27655a';
+
+
+.. class:: PostgresqlAbstractStorage(driver_pool, *, \
+                                     cookie_name="AIOHTTP_SESSION", \
+                                     domain=None, max_age=None, path='/', \
+                                     secure=None, httponly=True, \
+                                     key_factory=lambda: uuid.uuid4().hex, \
+                                     encoder=json.dumps, decoder=json.loads, \
+                                     schema_name='public', table_name='aiohttp_session', \
+                                     column_name_key='key', column_name_data='data', \
+                                     column_name_expire='expire', data_type='text', \
+                                     timeout=None)
+
+
+
+   *schema_name* -- SQL schema name for the table used for session data.
+
+   *table_name* -- SQL table name used for session data.
+
+   *column_name_key* -- SQL column name which is used for storing session key. 
+   For existing tables it should have one of character types: *CHAR*, *VARCHAR*, *TEXT*.
+
+   *column_name_data* -- SQL column name which is used for storing session data.
+   For existing tables, it should have *TEXT* or *JSONB* data type.
+
+   *column_name_expire* -- SQL column name which is used for storing session data.
+   For existing tables, it should have *TIMESTAMP* data type.
+
+   *data_type* -- data type of SQL column *column_name_data* which is used for storing session data.
+   Currently, supported datatypes are `text` or `jsonb`. If `jsonb` datatype is used,
+   values of `encoder` and `decoder` parameters are ignored.
+
+   *timeout* -- timeout in seconds for operations on database.
+   
+    .. method:: initialize(setup_table=True, delete_expired_every=3600)
+
+        A :ref:`coroutine<coroutine>` for initializing storage. 
+
+        *setup_table* -- When `True`, it tries to create SQL table on server 
+        if it does not exists.
+            
+        *delete_expired_every* -- Schedule periodic call (in seconds) which 
+        removes expired session rows from database. Passing :code:`0` disables 
+        this behaviour.
+
+
+    .. method:: finalize ()
+        
+        Cancel periodic call scheduled by :meth:`~PostgresqlAbstractStorage.initialize`.
+
+
+
+Postgresql Asyncpg Storage
+--------------------------
+
+It operates with Postgresql database via :class:`asyncpg.pool.Pool`.
+This class is derived from :class:`PostgresqlAbstractStorage`.
+
+To use the storage you need setup it first::
+
+    import asyncpg
+    from aiohttp_session.postgresql_storage \
+        import PostgresqlAsyncpgStorage
+
+    POSTGRES_DSN = 'postgresql://user:pass@host:port/dbname'
+    pool = await asyncpg.create_pool(POSTGRES_DSN)
+    storage = PostgresqlAsyncpgStorage(pool)
+    await storage.initialize()
+
+See :class:`PostgresqlAbstractStorage` for paramater list and description.
+
+Calling :meth:`~PostgresqlAbstractStorage.initialize` method is optional. 
+It provides initial creation of SQL table, and fires backgroud job for removing 
+expired session rows from SQL table. If you've 
+called :meth:`~PostgresqlAbastractStorage.initialize`, don't forget to call
+:meth:`~PostgresqlAsyncpgStorage.finalize` on shutdown::
+    
+    storage.finalize()
+    await pool.close()
+
+
+Using *asyncpg* with `JSONB` data type needs additional stage to setup jsonb type 
+codec on pool creation::
+
+    import json
+
+    async def asyncpg_connection_init(conn):
+        await conn.set_type_codec('jsonb',
+                                  encoder=json.dumps,
+                                  decoder=json.loads,
+                                  schema='pg_catalog')
+
+    pool = await asyncpg.create_pool(POSTGRES_DSN,
+                                     init=asyncpg_connection_init)
+
+See `postgresql_asyncpg_jsonb_storage.py` in demo directory for working example.
+
+.. class:: PostgresqlAsyncpgStorage(driver_pool, *, \
+                                     cookie_name="AIOHTTP_SESSION", \
+                                     domain=None, max_age=None, path='/', \
+                                     secure=None, httponly=True, \
+                                     key_factory=lambda: uuid.uuid4().hex, \
+                                     encoder=json.dumps, decoder=json.loads, \
+                                     schema_name='public', table_name='aiohttp_session', \
+                                     column_name_key='key', column_name_data='data', \
+                                     column_name_expire='expire', data_type='text', \
+                                     timeout=None)
+
+
+
+
+
+Postgresql Aiopg Storage
+------------------------
+
+It operates with Postgresql database via :class:`aiopg.pool.Pool`.
+This class is derived from :class:`PostgresqlAbstractStorage`.
+
+To use the storage you need setup it first::
+
+    import aiopg
+    from aiohttp_session.postgresql_storage \
+        import PostgresqlAiopgStorage
+
+    POSTGRES_DSN = 'postgresql://user:pass@host:port/dbname'
+    pool = await aiopg.create_pool(POSTGRES_DSN)
+    storage = PostgresqlAiopgStorage(pool)
+    await storage.initialize()
+
+See :class:`PostgresqlAbstractStorage` for paramater list and description.
+
+Calling :meth:`~PostgresqlAbstractStorage.initialize` method is optional. 
+It provides initial creation of SQL table, and fires backgroud job for removing 
+expired session rows from SQL table. If you've 
+called :meth:`~PostgresqlAbastractStorage.initialize`, don't forget to call
+:meth:`~PostgresqlAsyncpgStorage.finalize` on shutdown::
+    
+    storage.finalize()
+    await pool.close()
+
+See `postgresql_aiopg_storage.py` in demo directory for working example.
+
+
+.. class:: PostgresqlAiopgStorage(driver_pool, *, \
+                                     cookie_name="AIOHTTP_SESSION", \
+                                     domain=None, max_age=None, path='/', \
+                                     secure=None, httponly=True, \
+                                     key_factory=lambda: uuid.uuid4().hex, \
+                                     encoder=json.dumps, decoder=json.loads, \
+                                     schema_name='public', table_name='aiohttp_session', \
+                                     column_name_key='key', column_name_data='data', \
+                                     column_name_expire='expire', data_type='text', \
+                                     timeout=None)
+
+

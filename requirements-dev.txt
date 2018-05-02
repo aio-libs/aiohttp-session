@@ -17,3 +17,5 @@ multidict==4.1.0
 chardet==3.0.4
 yarl==1.1.1
 aiomcache==0.6.0
+asyncpg==0.15.0
+aiopg==0.13.2

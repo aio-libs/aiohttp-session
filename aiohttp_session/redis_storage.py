@@ -18,14 +18,11 @@ class RedisStorage(AbstractStorage):
                  secure=None, httponly=True,
                  key_factory=lambda: uuid.uuid4().hex,
                  encoder=json.dumps, decoder=json.loads):
-        super().__init__(cookie_name=cookie_name, domain=domain,
-                         max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
-                         encoder=encoder, decoder=decoder)
         if aioredis is None:
             raise RuntimeError("Please install aioredis")
         if StrictVersion(aioredis.__version__).version < (1, 0):
             raise RuntimeError("aioredis<1.0 is not supported")
+
         self._key_factory = key_factory
         if isinstance(redis_pool, aioredis.pool.ConnectionsPool):
             warnings.warn(
@@ -37,6 +34,12 @@ class RedisStorage(AbstractStorage):
         elif not isinstance(redis_pool, aioredis.commands.Redis):
             raise TypeError("Expexted aioredis.commands.Redis got {}".format(
                     type(redis_pool)))
+
+        super().__init__(cookie_name=cookie_name, domain=domain,
+                         max_age=max_age, path=path, secure=secure,
+                         httponly=httponly,
+                         encoder=encoder, decoder=decoder)
+
         self._redis = redis_pool
 
     async def load_session(self, request):

@@ -203,3 +203,26 @@ async def test_create_storate_with_custom_key_factory(aiohttp_client,
     value = await load_cookie(client, memcached)
     assert 'key' in value['session']
     assert value['session']['key'] == 'value'
+
+async def test_memcached_session_fixation(aiohttp_client, memcached):
+    async def login(request):
+        session = await get_session(request)
+        session['k'] = 'v'
+        return web.Response()
+
+    async def logout(request):
+        session = await get_session(request)
+        session.invalidate()
+        return web.Response()
+
+    app = create_app(login, memcached)
+    app.router.add_route('DELETE', '/', logout)
+    client = await aiohttp_client(app)
+    resp = await client.get('/')
+    assert 'AIOHTTP_SESSION' in resp.cookies
+    evil_cookie = resp.cookies['AIOHTTP_SESSION'].value
+    resp = await client.delete('/')
+    assert resp.cookies['AIOHTTP_SESSION'].value == ""
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': evil_cookie})
+    resp = await client.get('/')
+    assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie

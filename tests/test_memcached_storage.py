@@ -204,6 +204,7 @@ async def test_create_storate_with_custom_key_factory(aiohttp_client,
     assert 'key' in value['session']
     assert value['session']['key'] == 'value'
 
+
 async def test_memcached_session_fixation(aiohttp_client, memcached):
     async def login(request):
         session = await get_session(request)

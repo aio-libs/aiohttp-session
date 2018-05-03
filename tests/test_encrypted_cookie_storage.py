@@ -137,6 +137,7 @@ async def test_clear_cookie_on_session_invalidation(aiohttp_client,
     assert not morsel['httponly']
     assert morsel['path'] == '/'
 
+
 async def test_encrypted_cookie_session_fixation(aiohttp_client, fernet, key):
     async def login(request):
         session = await get_session(request)

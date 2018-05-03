@@ -27,7 +27,9 @@ The session object has a dict-like interface (operations like
 Before processing the session in a web-handler, you have to register the
 *session middleware* in ``aiohttp.web.Application``.
 
-A trivial usage example::
+A trivial usage example:
+
+.. code:: python
 
     import time
     import base64
@@ -85,6 +87,19 @@ Available session storages are:
   Requires ``aioredis`` library (only versions ``1.0+`` are supported)::
 
       $ pip install aiohttp_session[aioredis]
+
+
+Developing
+----------
+
+Install for local development::
+
+    $ pip install -r requirements-dev.txt
+
+Run tests with::
+
+    $ pytest -sv tests/
+
 
 License
 -------

@@ -18,13 +18,14 @@ class Session(MutableMapping):
     def __init__(self, identity, *, data, new, max_age=None):
         self._changed = False
         self._mapping = {}
-        self._identity = identity
+        self._identity = identity if data != {} else None
         self._new = new
+        self._new = new if data != {} else True
         self._max_age = max_age
         created = data.get('created', None) if data else None
         session_data = data.get('session', None) if data else None
 
-        if new or created is None:
+        if self._new or created is None:
             self._created = int(time.time())
         else:
             self._created = created

@@ -1,13 +1,10 @@
 import base64
+
 from cryptography import fernet
 from aiohttp import web
 from aiohttp import hdrs
 from aiohttp_session import setup, generate_csrf_token, check_csrf_token
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
-
-import uuid
-from pyramid import csrf
-# from pyramid.session import check_csrf_token
 
 
 tmpl = '''\
@@ -51,5 +48,5 @@ def make_app():
     return app
 
 
-web.run_app(make_app(), port=8099)
+web.run_app(make_app())
 

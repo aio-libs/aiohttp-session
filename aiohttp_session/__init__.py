@@ -4,8 +4,9 @@ import abc
 from collections import MutableMapping
 import json
 import time
+import uuid
 
-from aiohttp import web
+from aiohttp import web, hdrs
 
 
 __version__ = '2.4.0'
@@ -99,6 +100,7 @@ class Session(MutableMapping):
 
 SESSION_KEY = 'aiohttp_session'
 STORAGE_KEY = 'aiohttp_session_storage'
+CSRF_TOKEN_KEY = 'csrf_token'
 
 
 async def get_session(request):
@@ -118,6 +120,22 @@ async def get_session(request):
                                                                 session))
             request[SESSION_KEY] = session
     return session
+
+
+async def generate_csrf_token(request):
+    """Generate fresh CSRF token and store it within a session."""
+    token = uuid.uuid4().hex
+    session = await get_session(request)
+    session[CSRF_TOKEN_KEY] = token
+    return token
+
+
+async def check_csrf_token(request, token='csrf_token'):
+    session = await get_session(request)
+    if request.method == hdrs.METH_POST and CSRF_TOKEN_KEY in session:
+        form = await request.post()
+        return session[CSRF_TOKEN_KEY] == form.get(token)
+    return False
 
 
 def session_middleware(storage):

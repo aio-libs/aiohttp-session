@@ -27,7 +27,9 @@ The session object has a dict-like interface (operations like
 Before processing the session in a web-handler, you have to register the
 *session middleware* in ``aiohttp.web.Application``.
 
-A trivial usage example::
+A trivial usage example:
+
+.. code:: python
 
     import time
     import base64

@@ -1,11 +1,10 @@
-import codecs
 from setuptools import setup
 import os
 import re
 
 
-with codecs.open(os.path.join(os.path.abspath(os.path.dirname(
-        __file__)), 'aiohttp_session', '__init__.py'), 'r', 'latin1') as fp:
+with open(os.path.join(os.path.abspath(os.path.dirname(
+        __file__)), 'aiohttp_session', '__init__.py'), 'r', encoding='latin1') as fp:
     try:
         version = re.findall(r"^__version__ = '([^']+)'$", fp.read(), re.M)[0]
     except IndexError:

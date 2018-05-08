@@ -45,7 +45,7 @@ async def load_cookie(client, memcached):
     return value
 
 
-async def test_create_new_sesssion(aiohttp_client, memcached):
+async def test_create_new_session(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -60,7 +60,7 @@ async def test_create_new_sesssion(aiohttp_client, memcached):
     assert resp.status == 200
 
 
-async def test_load_existing_sesssion(aiohttp_client, memcached):
+async def test_load_existing_session(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -76,7 +76,7 @@ async def test_load_existing_sesssion(aiohttp_client, memcached):
     assert resp.status == 200
 
 
-async def test_load_bad_sesssion(aiohttp_client, memcached):
+async def test_load_bad_session(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -92,7 +92,7 @@ async def test_load_bad_sesssion(aiohttp_client, memcached):
     assert resp.status == 200
 
 
-async def test_change_sesssion(aiohttp_client, memcached):
+async def test_change_session(aiohttp_client, memcached):
 
     async def handler(request):
         session = await get_session(request)
@@ -118,7 +118,7 @@ async def test_change_sesssion(aiohttp_client, memcached):
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_sesssion_invalidation(aiohttp_client,
+async def test_clear_cookie_on_session_invalidation(aiohttp_client,
                                                      memcached):
 
     async def handler(request):
@@ -166,7 +166,7 @@ async def test_create_cookie_in_handler(aiohttp_client, memcached):
     assert exists
 
 
-async def test_create_new_sesssion_if_key_doesnt_exists_in_memcached(
+async def test_create_new_session_if_key_doesnt_exists_in_memcached(
         aiohttp_client, memcached):
 
     async def handler(request):

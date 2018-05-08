@@ -47,7 +47,7 @@ async def load_cookie(client, redis):
         return value
 
 
-async def test_create_new_sesssion(aiohttp_client, redis):
+async def test_create_new_session(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -62,7 +62,7 @@ async def test_create_new_sesssion(aiohttp_client, redis):
     assert resp.status == 200
 
 
-async def test_load_existing_sesssion(aiohttp_client, redis):
+async def test_load_existing_session(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -78,7 +78,7 @@ async def test_load_existing_sesssion(aiohttp_client, redis):
     assert resp.status == 200
 
 
-async def test_load_bad_sesssion(aiohttp_client, redis):
+async def test_load_bad_session(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -94,7 +94,7 @@ async def test_load_bad_sesssion(aiohttp_client, redis):
     assert resp.status == 200
 
 
-async def test_change_sesssion(aiohttp_client, redis):
+async def test_change_session(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -120,7 +120,7 @@ async def test_change_sesssion(aiohttp_client, redis):
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_sesssion_invalidation(aiohttp_client, redis):
+async def test_clear_cookie_on_session_invalidation(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)
@@ -208,7 +208,7 @@ async def test_set_ttl_manually_set(aiohttp_client, redis):
     assert ttl <= 10
 
 
-async def test_create_new_sesssion_if_key_doesnt_exists_in_redis(
+async def test_create_new_session_if_key_doesnt_exists_in_redis(
         aiohttp_client, redis):
 
     async def handler(request):

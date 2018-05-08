@@ -55,7 +55,7 @@ def key():
     return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 
-async def test_create_new_sesssion(aiohttp_client, secretbox, key):
+async def test_create_new_session(aiohttp_client, secretbox, key):
 
     async def handler(request):
         session = await get_session(request)
@@ -70,7 +70,7 @@ async def test_create_new_sesssion(aiohttp_client, secretbox, key):
     assert resp.status == 200
 
 
-async def test_load_existing_sesssion(aiohttp_client, secretbox, key):
+async def test_load_existing_session(aiohttp_client, secretbox, key):
 
     async def handler(request):
         session = await get_session(request)

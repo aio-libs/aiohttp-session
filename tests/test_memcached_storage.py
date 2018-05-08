@@ -119,7 +119,7 @@ async def test_change_session(aiohttp_client, memcached):
 
 
 async def test_clear_cookie_on_session_invalidation(aiohttp_client,
-                                                     memcached):
+                                                    memcached):
 
     async def handler(request):
         session = await get_session(request)

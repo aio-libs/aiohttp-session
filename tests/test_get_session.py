@@ -59,7 +59,7 @@ async def test_get_new_session_no_storage():
     req[SESSION_KEY] = session
 
     with pytest.raises(RuntimeError):
-        ret = new_session(req)
+        new_session(req)
 
 
 async def test_get_new_session_bad_return():
@@ -68,4 +68,4 @@ async def test_get_new_session_bad_return():
     req[SESSION_KEY] = session
 
     with pytest.raises(RuntimeError):
-        ret = new_session(req)
+        new_session(req)

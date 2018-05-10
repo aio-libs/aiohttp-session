@@ -21,6 +21,23 @@ Public functions
    See example below in :ref:`Session<aiohttp-session-session>`
    section for :func:`get_session` usage.
 
+.. function:: new_session(request)
+
+   Get a new session regardless of whether a cookie exists.
+
+   .. warning::
+
+      Always use :func:`new_session` instead of :func:`get_session`
+      in your login views to guard against Session Fixation attacks!
+
+   Example usage::
+
+      from aiohttp_session import new_session
+
+      async def handler(request):
+          session = new_session(request)
+          session.new == True # This will always be True
+
 .. function:: session_middleware(storage)
 
    Session middleware factory.

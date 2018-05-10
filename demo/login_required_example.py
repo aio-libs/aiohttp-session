@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from cryptography import fernet
 from aiohttp import web
-from aiohttp_session import setup, get_session
+from aiohttp_session import setup, get_session, new_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 
@@ -61,7 +61,9 @@ async def login(request):
     # actually implement business logic to check user credentials
     try:
         user_id = DATABASE.index(user_signature)
-        session = await get_session(request)
+        # Always use `new_session` during login to guard against
+        # Session Fixation. See aiohttp-session#281
+        session = new_session(request)
         session['user_id'] = user_id
         return web.HTTPFound(router['restricted'].url_for())
     except ValueError:

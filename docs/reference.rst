@@ -232,6 +232,13 @@ implement both :meth:`~AbstractStorage.load_session` and
 
       .. versionadded:: 2.3
 
+   .. method:: new_session()
+
+      A :ref:`coroutine<coroutine>` for getting a new session regardless
+      of whether a cookie exists.
+
+      Return :class:`Session` instance.
+
    .. method:: load_session(request)
 
       An *abstract* :ref:`coroutine<coroutine>`, called by internal

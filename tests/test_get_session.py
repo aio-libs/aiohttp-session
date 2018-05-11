@@ -49,7 +49,7 @@ async def test_get_new_session():
     req[SESSION_KEY] = session
     req[STORAGE_KEY] = Storage()
 
-    ret = new_session(req)
+    ret = await new_session(req)
     assert ret is not session
 
 
@@ -59,14 +59,14 @@ async def test_get_new_session_no_storage():
     req[SESSION_KEY] = session
 
     with pytest.raises(RuntimeError):
-        new_session(req)
+        await new_session(req)
 
 
 async def test_get_new_session_bad_return():
     req = make_mocked_request('GET', '/')
 
     class Storage(AbstractStorage):
-        def new_session(self):
+        async def new_session(self):
             return ''
 
         async def load_session(self, request):
@@ -78,4 +78,4 @@ async def test_get_new_session_bad_return():
     req[STORAGE_KEY] = Storage()
 
     with pytest.raises(RuntimeError):
-        new_session(req)
+        await new_session(req)

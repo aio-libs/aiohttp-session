@@ -63,7 +63,7 @@ async def login(request):
         user_id = DATABASE.index(user_signature)
         # Always use `new_session` during login to guard against
         # Session Fixation. See aiohttp-session#281
-        session = new_session(request)
+        session = await new_session(request)
         session['user_id'] = user_id
         return web.HTTPFound(router['restricted'].url_for())
     except ValueError:

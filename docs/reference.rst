@@ -23,7 +23,8 @@ Public functions
 
 .. function:: new_session(request)
 
-   Get a new session regardless of whether a cookie exists.
+   A :ref:`coroutine<coroutine>` for getting a new session regardless
+   of whether a cookie exists.
 
    .. warning::
 
@@ -35,7 +36,7 @@ Public functions
       from aiohttp_session import new_session
 
       async def handler(request):
-          session = new_session(request)
+          session = await new_session(request)
           session.new == True # This will always be True
 
 .. function:: session_middleware(storage)

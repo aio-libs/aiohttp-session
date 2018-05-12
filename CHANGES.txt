@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.5.0 (2018-05-12)
+------------------
+
+* Add an API for requesting new session explicitly #281
+
 2.4.0 (2018-05-04)
 ------------------
 

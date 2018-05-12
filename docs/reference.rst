@@ -21,6 +21,24 @@ Public functions
    See example below in :ref:`Session<aiohttp-session-session>`
    section for :func:`get_session` usage.
 
+.. function:: new_session(request)
+
+   A :ref:`coroutine<coroutine>` for getting a new session regardless
+   of whether a cookie exists.
+
+   .. warning::
+
+      Always use :func:`new_session` instead of :func:`get_session`
+      in your login views to guard against Session Fixation attacks!
+
+   Example usage::
+
+      from aiohttp_session import new_session
+
+      async def handler(request):
+          session = await new_session(request)
+          session.new == True # This will always be True
+
 .. function:: session_middleware(storage)
 
    Session middleware factory.
@@ -213,6 +231,13 @@ implement both :meth:`~AbstractStorage.load_session` and
       The JSON deserializer that will be used to load session cookie data.
 
       .. versionadded:: 2.3
+
+   .. method:: new_session()
+
+      A :ref:`coroutine<coroutine>` for getting a new session regardless
+      of whether a cookie exists.
+
+      Return :class:`Session` instance.
 
    .. method:: load_session(request)
 

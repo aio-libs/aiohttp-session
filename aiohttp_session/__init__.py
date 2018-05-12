@@ -120,6 +120,22 @@ async def get_session(request):
     return session
 
 
+async def new_session(request):
+    storage = request.get(STORAGE_KEY)
+    if storage is None:
+        raise RuntimeError(
+            "Install aiohttp_session middleware "
+            "in your aiohttp.web.Application")
+    else:
+        session = await storage.new_session()
+        if not isinstance(session, Session):
+            raise RuntimeError(
+                "Installed {!r} storage should return session instance "
+                "on .load_session() call, got {!r}.".format(storage, session))
+        request[SESSION_KEY] = session
+    return session
+
+
 def session_middleware(storage):
 
     if not isinstance(storage, AbstractStorage):
@@ -197,6 +213,9 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         else:
             data = {}
         return data
+
+    async def new_session(self):
+        return Session(None, data=None, new=True, max_age=self.max_age)
 
     @abc.abstractmethod
     async def load_session(self, request):

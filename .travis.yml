@@ -13,17 +13,13 @@ matrix:
   - python: nightly
 
 install:
-# - pip install --upgrade setuptools
-- pip install wheel
+- pip install -U setuptools twine pip wheel
 - pip install -r requirements-dev.txt
-- pip install codecov
+- pip install -U codecov
 
 script:
 - make cov
-- python setup.py check -rm
-- if python -c "import sys; sys.exit(sys.version_info < (3,5))"; then
-      python setup.py check -s;
-  fi
+- python setup.py check -rms
 
 after_success:
 - codecov
@@ -39,4 +35,4 @@ deploy:
   on:
     tags: true
     all_branches: true
-    python: 3.5
+    python: 3.6

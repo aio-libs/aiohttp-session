@@ -223,7 +223,7 @@ async def test_create_new_session_if_key_doesnt_exists_in_redis(
     assert resp.status == 200
 
 
-async def test_create_storate_with_custom_key_factory(aiohttp_client, redis):
+async def test_create_storage_with_custom_key_factory(aiohttp_client, redis):
 
     async def handler(request):
         session = await get_session(request)

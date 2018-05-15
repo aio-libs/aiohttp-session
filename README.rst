@@ -101,6 +101,13 @@ Run tests with::
     $ pytest -sv tests/
 
 
+Third party extensions
+----------------------
+
+* `aiohttp_session_mongo
+  <https://github.com/alexpantyukhin/aiohttp-session-mongo>`_
+
+
 License
 -------
 

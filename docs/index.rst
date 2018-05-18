@@ -23,7 +23,9 @@ The session object has dict-like interface (operations like
 Before processing session in web-handler you have to register *session
 middleware* in :class:`aiohttp.web.Application`.
 
-A trivial usage example::
+A trivial usage example:
+
+.. code-block:: python
 
     import time
     from aiohttp import web
@@ -59,11 +61,11 @@ Available session storages are:
 
   For key generation use :meth:`cryptography.fernet.Fernet.generate_key` method.
 
-  Requires :term:`cryptography` library::
+  Requires :term:`cryptography` library:
 
-  .. code::
+  .. code-block:: bash
 
-     $ pip3 install aiohttp_session[secure]
+      $ pip3 install aiohttp_session[secure]
 
 * :class:`~aiohttp_session.redis_storage.RedisStorage` -- stores
   JSON-ed data into *redis*, keeping into cookie only redis key

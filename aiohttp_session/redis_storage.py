@@ -50,6 +50,8 @@ class RedisStorage(AbstractStorage):
                 if data is None:
                     return Session(None, data=None,
                                    new=True, max_age=self.max_age)
+                if self._decoder == json.loads:
+                    data = data.decode('utf-8')
                 try:
                     data = self._decoder(data)
                 except ValueError:

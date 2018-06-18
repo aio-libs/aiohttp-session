@@ -1,6 +1,7 @@
 import json
 import uuid
 import time
+import asyncio
 
 from aiohttp import web
 from aiohttp_session import Session, session_middleware, get_session
@@ -227,3 +228,28 @@ async def test_memcached_session_fixation(aiohttp_client, memcached):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': evil_cookie})
     resp = await client.get('/')
     assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie
+
+
+async def test_load_session_dont_load_expired_session(aiohttp_client,
+                                                      memcached):
+    async def handler(request):
+        session = await get_session(request)
+        exp_param = request.rel_url.query.get('exp', None)
+        if exp_param is None:
+            session['a'] = 1
+            session['b'] = 2
+        else:
+            assert {} == session
+
+        return web.Response(body=b'OK')
+
+    client = await aiohttp_client(
+        create_app(handler, memcached, 2)
+    )
+    resp = await client.get('/')
+    assert resp.status == 200
+
+    await asyncio.sleep(5)
+
+    resp = await client.get('/?exp=yes')
+    assert resp.status == 200

@@ -1,5 +1,6 @@
 import json
 import time
+import asyncio
 
 import pytest
 import nacl.secret
@@ -30,8 +31,8 @@ def make_cookie(client, secretbox, data):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': data})
 
 
-def create_app(handler, key):
-    middleware = session_middleware(NaClCookieStorage(key))
+def create_app(handler, key, max_age=None):
+    middleware = session_middleware(NaClCookieStorage(key, max_age=max_age))
     app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     return app
@@ -153,3 +154,28 @@ async def test_nacl_session_fixation(aiohttp_client, secretbox, key):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': evil_cookie})
     resp = await client.get('/')
     assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie
+
+
+async def test_load_session_dont_load_expired_session(aiohttp_client,
+                                                      key):
+    async def handler(request):
+        session = await get_session(request)
+        exp_param = request.rel_url.query.get('exp', None)
+        if exp_param is None:
+            session['a'] = 1
+            session['b'] = 2
+        else:
+            assert {} == session
+
+        return web.Response(body=b'OK')
+
+    client = await aiohttp_client(
+        create_app(handler, key, 2)
+    )
+    resp = await client.get('/')
+    assert resp.status == 200
+
+    await asyncio.sleep(5)
+
+    resp = await client.get('/?exp=yes')
+    assert resp.status == 200

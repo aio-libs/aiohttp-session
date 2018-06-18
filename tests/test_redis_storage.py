@@ -3,6 +3,7 @@ import json
 import pytest
 import uuid
 import time
+import asyncio
 
 from aiohttp import web
 from aiohttp_session import Session, session_middleware, get_session
@@ -310,3 +311,28 @@ async def test_old_aioredis_version(mocker):
     mocker.patch('aiohttp_session.redis_storage.StrictVersion', Dummy)
     with pytest.raises(RuntimeError):
         create_app(handler=handler, redis=None)
+
+
+async def test_load_session_dont_load_expired_session(aiohttp_client,
+                                                      redis):
+    async def handler(request):
+        session = await get_session(request)
+        exp_param = request.rel_url.query.get('exp', None)
+        if exp_param is None:
+            session['a'] = 1
+            session['b'] = 2
+        else:
+            assert {} == session
+
+        return web.Response(body=b'OK')
+
+    client = await aiohttp_client(
+        create_app(handler, redis, 2)
+    )
+    resp = await client.get('/')
+    assert resp.status == 200
+
+    await asyncio.sleep(5)
+
+    resp = await client.get('/?exp=yes')
+    assert resp.status == 200

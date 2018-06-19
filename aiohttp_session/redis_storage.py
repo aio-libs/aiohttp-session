@@ -17,7 +17,7 @@ class RedisStorage(AbstractStorage):
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
                  key_factory=lambda: uuid.uuid4().hex,
-                 encoder=json.dumps, decoder=json.loads):
+                 encoder=json.dumps, decoder=json.loads, str_decode=True):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly,
@@ -38,6 +38,7 @@ class RedisStorage(AbstractStorage):
             raise TypeError("Expexted aioredis.commands.Redis got {}".format(
                     type(redis_pool)))
         self._redis = redis_pool
+        self.str_decode = str_decode
 
     async def load_session(self, request):
         cookie = self.load_cookie(request)
@@ -50,7 +51,8 @@ class RedisStorage(AbstractStorage):
                 if data is None:
                     return Session(None, data=None,
                                    new=True, max_age=self.max_age)
-                data = data.decode('utf-8')
+                if self.str_decode:
+                    data = data.decode('utf-8')
                 try:
                     data = self._decoder(data)
                 except ValueError:

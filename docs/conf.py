@@ -140,7 +140,7 @@ html_theme_options = {
     'logo': 'aiohttp-icon-128x128.png',
     'description': 'user session support for aiohttp.web',
     'github_user': 'aio-libs',
-    'github_repo': 'aiohttp_session',
+    'github_repo': 'aiohttp-session',
     'github_button': True,
     'github_type': 'star',
     'github_banner': True,

@@ -179,3 +179,36 @@ async def test_load_session_dont_load_expired_session(aiohttp_client,
 
     resp = await client.get('/?exp=yes')
     assert resp.status == 200
+
+
+async def test_load_corrupted_session(aiohttp_client, key):
+
+    async def handler(request):
+        session = await get_session(request)
+        assert isinstance(session, Session)
+        assert session.new
+        assert {} == session
+        return web.Response(body=b'OK')
+
+    client = await aiohttp_client(create_app(handler, key))
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': 'bad key'})
+    resp = await client.get('/')
+    assert resp.status == 200
+
+
+async def test_load_session_different_key(aiohttp_client, key):
+
+    async def handler(request):
+        session = await get_session(request)
+        assert isinstance(session, Session)
+        assert session.new
+        assert {} == session
+        return web.Response(body=b'OK')
+
+    client = await aiohttp_client(create_app(handler, key))
+    # create another box with another key
+    key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
+    secretbox = nacl.secret.SecretBox(key)
+    make_cookie(client, secretbox, {'a': 1, 'b': 12})
+    resp = await client.get('/')
+    assert resp.status == 200

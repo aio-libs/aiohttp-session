@@ -348,7 +348,7 @@ To use the storage you should push it into
 :func:`~aiohttp_session.session_middleware`::
 
    app = aiohttp.web.Application(middlewares=[
-       aiohttp_session.cookie_storage.NaClCookieStorage(
+       aiohttp_session.nacl_storage.NaClCookieStorage(
            b'Thirty  two  length  bytes  key.'])
 
 .. class:: NaClCookieStorage(secret_key, *, \

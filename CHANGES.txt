@@ -1,6 +1,12 @@
 Changes
 =======
 
+2.6.0 (2018-09-12)
+------------------
+
+* Create a new session if `NaClCookieStorage` cannot decode a
+  corrupted cookie #317
+
 2.5.0 (2018-05-12)
 ------------------
 

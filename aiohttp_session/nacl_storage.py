@@ -1,10 +1,13 @@
+import binascii
 import json
 
 import nacl.secret
 import nacl.utils
+import nacl.exceptions
 from nacl.encoding import Base64Encoder
 
 from . import AbstractStorage, Session
+from .log import log
 
 
 class NaClCookieStorage(AbstractStorage):
@@ -22,16 +25,26 @@ class NaClCookieStorage(AbstractStorage):
 
         self._secretbox = nacl.secret.SecretBox(secret_key)
 
+    def empty_session(self):
+        return Session(None, data=None, new=True, max_age=self.max_age)
+
     async def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
-            return Session(None, data=None, new=True, max_age=self.max_age)
+            return self.empty_session()
         else:
-            data = self._decoder(
-                self._secretbox.decrypt(cookie.encode('utf-8'),
-                                        encoder=Base64Encoder).decode('utf-8')
-            )
-            return Session(None, data=data, new=False, max_age=self.max_age)
+            try:
+                data = self._decoder(
+                    self._secretbox.decrypt(
+                        cookie.encode('utf-8'),
+                        encoder=Base64Encoder).decode('utf-8')
+                )
+                return Session(None, data=data, new=False,
+                               max_age=self.max_age)
+            except (binascii.Error, nacl.exceptions.CryptoError):
+                log.warning("Cannot decrypt cookie value, "
+                            "create a new fresh session")
+                return self.empty_session()
 
     async def save_session(self, request, response, session):
         if session.empty:

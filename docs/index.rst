@@ -11,6 +11,8 @@ aiohttp_session
 
 The library provides sessions for :ref:`aiohttp.web<aiohttp-web>`.
 
+The current version is |version|
+
 Usage
 -----
 

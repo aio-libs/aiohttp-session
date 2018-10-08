@@ -1,3 +1,4 @@
+import asyncio
 import json
 import base64
 import time
@@ -7,8 +8,11 @@ from aiohttp import web
 
 from cryptography.fernet import Fernet
 
-from aiohttp_session import Session, session_middleware, get_session
+from aiohttp_session import Session, session_middleware, get_session, new_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
+
+
+MAX_AGE = 1
 
 
 def make_cookie(client, fernet, data):
@@ -160,3 +164,34 @@ async def test_encrypted_cookie_session_fixation(aiohttp_client, fernet, key):
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': evil_cookie})
     resp = await client.get('/')
     assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie
+
+
+async def test_fernet_ttl(aiohttp_client, fernet, key):
+    async def login(request):
+        session = await new_session(request)
+        session['created'] = int(time.time())
+        return web.Response()
+
+    async def handler(request):
+        session = await get_session(request)
+        now = time.time()
+        created = session['created'] if not session.new else None
+        text = ''
+        if created is not None and (time.time() - created) > MAX_AGE:
+            text += 'WARNING!'
+        return web.Response(text=text)
+
+    middleware = session_middleware(EncryptedCookieStorage(key, max_age=MAX_AGE))
+    app = web.Application(middlewares=[middleware])
+    app.router.add_route('POST', '/', login)
+    app.router.add_route('GET', '/', handler)
+
+    client = await aiohttp_client(app)
+    resp = await client.post('/')
+    assert 'AIOHTTP_SESSION' in resp.cookies
+    cookie = resp.cookies['AIOHTTP_SESSION'].value
+    await asyncio.sleep(MAX_AGE + 1)
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': cookie})
+    resp = await client.get('/')
+    body = await resp.text()
+    assert body == ''

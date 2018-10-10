@@ -16,6 +16,10 @@ jobs:
   - python: nightly
 
   include:
+  - python: 3.7
+    dist: xenial
+    sudo: true
+
   - stage: Deploy
     name: Publishing dists to PyPI
     if: tag IS present

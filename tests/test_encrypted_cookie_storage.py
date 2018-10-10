@@ -8,7 +8,8 @@ from aiohttp import web
 
 from cryptography.fernet import Fernet
 
-from aiohttp_session import Session, session_middleware, get_session, new_session
+from aiohttp_session import (Session, session_middleware, get_session,
+                             new_session)
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 
@@ -174,14 +175,15 @@ async def test_fernet_ttl(aiohttp_client, fernet, key):
 
     async def handler(request):
         session = await get_session(request)
-        now = time.time()
         created = session['created'] if not session.new else None
         text = ''
         if created is not None and (time.time() - created) > MAX_AGE:
             text += 'WARNING!'
         return web.Response(text=text)
 
-    middleware = session_middleware(EncryptedCookieStorage(key, max_age=MAX_AGE))
+    middleware = session_middleware(
+        EncryptedCookieStorage(key, max_age=MAX_AGE)
+    )
     app = web.Application(middlewares=[middleware])
     app.router.add_route('POST', '/', login)
     app.router.add_route('GET', '/', handler)

@@ -44,18 +44,17 @@ class RedisStorage(AbstractStorage):
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
-            with await self._redis as conn:
-                key = str(cookie)
-                data = await conn.get(self.cookie_name + '_' + key)
-                if data is None:
-                    return Session(None, data=None,
-                                   new=True, max_age=self.max_age)
-                data = data.decode('utf-8')
-                try:
-                    data = self._decoder(data)
-                except ValueError:
-                    data = None
-                return Session(key, data=data, new=False, max_age=self.max_age)
+            key = str(cookie)
+            data = await self._redis.get(self.cookie_name + '_' + key)
+            if data is None:
+                return Session(None, data=None,
+                               new=True, max_age=self.max_age)
+            data = data.decode('utf-8')
+            try:
+                data = self._decoder(data)
+            except ValueError:
+                data = None
+            return Session(key, data=data, new=False, max_age=self.max_age)
 
     async def save_session(self, request, response, session):
         key = session.identity
@@ -73,7 +72,8 @@ class RedisStorage(AbstractStorage):
                                  max_age=session.max_age)
 
         data = self._encoder(self._get_session_data(session))
-        with await self._redis as conn:
-            max_age = session.max_age
-            expire = max_age if max_age is not None else 0
-            await conn.set(self.cookie_name + '_' + key, data, expire=expire)
+        max_age = session.max_age
+        expire = max_age if max_age is not None else 0
+        await self._redis.set(self.cookie_name + '_' + key,
+                              data,
+                              expire=expire)

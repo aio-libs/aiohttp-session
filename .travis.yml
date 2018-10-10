@@ -32,7 +32,6 @@ jobs:
         all_branches: true
         python: 3.6
 
-
 install:
 - pip install -U setuptools twine pip wheel
 - pip install -r requirements-dev.txt
@@ -44,5 +43,3 @@ script:
 
 after_success:
 - codecov
-
-sudo: false

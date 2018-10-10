@@ -35,7 +35,7 @@ class EncryptedCookieStorage(AbstractStorage):
             try:
                 data = self._decoder(
                     self._fernet.decrypt(
-                        cookie.encode('utf-8')).decode('utf-8'))
+                        cookie.encode('utf-8'), ttl=self.max_age).decode('utf-8'))
                 return Session(None, data=data,
                                new=False, max_age=self.max_age)
             except InvalidToken:

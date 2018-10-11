@@ -8,7 +8,8 @@ import nacl.utils
 from aiohttp import web
 from nacl.encoding import Base64Encoder
 
-from aiohttp_session import Session, session_middleware, get_session
+from aiohttp_session import (Session, session_middleware, get_session,
+                             new_session)
 from aiohttp_session.nacl_storage import NaClCookieStorage
 
 
@@ -212,3 +213,33 @@ async def test_load_session_different_key(aiohttp_client, key):
     make_cookie(client, secretbox, {'a': 1, 'b': 12})
     resp = await client.get('/')
     assert resp.status == 200
+
+
+async def test_load_expired_session(aiohttp_client, key):
+    MAX_AGE = 2
+
+    async def login(request):
+        session = await new_session(request)
+        session['created'] = int(time.time())
+        return web.Response()
+
+    async def handler(request):
+        session = await get_session(request)
+        created = session.get('created', None) if not session.new else None
+        text = ''
+        if created is not None and (time.time() - created) > MAX_AGE:
+            text += 'WARNING!'
+        return web.Response(text=text)
+
+    app = create_app(handler, key, max_age=MAX_AGE)
+    app.router.add_route('POST', '/', login)
+
+    client = await aiohttp_client(app)
+    resp = await client.post('/')
+    assert 'AIOHTTP_SESSION' in resp.cookies
+    cookie = resp.cookies['AIOHTTP_SESSION'].value
+    await asyncio.sleep(MAX_AGE + 1)
+    client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': cookie})
+    resp = await client.get('/')
+    body = await resp.text()
+    assert body == ''

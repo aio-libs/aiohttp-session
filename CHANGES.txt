@@ -6,7 +6,7 @@ Changes
 
 * Reset a session if the session age > max_age (#331)
 
-* Reset a session in TTL expiration for EncryptedCookieStorage (#326)
+* Reset a session on TTL expiration for EncryptedCookieStorage (#326)
 
 2.6.0 (2018-09-12)
 ------------------

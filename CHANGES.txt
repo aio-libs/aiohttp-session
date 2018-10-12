@@ -1,11 +1,18 @@
 Changes
 =======
 
+2.7.0 (2018-10-13)
+------------------
+
+* Reset a session if the session age > max_age (#331)
+
+* Reset a session in TTL expiration for EncryptedCookieStorage (#326)
+
 2.6.0 (2018-09-12)
 ------------------
 
 * Create a new session if `NaClCookieStorage` cannot decode a
-  corrupted cookie #317
+  corrupted cookie (#317)
 
 2.5.0 (2018-05-12)
 ------------------

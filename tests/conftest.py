@@ -85,7 +85,7 @@ def redis_server(docker, session_id, loop, request):
             )
             loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
             break
-        except ConnectionRefusedError as e:
+        except ConnectionRefusedError:
             time.sleep(delay)
             delay *= 2
     else:
@@ -159,7 +159,7 @@ def memcached_server(docker, session_id, loop, request):
             conn = aiomcache.Client(host, port, loop=loop)
             loop.run_until_complete(conn.set(b'foo', b'bar'))
             break
-        except ConnectionRefusedError as e:
+        except ConnectionRefusedError:
             time.sleep(delay)
             delay *= 2
     else:

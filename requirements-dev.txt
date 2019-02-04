@@ -1,5 +1,5 @@
 attrs==18.2.0
-flake8==3.5.0
+flake8==3.7.4
 sphinx==1.8.1
 pep257==0.7.0
 -e .

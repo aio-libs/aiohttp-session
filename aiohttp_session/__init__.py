@@ -2,13 +2,10 @@
 
 import abc
 
-try:
-    from collections.abc import MutableMapping
-except ImportError:  # pragma: no cover
-    from collections import MutableMapping
-
 import json
 import time
+
+from collections.abc import MutableMapping
 
 from aiohttp import web
 

@@ -1,7 +1,12 @@
 """User sessions for aiohttp.web."""
 
 import abc
-from collections import MutableMapping
+
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
+
 import json
 import time
 
@@ -157,7 +162,7 @@ def session_middleware(storage):
             raise RuntimeError(
                 "Expect response, not {!r}".format(type(response)))
         if not isinstance(response, web.Response):
-            # likely got websoket or streaming
+            # likely got websocket or streaming
             return response
         if response.prepared:
             raise RuntimeError(

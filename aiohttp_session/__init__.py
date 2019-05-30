@@ -4,7 +4,7 @@ import abc
 
 try:
     from collections.abc import MutableMapping
-except ImportError:
+except ImportError:  # pragma: no cover
     from collections import MutableMapping
 
 import json

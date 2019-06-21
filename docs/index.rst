@@ -37,7 +37,7 @@ A trivial usage example:
     async def handler(request):
         session = await get_session(request)
         session['last_visit'] = time.time()
-        return web.Response(body=b'OK')
+        return web.Response(body='OK')
 
     def init():
         app = web.Application()

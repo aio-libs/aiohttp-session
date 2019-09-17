@@ -1,7 +1,7 @@
 Changes
 =======
 
-2.8.0 (2019-05-29)
+2.8.0 (2019-09-17)
 ------------------
 
 * Make this compatible with Python 3.7+. Import from collections.abc, instead

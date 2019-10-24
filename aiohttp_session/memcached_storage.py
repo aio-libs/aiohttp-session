@@ -1,5 +1,6 @@
-import uuid
 import json
+import uuid
+from time import time
 from . import AbstractStorage, Session
 
 
@@ -53,7 +54,17 @@ class MemcachedStorage(AbstractStorage):
 
         data = self._encoder(self._get_session_data(session))
         max_age = session.max_age
-        expire = max_age if max_age is not None else 0
+        # https://github.com/memcached/memcached/wiki/Programming#expiration
+        # "Expiration times can be set from 0, meaning "never expire", to
+        # 30 days. Any time higher than 30 days is interpreted as a Unix
+        # timestamp date. If you want to expire an object on January 1st of
+        # next year, this is how you do that."
+        if max_age is None:
+            expire = 0
+        elif max_age > 30*24*60*60:
+            expire = int(time()) + max_age
+        else:
+            expire = max_age
         stored_key = (self.cookie_name + '_' + key).encode('utf-8')
         await self.conn.set(
                                 stored_key, data.encode('utf-8'),

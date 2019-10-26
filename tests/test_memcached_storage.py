@@ -253,3 +253,38 @@ async def test_load_session_dont_load_expired_session(aiohttp_client,
 
     resp = await client.get('/?exp=yes')
     assert resp.status == 200
+
+
+async def test_memcached_max_age_over_30_days(aiohttp_client, memcached):
+    async def handler(request):
+        session = await get_session(request)
+        session['stored'] = 'TEST_VALUE'
+        session.max_age = 30*24*60*60 + 1
+        assert session.new
+        return web.Response(body=b'OK')
+
+    async def get_value(request):
+        session = await get_session(request)
+        assert not session.new
+        response = session['stored']
+        return web.Response(body=response.encode('utf-8'))
+
+    app = create_app(handler, memcached)
+    app.router.add_route('GET', '/get_value', get_value)
+    client = await aiohttp_client(app)
+
+    resp = await client.get('/')
+    assert resp.status == 200
+    assert 'AIOHTTP_SESSION' in resp.cookies
+    storage_key = (
+        'AIOHTTP_SESSION_' + resp.cookies['AIOHTTP_SESSION'].value
+    ).encode('utf-8')
+    storage_value = await memcached.get(storage_key)
+    storage_value = json.loads(storage_value.decode('utf-8'))
+    assert storage_value['session']['stored'] == 'TEST_VALUE'
+
+    resp = await client.get('/get_value')
+    assert resp.status == 200
+
+    resp_content = await resp.text()
+    assert resp_content == 'TEST_VALUE'

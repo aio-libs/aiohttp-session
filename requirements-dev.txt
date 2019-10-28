@@ -1,6 +1,6 @@
 attrs==19.3.0
 flake8==3.7.8
-sphinx==2.2.0
+sphinx==2.2.1
 pep257==0.7.0
 -e .
 aioredis==1.3.0

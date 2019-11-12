@@ -1,3 +1,4 @@
+# type: ignore
 import aiomcache
 import aioredis
 import asyncio

@@ -7,17 +7,29 @@ import uuid
 import warnings
 
 from distutils.version import StrictVersion
+
+from aiohttp import web  # Imported for typing
+from typing import Any, Callable, Dict, Optional
+
 from . import AbstractStorage, Session
 
 
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(self, redis_pool, *, cookie_name="AIOHTTP_SESSION",
-                 domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
-                 key_factory=lambda: uuid.uuid4().hex,
-                 encoder=json.dumps, decoder=json.loads):
+    def __init__(
+        self,
+        redis_pool: 'aioredis.commands.Redis', *,
+        cookie_name: str = "AIOHTTP_SESSION",
+        domain: Optional[str] = None,
+        max_age: Optional[int] = None,
+        path: str = '/',
+        secure: Optional[bool] = None,
+        httponly: bool = True,
+        key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
+        encoder: Callable[..., str] = json.dumps,
+        decoder: Callable[..., Dict[Any, Any]] = json.loads
+    ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly,
@@ -39,7 +51,7 @@ class RedisStorage(AbstractStorage):
                     type(redis_pool)))
         self._redis = redis_pool
 
-    async def load_session(self, request):
+    async def load_session(self, request: web.Request) -> Session:
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
@@ -57,7 +69,12 @@ class RedisStorage(AbstractStorage):
                     data = None
                 return Session(key, data=data, new=False, max_age=self.max_age)
 
-    async def save_session(self, request, response, session):
+    async def save_session(
+        self,
+        request: web.Request,
+        response: web.StreamResponse,
+        session: Session
+    ) -> None:
         key = session.identity
         if key is None:
             key = self._key_factory()

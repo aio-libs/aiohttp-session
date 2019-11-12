@@ -4,7 +4,7 @@ import time
 from aiohttp_session import Session
 
 
-def test_create():
+def test_create() -> None:
     s = Session('test_identity', data=None, new=True)
     assert s == {}
     assert s.new
@@ -13,7 +13,7 @@ def test_create():
     assert s.created is not None
 
 
-def test_create2():
+def test_create2() -> None:
     s = Session('test_identity', data={'session': {'some': 'data'}},
                 new=False)
     assert s == {'some': 'data'}
@@ -23,7 +23,7 @@ def test_create2():
     assert s.created is not None
 
 
-def test_create3():
+def test_create3() -> None:
     s = Session(identity=1, data=None, new=True)
     assert s == {}
     assert s.new
@@ -32,7 +32,7 @@ def test_create3():
     assert s.created is not None
 
 
-def test_set_new_identity_ok():
+def test_set_new_identity_ok() -> None:
     s = Session(identity=1, data=None, new=True)
     assert s.new
     assert s.identity == 1
@@ -42,13 +42,13 @@ def test_set_new_identity_ok():
     assert s.identity == 2
 
 
-def test_set_new_identity_for_not_new_session():
+def test_set_new_identity_for_not_new_session() -> None:
     s = Session(identity=1, data=None, new=False)
     with pytest.raises(RuntimeError):
         s.set_new_identity(2)
 
 
-def test__repr__():
+def test__repr__() -> None:
     s = Session('test_identity', data=None, new=True)
     assert str(s) == \
         '<Session [new:True, changed:False, created:{0}] {{}}>'.format(
@@ -59,7 +59,7 @@ def test__repr__():
         " {{'foo': 'bar'}}>".format(s.created)
 
 
-def test__repr__2():
+def test__repr__2() -> None:
     created = int(time.time()) - 1000
     session_data = {
         'session': {
@@ -77,7 +77,7 @@ def test__repr__2():
             created)
 
 
-def test_invalidate():
+def test_invalidate() -> None:
     s = Session('test_identity', data={'session': {'foo': 'bar'}},
                 new=False)
     assert s == {'foo': 'bar'}
@@ -89,7 +89,7 @@ def test_invalidate():
     assert s.created is not None
 
 
-def test_invalidate2():
+def test_invalidate2() -> None:
     s = Session('test_identity', data={'session': {'foo': 'bar'}},
                 new=False)
     assert s == {'foo': 'bar'}
@@ -101,7 +101,7 @@ def test_invalidate2():
     assert s.created is not None
 
 
-def test_operations():
+def test_operations() -> None:
     s = Session('test_identity', data=None, new=False)
     assert s == {}
     assert len(s) == 0
@@ -139,7 +139,7 @@ def test_operations():
     assert 'key' not in s
 
 
-def test_change():
+def test_change() -> None:
     created = int(time.time())
     s = Session('test_identity', new=False, data={
         'session': {

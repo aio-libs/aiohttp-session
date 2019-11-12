@@ -6,6 +6,9 @@ import nacl.utils
 import nacl.exceptions
 from nacl.encoding import Base64Encoder
 
+from aiohttp import web  # Imported for typing
+from typing import Any, Callable, Dict, Optional
+
 from . import AbstractStorage, Session
 from .log import log
 
@@ -14,10 +17,18 @@ class NaClCookieStorage(AbstractStorage):
     """NaCl Encrypted JSON storage.
     """
 
-    def __init__(self, secret_key, *, cookie_name="AIOHTTP_SESSION",
-                 domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
-                 encoder=json.dumps, decoder=json.loads):
+    def __init__(
+        self,
+        secret_key: bytes, *,
+        cookie_name: str = "AIOHTTP_SESSION",
+        domain: Optional[str] = None,
+        max_age: Optional[int] = None,
+        path: str = '/',
+        secure: Optional[bool] = None,
+        httponly: bool = True,
+        encoder: Callable[..., str] = json.dumps,
+        decoder: Callable[..., Dict[Any, Any]] = json.loads
+    ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly,
@@ -25,10 +36,10 @@ class NaClCookieStorage(AbstractStorage):
 
         self._secretbox = nacl.secret.SecretBox(secret_key)
 
-    def empty_session(self):
+    def empty_session(self) -> Session:
         return Session(None, data=None, new=True, max_age=self.max_age)
 
-    async def load_session(self, request):
+    async def load_session(self, request: web.Request) -> Session:
         cookie = self.load_cookie(request)
         if cookie is None:
             return self.empty_session()
@@ -46,7 +57,12 @@ class NaClCookieStorage(AbstractStorage):
                             "create a new fresh session")
                 return self.empty_session()
 
-    async def save_session(self, request, response, session):
+    async def save_session(
+        self,
+        request: web.Request,
+        response: web.StreamResponse,
+        session: Session
+    ) -> None:
         if session.empty:
             return self.save_cookie(response, session._mapping,
                                     max_age=session.max_age)

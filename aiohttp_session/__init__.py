@@ -34,7 +34,7 @@ if TYPE_CHECKING:  # pragma: no cover
             "httponly": bool,
             "expires": str,
         },
-        total = False
+        total=False
     )
 
 __version__ = '2.9.0'

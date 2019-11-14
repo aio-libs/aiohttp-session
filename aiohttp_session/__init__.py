@@ -24,13 +24,18 @@ from typing import (
 if TYPE_CHECKING:  # pragma: no cover
     from mypy_extensions import TypedDict
 
-    class _TCookieParams(TypedDict, total=False):
-        domain: Optional[str]
-        max_age: Optional[int]
-        path: str
-        secure: Optional[bool]
-        httponly: bool
-        expires: str
+    _TCookieParams = TypedDict(
+        '_TCookieParams',
+        {
+            "domain": Optional[str],
+            "max_age": Optional[int],
+            "path": str,
+            "secure": Optional[bool],
+            "httponly": bool,
+            "expires": str,
+        },
+        total = False
+    )
 
 __version__ = '2.9.0'
 

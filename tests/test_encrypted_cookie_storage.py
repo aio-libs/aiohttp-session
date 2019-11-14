@@ -33,7 +33,7 @@ def make_cookie(
     }
 
     cookie_data = json.dumps(session_data).encode('utf-8')
-    encrypted_data: str = fernet.encrypt(cookie_data).decode('utf-8')
+    encrypted_data = fernet.encrypt(cookie_data).decode('utf-8')  # type: str
 
     # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(

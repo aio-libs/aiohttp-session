@@ -52,7 +52,7 @@ class Session(MutableMapping):
         max_age: Optional[int] = None
     ) -> None:
         self._changed = False
-        self._mapping: Dict[Any, Any] = {}
+        self._mapping = {}  # type: Dict[Any, Any]
         self._identity = identity if data != {} else None
         self._new = new if data != {} else True
         self._max_age = max_age
@@ -230,11 +230,13 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         decoder: Callable[..., Dict[Any, Any]] = json.loads
     ) -> None:
         self._cookie_name = cookie_name
-        self._cookie_params: '_TCookieParams' = dict(domain=domain,
-                                                     max_age=max_age,
-                                                     path=path,
-                                                     secure=secure,
-                                                     httponly=httponly)
+        self._cookie_params = dict(
+            domain=domain,
+            max_age=max_age,
+            path=path,
+            secure=secure,
+            httponly=httponly
+        )  # type: '_TCookieParams'
         self._max_age = max_age
         self._encoder = encoder
         self._decoder = decoder
@@ -278,7 +280,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         pass
 
     def load_cookie(self, request: web.Request) -> Optional[str]:
-        cookie: Optional[str] = request.cookies.get(self._cookie_name)
+        cookie = request.cookies.get(self._cookie_name)  # type: Optional[str]
         return cookie
 
     def save_cookie(
@@ -287,7 +289,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         cookie_data: str, *,
         max_age: Optional[int] = None
     ) -> None:
-        params: '_TCookieParams' = self._cookie_params.copy()
+        params = self._cookie_params.copy()  # type: '_TCookieParams'
         if max_age is not None:
             params['max_age'] = max_age
             params['expires'] = time.strftime(

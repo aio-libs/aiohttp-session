@@ -11,7 +11,6 @@ from aiohttp import web
 from aiohttp.web_middlewares import _Handler, _Middleware
 
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -20,22 +19,20 @@ from typing import (
     Optional,
     Tuple,
 )
+from typing_extensions import TypedDict
 
-if TYPE_CHECKING:  # pragma: no cover
-    from mypy_extensions import TypedDict
-
-    _TCookieParams = TypedDict(
-        '_TCookieParams',
-        {
-            "domain": Optional[str],
-            "max_age": Optional[int],
-            "path": str,
-            "secure": Optional[bool],
-            "httponly": bool,
-            "expires": str,
-        },
-        total=False
-    )
+_TCookieParams = TypedDict(
+    '_TCookieParams',
+    {
+        "domain": Optional[str],
+        "max_age": Optional[int],
+        "path": str,
+        "secure": Optional[bool],
+        "httponly": bool,
+        "expires": str,
+    },
+    total=False
+)
 
 __version__ = '2.9.0'
 
@@ -236,7 +233,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
             path=path,
             secure=secure,
             httponly=httponly
-        )  # type: '_TCookieParams'
+        )  # type: _TCookieParams
         self._max_age = max_age
         self._encoder = encoder
         self._decoder = decoder
@@ -250,7 +247,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         return self._max_age
 
     @property
-    def cookie_params(self) -> '_TCookieParams':
+    def cookie_params(self) -> _TCookieParams:
         return self._cookie_params
 
     def _get_session_data(self, session: Session) -> Dict[str, Any]:
@@ -289,7 +286,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         cookie_data: str, *,
         max_age: Optional[int] = None
     ) -> None:
-        params = self._cookie_params.copy()  # type: '_TCookieParams'
+        params = self._cookie_params.copy()  # type: _TCookieParams
         if max_age is not None:
             params['max_age'] = max_age
             params['expires'] = time.strftime(

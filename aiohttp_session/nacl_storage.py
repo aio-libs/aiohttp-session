@@ -26,8 +26,8 @@ class NaClCookieStorage(AbstractStorage):
         path: str = '/',
         secure: Optional[bool] = None,
         httponly: bool = True,
-        encoder: Callable[..., str] = json.dumps,
-        decoder: Callable[..., Dict[Any, Any]] = json.loads
+        encoder: Callable[[Dict[str, Any]], str] = json.dumps,
+        decoder: Callable[[str], Dict[str, Any]] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,

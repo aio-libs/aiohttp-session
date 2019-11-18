@@ -10,6 +10,7 @@ from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
 
 from typing import Any, Callable, Dict, Optional, Tuple
+from pytest_mock import MockFixture
 
 from aiohttp_session import Session, session_middleware, get_session
 from aiohttp_session.redis_storage import RedisStorage
@@ -356,7 +357,7 @@ async def test_not_redis_provided_to_storage() -> None:
         create_app(handler=handler, redis=None)
 
 
-async def test_no_aioredis_installed(mocker):
+async def test_no_aioredis_installed(mocker: MockFixture) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
@@ -366,13 +367,13 @@ async def test_no_aioredis_installed(mocker):
         create_app(handler=handler, redis=None)
 
 
-async def test_old_aioredis_version(mocker):
+async def test_old_aioredis_version(mocker: MockFixture) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
 
     class Dummy(object):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             self.version = (0, 3)
 
     mocker.patch('aiohttp_session.redis_storage.StrictVersion', Dummy)

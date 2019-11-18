@@ -299,7 +299,12 @@ class AbstractStorage(metaclass=abc.ABCMeta):
                 path=params["path"],
                 )
         else:
-            response.set_cookie(self._cookie_name, cookie_data, **params)
+            # Ignoring type for params until aiohttp#4238 is released
+            response.set_cookie(
+                self._cookie_name,
+                cookie_data,
+                **params  # type: ignore
+            )
 
 
 class SimpleCookieStorage(AbstractStorage):

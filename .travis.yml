@@ -46,7 +46,7 @@ install:
 script:
 - make cov
 - python setup.py check -rms
-- mypy --strict aiohttp_session test
+- mypy --strict aiohttp_session tests
 
 after_success:
 - codecov

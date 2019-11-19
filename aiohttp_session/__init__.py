@@ -5,8 +5,6 @@ import abc
 import json
 import time
 
-from collections.abc import MutableMapping
-
 from aiohttp import web
 from aiohttp.web_middlewares import _Handler, _Middleware
 
@@ -16,8 +14,8 @@ from typing import (
     Dict,
     Hashable,
     Iterator,
+    MutableMapping,
     Optional,
-    Tuple,
 )
 from typing_extensions import TypedDict
 
@@ -37,7 +35,7 @@ _TCookieParams = TypedDict(
 __version__ = '2.9.0'
 
 
-class Session(MutableMapping):
+class Session(MutableMapping[str, Any]):
 
     """Session dict-like object."""
 
@@ -113,7 +111,7 @@ class Session(MutableMapping):
     def __len__(self) -> int:
         return len(self._mapping)
 
-    def __iter__(self) -> Iterator[Tuple[Hashable, Any]]:
+    def __iter__(self) -> Iterator[str]:
         return iter(self._mapping)
 
     def __contains__(self, key: Hashable) -> bool:

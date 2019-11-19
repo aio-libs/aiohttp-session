@@ -16,6 +16,7 @@ from typing import (
     Iterator,
     MutableMapping,
     Optional,
+    Union,
 )
 from typing_extensions import TypedDict
 
@@ -179,9 +180,10 @@ def session_middleware(storage: 'AbstractStorage') -> _Middleware:
         handler: _Handler
     ) -> web.StreamResponse:
         request[STORAGE_KEY] = storage
-        raise_response = False
         try:
-            response = await handler(request)
+            response = await handler(
+                request
+            )  # type: Union[web.StreamResponse, web.HTTPException]
         except web.HTTPException as exc:
             response = exc
             raise_response = True
@@ -198,7 +200,7 @@ def session_middleware(storage: 'AbstractStorage') -> _Middleware:
         if session is not None:
             if session._changed:
                 await storage.save_session(request, response, session)
-        if raise_response:
+        if isinstance(response, web.HTTPException):
             raise response
         return response
 

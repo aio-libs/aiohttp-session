@@ -21,7 +21,6 @@ class Session(MutableMapping):
         self._changed = False
         self._mapping = {}
         self._identity = identity if data != {} else None
-        self._new = new
         self._new = new if data != {} else True
         self._max_age = max_age
         created = data.get('created', None) if data else None

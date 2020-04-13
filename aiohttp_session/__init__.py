@@ -184,14 +184,15 @@ class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
+                 secure=None, httponly=True, samesite=None
                  encoder=json.dumps, decoder=json.loads):
         self._cookie_name = cookie_name
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,
                                    path=path,
                                    secure=secure,
-                                   httponly=httponly)
+                                   httponly=httponly,
+                                   samesite=samesite)
         self._max_age = max_age
         self._encoder = encoder
         self._decoder = decoder
@@ -257,11 +258,11 @@ class SimpleCookieStorage(AbstractStorage):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
+                 secure=None, httponly=True, samesite=None,
                  encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
+                         httponly=httponly, samesite=samesite,
                          encoder=encoder, decoder=decoder)
 
     async def load_session(self, request):

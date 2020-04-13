@@ -14,7 +14,7 @@ class EncryptedCookieStorage(AbstractStorage):
 
     def __init__(self, secret_key, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True, samesite=None
+                 secure=None, httponly=True, samesite=None,
                  encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,

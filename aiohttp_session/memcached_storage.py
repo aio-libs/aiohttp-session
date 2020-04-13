@@ -9,12 +9,12 @@ class MemcachedStorage(AbstractStorage):
 
     def __init__(self, memcached_conn, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
+                 secure=None, httponly=True, samesite=None,
                  key_factory=lambda: uuid.uuid4().hex,
                  encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
+                         httponly=httponly, samesite=samesite,
                          encoder=encoder, decoder=decoder)
         self._key_factory = key_factory
         self.conn = memcached_conn

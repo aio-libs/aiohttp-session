@@ -119,4 +119,4 @@ async def test_cookie_has_valid_grammar(aiohttp_client):
     client = await aiohttp_client(create_app(handler))
     resp = await client.get('/')
     morsel = resp.cookies['AIOHTTP_SESSION']
-    assert set(_cookie_unsafe_char.findall(morsel.value)) <= {'%'}
+    assert set(_cookie_unsafe_char.findall(morsel.value)) == {'%'}

@@ -120,3 +120,16 @@ async def test_cookie_has_valid_grammar(aiohttp_client):
     resp = await client.get('/')
     morsel = resp.cookies['AIOHTTP_SESSION']
     assert set(_cookie_unsafe_char.findall(morsel.value)) == {'%'}
+
+def test_cookiesafe_json():
+    bad_chars = {' ', '\t', '\n', '"', ',', ';', '\\', '\x00', '\U0001f4a9'}
+    bad_strings = bad_chars | {'buffer_' + c + '_buffer' for c in bad_chars}
+    safe_strings = {'fine', 'punctuation-_{}<>()!'}
+
+    for string in bad_strings | safe_strings:
+        encoded = _to_cookiesafe_json(string)
+        assert string == _from_cookiesafe_json(encoded)
+        assert not set(encoded).intersection(bad_chars)
+
+    for safe_string in safe_strings:
+        assert safe_string in _to_cookiesafe_json(safe_string)[3:-3]

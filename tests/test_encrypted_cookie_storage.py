@@ -1,7 +1,6 @@
 import asyncio
 import json
 import base64
-import re
 import time
 
 import pytest
@@ -10,7 +9,7 @@ from aiohttp import web
 from cryptography.fernet import Fernet
 
 from aiohttp_session import (Session, session_middleware, get_session,
-                             new_session, _cookie_unsafe_char)
+                             new_session)
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 

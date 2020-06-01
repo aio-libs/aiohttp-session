@@ -1,5 +1,3 @@
-import json
-import re
 import time
 
 from aiohttp import web
@@ -111,6 +109,7 @@ async def test_dont_save_not_requested_session(aiohttp_client):
     assert resp.status == 200
     assert 'AIOHTTP_SESSION' not in resp.cookies
 
+
 async def test_cookie_has_valid_grammar(aiohttp_client):
     async def handler(request):
         session = await get_session(request)
@@ -120,6 +119,7 @@ async def test_cookie_has_valid_grammar(aiohttp_client):
     resp = await client.get('/')
     morsel = resp.cookies['AIOHTTP_SESSION']
     assert set(_cookie_unsafe_char.findall(morsel.value)) == {'%'}
+
 
 def test_cookiesafe_json():
     bad_chars = {' ', '\t', '\n', '"', ',', ';', '\\', '\x00', '\U0001f4a9'}

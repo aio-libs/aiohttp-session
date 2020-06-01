@@ -253,14 +253,26 @@ class AbstractStorage(metaclass=abc.ABCMeta):
 
 
 _cookie_unsafe_char = re.compile(r'[% ",;\\]')
+
+
 def _to_cookiesafe_json(data) -> str:
     '''Turns a JSON-serializable value into a %-encoded string
     suitable for use in a cookie, as described by RFC 6265.
     '''
-    return _cookie_unsafe_char.sub(lambda m: '%'+hex(ord(m.group()))[2:], json.dumps(data))
+    return _cookie_unsafe_char.sub(
+        lambda m: '%'+hex(ord(m.group()))[2:],
+        json.dumps(data),
+    )
+
+
 def _from_cookiesafe_json(cookie: str):
     '''Inverse of ``_to_cookiesafe_json``.'''
-    return json.loads(re.sub('%(..)', lambda m: chr(int(m.group(1), 16)), cookie))
+    return json.loads(re.sub(
+        '%(..)',
+        lambda m: chr(int(m.group(1), 16)),
+        cookie,
+    ))
+
 
 class SimpleCookieStorage(AbstractStorage):
     """Simple JSON storage.

@@ -107,3 +107,12 @@ async def test_dont_save_not_requested_session(aiohttp_client):
     resp = await client.get('/')
     assert resp.status == 200
     assert 'AIOHTTP_SESSION' not in resp.cookies
+
+async def test_cookie_has_valid_grammar(aiohttp_client):
+    async def handler(request):
+        session = await get_session(request)
+        session['key'] = 'funky" value'
+        return web.Response(body=b'OK')
+    client = await aiohttp_client(create_app(handler))
+    resp = await client.get('/')
+    assert r'Set-Cookie: AIO_HTTP_SESSION="{"key": "funky\" value"}"'.upper() == resp.cookies['AIOHTTP_SESSION'].output().upper()

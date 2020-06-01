@@ -4,6 +4,8 @@ import abc
 
 import json
 import time
+import urllib.parse as urlparse
+
 
 from collections.abc import MutableMapping
 
@@ -180,12 +182,18 @@ def setup(app, storage):
     app.middlewares.append(session_middleware(storage))
 
 
+def _to_cookiesafe_json(data) -> str:
+    return urlparse.quote(json.dumps(data))
+def _from_cookiesafe_json(cookie: str):
+    return json.loads(urlparse.unquote(cookie))
+
 class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
-                 encoder=json.dumps, decoder=json.loads):
+                 encoder=_to_cookiesafe_json,
+                 decoder=_from_cookiesafe_json):
         self._cookie_name = cookie_name
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,

@@ -1,9 +1,9 @@
 from unittest import mock
-import json
 import time
 
 from aiohttp import web
-from aiohttp_session import get_session, SimpleCookieStorage
+from aiohttp_session import (get_session, SimpleCookieStorage,
+                             _to_cookiesafe_json)
 from aiohttp_session import setup as setup_middleware
 
 
@@ -13,7 +13,7 @@ def make_cookie(client, data):
         'created': int(time.time())
     }
 
-    value = json.dumps(session_data)
+    value = _to_cookiesafe_json(session_data)
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': value})
 
 

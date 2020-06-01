@@ -1,10 +1,11 @@
 from http import cookies
-import json
 import time
 
 from aiohttp import web
 from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage)
+                             get_session, SimpleCookieStorage,
+                             _to_cookiesafe_json,
+                             _from_cookiesafe_json)
 
 
 def make_cookie(client, data, path=None, domain=None):
@@ -13,7 +14,7 @@ def make_cookie(client, data, path=None, domain=None):
         'created': int(time.time())
     }
     C = cookies.SimpleCookie()
-    value = json.dumps(session_data)
+    value = _to_cookiesafe_json(session_data)
     C["AIOHTTP_SESSION"] = value
     C["AIOHTTP_SESSION"]["path"] = path
     C["AIOHTTP_SESSION"]["domain"] = domain
@@ -45,7 +46,7 @@ async def test_with_same_path_domain(aiohttp_client):
     resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
-    cookie_data = json.loads(morsel.value)
+    cookie_data = _from_cookiesafe_json(morsel.value)
     assert 'session' in cookie_data
     assert 'a' in cookie_data['session']
     assert 'b' in cookie_data['session']
@@ -72,7 +73,7 @@ async def test_with_different_path(aiohttp_client):
     resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
-    cookie_data = json.loads(morsel.value)
+    cookie_data = _from_cookiesafe_json(morsel.value)
     assert 'session' in cookie_data
     assert 'a' not in cookie_data['session']
     assert 'b' not in cookie_data['session']
@@ -97,7 +98,7 @@ async def test_with_different_domain(aiohttp_client):
     resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
-    cookie_data = json.loads(morsel.value)
+    cookie_data = _from_cookiesafe_json(morsel.value)
     assert 'session' in cookie_data
     assert 'a' not in cookie_data['session']
     assert 'b' not in cookie_data['session']
@@ -123,7 +124,7 @@ async def test_invalidate_with_same_path_domain(aiohttp_client):
     resp = await client.get('/anotherpath')
     assert resp.status == 200
     morsel = resp.cookies['AIOHTTP_SESSION']
-    cookie_data = json.loads(morsel.value)
+    cookie_data = _from_cookiesafe_json(morsel.value)
     assert {} == cookie_data
     assert morsel['httponly']
     assert '/anotherpath' == morsel['path']

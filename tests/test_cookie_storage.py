@@ -1,9 +1,12 @@
 import json
+import re
 import time
 
 from aiohttp import web
 from aiohttp_session import (Session, session_middleware,
-                             get_session, SimpleCookieStorage)
+                             get_session, SimpleCookieStorage,
+                             _cookie_unsafe_char, _to_cookiesafe_json,
+                             _from_cookiesafe_json)
 
 
 def make_cookie(client, data):
@@ -12,7 +15,7 @@ def make_cookie(client, data):
         'created': int(time.time())
     }
 
-    value = json.dumps(session_data)
+    value = _to_cookiesafe_json(session_data)
     client.session.cookie_jar.update_cookies({'AIOHTTP_SESSION': value})
 
 
@@ -68,7 +71,7 @@ async def test_change_session(aiohttp_client):
     assert resp.status == 200
 
     morsel = resp.cookies['AIOHTTP_SESSION']
-    cookie_data = json.loads(morsel.value)
+    cookie_data = _from_cookiesafe_json(morsel.value)
     assert 'session' in cookie_data
     assert 'a' in cookie_data['session']
     assert 'b' in cookie_data['session']
@@ -115,4 +118,5 @@ async def test_cookie_has_valid_grammar(aiohttp_client):
         return web.Response(body=b'OK')
     client = await aiohttp_client(create_app(handler))
     resp = await client.get('/')
-    assert r'Set-Cookie: AIO_HTTP_SESSION="{"key": "funky\" value"}"'.upper() == resp.cookies['AIOHTTP_SESSION'].output().upper()
+    morsel = resp.cookies['AIOHTTP_SESSION']
+    assert set(_cookie_unsafe_char.findall(morsel.value)) <= {'%'}

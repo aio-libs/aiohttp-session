@@ -4,7 +4,7 @@ import abc
 
 import json
 import time
-import urllib.parse as urlparse
+import re
 
 
 from collections.abc import MutableMapping
@@ -182,18 +182,12 @@ def setup(app, storage):
     app.middlewares.append(session_middleware(storage))
 
 
-def _to_cookiesafe_json(data) -> str:
-    return urlparse.quote(json.dumps(data))
-def _from_cookiesafe_json(cookie: str):
-    return json.loads(urlparse.unquote(cookie))
-
 class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
-                 encoder=_to_cookiesafe_json,
-                 decoder=_from_cookiesafe_json):
+                 encoder=json.dumps, decoder=json.loads):
         self._cookie_name = cookie_name
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,
@@ -258,6 +252,16 @@ class AbstractStorage(metaclass=abc.ABCMeta):
             response.set_cookie(self._cookie_name, cookie_data, **params)
 
 
+_cookie_unsafe_char = re.compile(r'[% ",;\\]')
+def _to_cookiesafe_json(data) -> str:
+    '''Turns a JSON-serializable value into a %-encoded string
+    suitable for use in a cookie.
+    '''
+    return _cookie_unsafe_char.sub(lambda m: '%'+hex(ord(m.group()))[2:], json.dumps(data))
+def _from_cookiesafe_json(cookie: str):
+    '''Inverse of ``_to_cookiesafe_json``.'''
+    return json.loads(re.sub('%(..)', lambda m: chr(int(m.group(1), 16)), cookie))
+
 class SimpleCookieStorage(AbstractStorage):
     """Simple JSON storage.
 
@@ -266,7 +270,8 @@ class SimpleCookieStorage(AbstractStorage):
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
-                 encoder=json.dumps, decoder=json.loads):
+                 encoder=_to_cookiesafe_json,
+                 decoder=_from_cookiesafe_json):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly,

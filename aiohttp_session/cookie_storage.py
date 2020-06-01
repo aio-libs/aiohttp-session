@@ -4,7 +4,7 @@ import base64
 from cryptography import fernet
 from cryptography.fernet import InvalidToken
 
-from . import AbstractStorage, Session
+from . import AbstractStorage, Session, _to_cookiesafe_json, _from_cookiesafe_json
 from .log import log
 
 
@@ -15,6 +15,7 @@ class EncryptedCookieStorage(AbstractStorage):
     def __init__(self, secret_key, *, cookie_name="AIOHTTP_SESSION",
                  domain=None, max_age=None, path='/',
                  secure=None, httponly=True,
+                 #encoder=_to_cookiesafe_json, decoder=_from_cookiesafe_json):
                  encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,

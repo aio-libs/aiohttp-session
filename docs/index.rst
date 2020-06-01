@@ -53,7 +53,7 @@ All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
 Available session storages are:
 
 * :class:`SimpleCookieStorage` -- keeps session data as
-  plain JSON string in cookie body. Use the storage only for testing
+  %-encoded JSON string in cookie body. Use the storage only for testing
   purposes, it's very non-secure.
 
 * :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`

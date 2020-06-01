@@ -67,7 +67,7 @@ the storage class of your choice.
 Available session storages are:
 
 * ``aiohttp_session.SimpleCookieStorage()`` -- keeps session data as a
-  plain JSON string in the cookie body. Use the storage only for testing
+  %-encoded JSON string in the cookie body. Use the storage only for testing
   purposes, it's very non-secure.
 
 * ``aiohttp_session.cookie_storage.EncryptedCookieStorage(secret_key)``

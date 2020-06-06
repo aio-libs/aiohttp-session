@@ -183,10 +183,12 @@ def setup(app, storage):
 class AbstractStorage(metaclass=abc.ABCMeta):
 
     def __init__(self, *, cookie_name="AIOHTTP_SESSION",
-                 domain=None, max_age=None, path='/',
+                 key_delimiter="_", domain=None,
+                 max_age=None, path='/',
                  secure=None, httponly=True,
                  encoder=json.dumps, decoder=json.loads):
         self._cookie_name = cookie_name
+        self._key_delimiter = key_delimiter
         self._cookie_params = dict(domain=domain,
                                    max_age=max_age,
                                    path=path,

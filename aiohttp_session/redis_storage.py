@@ -13,15 +13,14 @@ from . import AbstractStorage, Session
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(self, redis_pool, *, cookie_name="AIOHTTP_SESSION",
-                 domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
+    def __init__(self, redis_pool, *, cookie_name="SESS",
+                 key_delimiter=":", domain=None, max_age=None,
+                 path='/', secure=None, httponly=True,
                  key_factory=lambda: uuid.uuid4().hex,
                  encoder=json.dumps, decoder=json.loads):
-        super().__init__(cookie_name=cookie_name, domain=domain,
-                         max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
-                         encoder=encoder, decoder=decoder)
+        super().__init__(cookie_name=cookie_name, key_delimiter=key_delimiter,
+                         domain=domain, max_age=max_age, path=path, secure=secure,
+                         httponly=httponly, encoder=encoder, decoder=decoder)
         if aioredis is None:
             raise RuntimeError("Please install aioredis")
         if StrictVersion(aioredis.__version__).version < (1, 0):
@@ -46,7 +45,7 @@ class RedisStorage(AbstractStorage):
         else:
             with await self._redis as conn:
                 key = str(cookie)
-                data = await conn.get(self.cookie_name + '_' + key)
+                data = await conn.get(self.cookie_name + self._key_delimiter + key)
                 if data is None:
                     return Session(None, data=None,
                                    new=True, max_age=self.max_age)
@@ -76,4 +75,4 @@ class RedisStorage(AbstractStorage):
         with await self._redis as conn:
             max_age = session.max_age
             expire = max_age if max_age is not None else 0
-            await conn.set(self.cookie_name + '_' + key, data, expire=expire)
+            await conn.set(self.cookie_name + self._key_delimiter + key, data, expire=expire)

@@ -8,14 +8,14 @@ class MemcachedStorage(AbstractStorage):
     """Memcached storage"""
 
     def __init__(self, memcached_conn, *, cookie_name="AIOHTTP_SESSION",
-                 domain=None, max_age=None, path='/',
+                 key_delimiter="_", domain=None,
+                 max_age=None, path='/',
                  secure=None, httponly=True,
-                 key_factory=lambda: uuid.uuid4().hex,
-                 encoder=json.dumps, decoder=json.loads):
-        super().__init__(cookie_name=cookie_name, domain=domain,
-                         max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
-                         encoder=encoder, decoder=decoder)
+                 key_factory=lambda: uuid.uuid4().hex, encoder=json.dumps,
+                 decoder=json.loads):
+        super().__init__(cookie_name=cookie_name, key_delimiter=key_delimiter,
+                         domain=domain, max_age=max_age, path=path, secure=secure,
+                         httponly=httponly, encoder=encoder, decoder=decoder)
         self._key_factory = key_factory
         self.conn = memcached_conn
 
@@ -25,7 +25,7 @@ class MemcachedStorage(AbstractStorage):
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             key = str(cookie)
-            stored_key = (self.cookie_name + '_' + key).encode('utf-8')
+            stored_key = (self.cookie_name + self._key_delimiter + key).encode('utf-8')
             data = await self.conn.get(stored_key)
             if data is None:
                 return Session(None, data=None,
@@ -65,7 +65,7 @@ class MemcachedStorage(AbstractStorage):
             expire = int(time()) + max_age
         else:
             expire = max_age
-        stored_key = (self.cookie_name + '_' + key).encode('utf-8')
+        stored_key = (self.cookie_name + self._key_delimiter + key).encode('utf-8')
         await self.conn.set(
                                 stored_key, data.encode('utf-8'),
                                 exptime=expire)

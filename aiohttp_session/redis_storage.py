@@ -19,8 +19,9 @@ class RedisStorage(AbstractStorage):
                  key_factory=lambda: uuid.uuid4().hex,
                  encoder=json.dumps, decoder=json.loads):
         super().__init__(cookie_name=cookie_name, key_delimiter=key_delimiter,
-                         domain=domain, max_age=max_age, path=path, secure=secure,
-                         httponly=httponly, encoder=encoder, decoder=decoder)
+                         domain=domain, max_age=max_age, path=path,
+                         secure=secure, httponly=httponly, encoder=encoder,
+                         decoder=decoder)
         if aioredis is None:
             raise RuntimeError("Please install aioredis")
         if StrictVersion(aioredis.__version__).version < (1, 0):
@@ -45,7 +46,8 @@ class RedisStorage(AbstractStorage):
         else:
             with await self._redis as conn:
                 key = str(cookie)
-                data = await conn.get(self.cookie_name + self._key_delimiter + key)
+                data = await conn.get(self.cookie_name + self._key_delimiter
+                                      + key)
                 if data is None:
                     return Session(None, data=None,
                                    new=True, max_age=self.max_age)
@@ -75,4 +77,5 @@ class RedisStorage(AbstractStorage):
         with await self._redis as conn:
             max_age = session.max_age
             expire = max_age if max_age is not None else 0
-            await conn.set(self.cookie_name + self._key_delimiter + key, data, expire=expire)
+            await conn.set(self.cookie_name + self._key_delimiter
+                           + key, data, expire=expire)

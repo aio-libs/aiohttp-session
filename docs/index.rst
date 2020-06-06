@@ -75,7 +75,8 @@ Available session storages are:
 
   Inside redis the key will be saved as COOKIENAME_VALUEOFTHECOOKIE.
   For example if inside the browser the cookie is saved with name
-  ``'AIOHTTP_SESSION'`` (default option) and value
+  ``'AIOHTTP_SESSION'`` (default option) with the delimiter
+  ``:`` (default delimiter) and value
   ``e33b57c7ec6e425eb626610f811ab6ae`` (a random UUID) they key inside
   redis will be ``AIOHTTP_SESSION_e33b57c7ec6e425eb626610f811ab6ae``.
 

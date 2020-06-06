@@ -13,7 +13,7 @@ from . import AbstractStorage, Session
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(self, redis_pool, *, cookie_name="SESS",
+    def __init__(self, redis_pool, *, cookie_name="AIOHTTP_SESSION",
                  key_delimiter=":", domain=None, max_age=None,
                  path='/', secure=None, httponly=True,
                  key_factory=lambda: uuid.uuid4().hex,

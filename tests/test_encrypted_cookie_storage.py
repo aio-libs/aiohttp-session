@@ -98,6 +98,22 @@ async def test_load_existing_session(aiohttp_client, fernet, key):
     assert resp.status == 200
 
 
+async def test_load_existing_session_with_fernet(aiohttp_client, fernet):
+
+    async def handler(request):
+        session = await get_session(request)
+        assert isinstance(session, Session)
+        assert not session.new
+        assert not session._changed
+        assert {'a': 1, 'b': 12} == session
+        return web.Response(body=b'OK')
+
+    client = await aiohttp_client(create_app(handler, fernet))
+    make_cookie(client, fernet, {'a': 1, 'b': 12})
+    resp = await client.get('/')
+    assert resp.status == 200
+
+
 async def test_change_session(aiohttp_client, fernet, key):
 
     async def handler(request):

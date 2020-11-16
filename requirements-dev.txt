@@ -15,5 +15,5 @@ pytest-sugar==0.9.4
 aiohttp==3.7.2
 multidict==5.0.2
 chardet==3.0.4
-yarl==1.6.2
+yarl==1.6.3
 aiomcache==0.6.0

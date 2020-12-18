@@ -79,10 +79,10 @@ def redis_server(docker, session_id, loop, request):
     delay = 0.1
     for i in range(20):
         try:
-            conn = loop.run_until_complete(
+            conn = asyncio.run(
                 aioredis.create_connection((host, port), loop=loop)
             )
-            loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
+            asyncio.run(conn.execute('SET', 'foo', 'bar'))
             break
         except ConnectionRefusedError:
             time.sleep(delay)

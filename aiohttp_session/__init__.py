@@ -154,10 +154,10 @@ def session_middleware(storage):
         except web.HTTPException as exc:
             response = exc
             raise_response = True
-        if not isinstance(response, web.StreamResponse):
+        if not isinstance(response, (web.StreamResponse, web.HTTPException)):
             raise RuntimeError(
                 "Expect response, not {!r}".format(type(response)))
-        if not isinstance(response, web.Response):
+        if not isinstance(response, (web.Response, web.HTTPException)):
             # likely got websocket or streaming
             return response
         if response.prepared:

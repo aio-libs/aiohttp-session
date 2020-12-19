@@ -77,7 +77,7 @@ def redis_server(docker, session_id, loop, request):
         port = 6379
 
     async def set_redis(host, port, loop):
-        await aioredis.create_connection((host, port), loop=loop)
+        conn = await aioredis.create_connection((host, port), loop=loop)
         await conn.execute('SET', 'foo', 'bar')
 
     delay = 0.1

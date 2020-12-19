@@ -22,7 +22,7 @@ def unused_port():
 @pytest.fixture(scope='session')
 def loop(request):
     loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(None)
+    asyncio.set_event_loop(loop)
 
     yield loop
 
@@ -79,10 +79,10 @@ def redis_server(docker, session_id, loop, request):
     delay = 0.1
     for i in range(20):
         try:
-            conn = asyncio.run(
+            conn = loop.run_until_complete(
                 aioredis.create_connection((host, port), loop=loop)
             )
-            asyncio.run(conn.execute('SET', 'foo', 'bar'))
+            loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
             break
         except ConnectionRefusedError:
             time.sleep(delay)

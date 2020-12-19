@@ -22,7 +22,7 @@ def unused_port():
 @pytest.fixture(scope='session')
 def loop(request):
     loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    asyncio.set_event_loop(None)
 
     yield loop
 

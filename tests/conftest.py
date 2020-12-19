@@ -83,7 +83,7 @@ def redis_server(docker, session_id, loop, request):
     delay = 0.1
     for i in range(20):
         try:
-            conn = loop.run_until_complete(set_redis(host, port, loop))
+            loop.run_until_complete(set_redis(host, port, loop))
             break
         except ConnectionRefusedError:
             time.sleep(delay)

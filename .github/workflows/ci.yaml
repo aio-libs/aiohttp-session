@@ -11,7 +11,8 @@ jobs:
         python-version: [3.6, 3.7]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -20,11 +21,12 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements-dev.txt
-        pip install codecov
     - name: Run tests
       run: |
         make cov
         python setup.py check -rms
-    - name: Upload coverage to Codecov
-      run: |
-        codecov
+    - name: Upload coverage
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        flags: unit

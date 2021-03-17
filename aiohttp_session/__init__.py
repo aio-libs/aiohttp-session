@@ -104,6 +104,12 @@ class Session(MutableMapping):
 SESSION_KEY = 'aiohttp_session'
 STORAGE_KEY = 'aiohttp_session_storage'
 
+async def is_active_session(request):
+    cookie = storage.load_cookie(request)
+    if cookie is not None:
+        return True
+    else:
+        return False
 
 async def get_session(request):
     session = request.get(SESSION_KEY)

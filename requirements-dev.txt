@@ -4,7 +4,7 @@ sphinx==3.5.2
 pep257==0.7.0
 -e .
 aioredis==1.2
-cryptography==3.3.2
+cryptography==3.4.6
 docker==4.4.4
 pynacl==1.4.0
 pytest==6.2.2

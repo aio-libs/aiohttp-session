@@ -5,7 +5,7 @@ pep257==0.7.0
 -e .
 aioredis==1.2
 cryptography==3.3.2
-docker==4.4.0
+docker==4.4.4
 pynacl==1.4.0
 pytest==6.2.2
 pytest-aiohttp==0.3.0

@@ -109,7 +109,7 @@ The project is hosted on GitHub_
 .. _GitHub: https://github.com/aio-libs/aiohttp_session
 
 Please feel free to file an issue on `bug tracker
-<https://github.com/aio-libs/aiopg/issues>`_ if you have found a bug
+<https://github.com/aio-libs/aiohttp_session/issues>`_ if you have found a bug
 or have some suggestion for library improvement.
 
 The library uses `Travis <https://travis-ci.org/aio-libs/aiohttp_session>`_ for

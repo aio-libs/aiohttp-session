@@ -11,7 +11,7 @@ vtest: flake develop
 	py.test ./tests/
 
 cov cover coverage: flake
-	py.test --cov aiohttp_session --cov-report html ./tests/
+	py.test --cov aiohttp_session --cov-report html --cov-report=xml ./tests/
 	@echo "open file://`pwd`/coverage/index.html"
 
 clean:

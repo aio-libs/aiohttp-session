@@ -24,6 +24,7 @@ jobs:
     - name: Run tests
       run: |
         make cov
+        make mypy
         python setup.py check -rms
     - name: Upload coverage
       uses: codecov/codecov-action@v1

@@ -5,7 +5,7 @@ from aiohttp import web
 from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
 
-from typing import Any, Dict
+from typing import Any, cast, Dict, MutableMapping
 
 from aiohttp_session import (Session, session_middleware,
                              get_session, SimpleCookieStorage)
@@ -40,7 +40,7 @@ async def test_create_new_session(aiohttp_client: _TAiohttpClient) -> None:
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler))
@@ -56,7 +56,7 @@ async def test_load_existing_session(aiohttp_client: _TAiohttpClient) -> None:
         assert not session.new
         assert not session._changed
         assert session.created is not None
-        assert {'a': 1, 'b': 2} == session
+        assert cast(MutableMapping[str, Any], {'a': 1, 'b': 2}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler))

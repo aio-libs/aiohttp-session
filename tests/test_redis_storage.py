@@ -9,7 +9,7 @@ from aiohttp import web
 from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
 
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, cast, Dict, MutableMapping, Optional, Tuple
 from pytest_mock import MockFixture
 
 from aiohttp_session import Session, session_middleware, get_session
@@ -86,7 +86,7 @@ async def test_create_new_session(
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, redis))
@@ -104,7 +104,7 @@ async def test_load_existing_session(
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
-        assert {'a': 1, 'b': 12} == session
+        assert cast(MutableMapping[str, Any], {'a': 1, 'b': 12}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, redis))
@@ -123,7 +123,7 @@ async def test_load_bad_session(
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, redis))
@@ -393,7 +393,7 @@ async def test_load_session_dont_load_expired_session(
             session['a'] = 1
             session['b'] = 2
         else:
-            assert {} == session
+            assert cast(MutableMapping[str, Any], {}) == session
 
         return web.Response(body=b'OK')
 

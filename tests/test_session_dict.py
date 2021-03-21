@@ -2,11 +2,12 @@ import pytest
 import time
 
 from aiohttp_session import Session
+from typing import Any, cast, MutableMapping
 
 
 def test_create() -> None:
     s = Session('test_identity', data=None, new=True)
-    assert s == {}
+    assert s == cast(MutableMapping[str, Any], {})
     assert s.new
     assert 'test_identity' == s.identity
     assert not s._changed
@@ -16,7 +17,7 @@ def test_create() -> None:
 def test_create2() -> None:
     s = Session('test_identity', data={'session': {'some': 'data'}},
                 new=False)
-    assert s == {'some': 'data'}
+    assert s == cast(MutableMapping[str, Any], {'some': 'data'})
     assert not s.new
     assert 'test_identity' == s.identity
     assert not s._changed
@@ -25,7 +26,7 @@ def test_create2() -> None:
 
 def test_create3() -> None:
     s = Session(identity=1, data=None, new=True)
-    assert s == {}
+    assert s == cast(MutableMapping[str, Any], {})
     assert s.new
     assert s.identity == 1
     assert not s._changed
@@ -80,11 +81,11 @@ def test__repr__2() -> None:
 def test_invalidate() -> None:
     s = Session('test_identity', data={'session': {'foo': 'bar'}},
                 new=False)
-    assert s == {'foo': 'bar'}
+    assert s == cast(MutableMapping[str, Any], {'foo': 'bar'})
     assert not s._changed
 
     s.invalidate()
-    assert s == {}
+    assert s == cast(MutableMapping[str, Any], {})
     assert s._changed
     assert s.created is not None
 
@@ -92,18 +93,18 @@ def test_invalidate() -> None:
 def test_invalidate2() -> None:
     s = Session('test_identity', data={'session': {'foo': 'bar'}},
                 new=False)
-    assert s == {'foo': 'bar'}
+    assert s == cast(MutableMapping[str, Any], {'foo': 'bar'})
     assert not s._changed
 
     s.invalidate()
-    assert s == {}
+    assert s == cast(MutableMapping[str, Any], {})
     assert s._changed
     assert s.created is not None
 
 
 def test_operations() -> None:
     s = Session('test_identity', data=None, new=False)
-    assert s == {}
+    assert s == cast(MutableMapping[str, Any], {})
     assert len(s) == 0
     assert list(s) == []
     assert 'foo' not in s
@@ -112,28 +113,28 @@ def test_operations() -> None:
     s = Session('test_identity', data={'session': {'foo': 'bar'}},
                 new=False)
     assert len(s) == 1
-    assert s == {'foo': 'bar'}
+    assert s == cast(MutableMapping[str, Any], {'foo': 'bar'})
     assert list(s) == ['foo']
     assert 'foo' in s
     assert 'key' not in s
 
     s['key'] = 'value'
     assert len(s) == 2
-    assert s == {'foo': 'bar', 'key': 'value'}
+    assert s == cast(MutableMapping[str, Any], {'foo': 'bar', 'key': 'value'})
     assert sorted(s) == ['foo', 'key']
     assert 'foo' in s
     assert 'key' in s
 
     del s['key']
     assert len(s) == 1
-    assert s == {'foo': 'bar'}
+    assert s == cast(MutableMapping[str, Any], {'foo': 'bar'})
     assert list(s) == ['foo']
     assert 'foo' in s
     assert 'key' not in s
 
     s.pop('foo')
     assert len(s) == 0
-    assert s == {}
+    assert s == cast(MutableMapping[str, Any], {})
     assert list(s) == []
     assert 'foo' not in s
     assert 'key' not in s
@@ -151,13 +152,17 @@ def test_change() -> None:
 
     s['a']['key2'] = 'val2'
     assert not s._changed
-    assert {'a': {'key': 'value',
-                  'key2': 'val2'}} == s
+    assert cast(
+        MutableMapping[str, Any],
+        {'a': {'key': 'value', 'key2': 'val2'}}
+    ) == s
 
     assert s.created == created
 
     s.changed()
     assert s._changed
-    assert {'a': {'key': 'value',
-                  'key2': 'val2'}} == s
+    assert cast(
+        MutableMapping[str, Any],
+        {'a': {'key': 'value', 'key2': 'val2'}}
+    ) == s
     assert s.created == created

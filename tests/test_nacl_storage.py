@@ -11,7 +11,7 @@ from aiohttp.test_utils import TestClient
 
 from nacl.encoding import Base64Encoder
 
-from typing import no_type_check, Any, Dict, Optional
+from typing import no_type_check, Any, cast, Dict, MutableMapping, Optional
 
 from aiohttp_session import (Session, session_middleware, get_session,
                              new_session)
@@ -90,7 +90,7 @@ async def test_create_new_session(
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, key))
@@ -109,7 +109,7 @@ async def test_load_existing_session(
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
-        assert {'a': 1, 'b': 12} == session
+        assert cast(MutableMapping[str, Any], {'a': 1, 'b': 12}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, key))
@@ -214,7 +214,7 @@ async def test_load_session_dont_load_expired_session(
             session['a'] = 1
             session['b'] = 2
         else:
-            assert {} == session
+            assert cast(MutableMapping[str, Any], {}) == session
 
         return web.Response(body=b'OK')
 
@@ -239,7 +239,7 @@ async def test_load_corrupted_session(
         session = await get_session(request)
         assert isinstance(session, Session)
         assert session.new
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, key))
@@ -260,7 +260,7 @@ async def test_load_session_different_key(
         session = await get_session(request)
         assert isinstance(session, Session)
         assert session.new
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, key))

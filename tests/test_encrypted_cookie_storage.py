@@ -8,7 +8,7 @@ from aiohttp import web
 from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
 
-from typing import no_type_check, Any, Dict, Tuple, Union
+from typing import no_type_check, Any, cast, Dict, MutableMapping, Tuple, Union
 
 from cryptography.fernet import Fernet
 
@@ -97,7 +97,7 @@ async def test_create_new_session_broken_by_format(
         assert isinstance(session, Session)
         assert session.new
         assert not session._changed
-        assert {} == session
+        assert cast(MutableMapping[str, Any], {}) == session
         return web.Response(body=b'OK')
 
     new_fernet = Fernet(Fernet.generate_key())
@@ -118,7 +118,7 @@ async def test_load_existing_session(
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
-        assert {'a': 1, 'b': 12} == session
+        assert cast(MutableMapping[str, Any], {'a': 1, 'b': 12}) == session
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, key))

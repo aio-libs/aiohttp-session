@@ -12,6 +12,7 @@ from aiohttp.web_middlewares import _Handler, _Middleware
 from typing import (
     Any,
     Callable,
+    cast,
     Dict,
     Hashable,
     Iterator,
@@ -184,11 +185,13 @@ def session_middleware(storage: 'AbstractStorage') -> _Middleware:
         handler: _Handler
     ) -> web.StreamResponse:
         request[STORAGE_KEY] = storage
+        raise_response = False
         response: Union[web.StreamResponse, web.HTTPException]
         try:
             response = await handler(request)
         except web.HTTPException as exc:
             response = exc
+            raise_response = True
         if not isinstance(response, (web.StreamResponse, web.HTTPException)):
             raise RuntimeError(
                 "Expect response, not {!r}".format(type(response)))
@@ -202,8 +205,8 @@ def session_middleware(storage: 'AbstractStorage') -> _Middleware:
         if session is not None:
             if session._changed:
                 await storage.save_session(request, response, session)
-        if isinstance(response, web.HTTPException):
-            raise response
+        if raise_response:
+            raise cast(web.HTTPException, response)
         return response
 
     return factory

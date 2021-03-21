@@ -40,7 +40,7 @@ async def test_max_age_also_returns_expires(
 
     async def handler(request: web.Request) -> web.StreamResponse:
         # Ignoring type since time.time is mocked in this context
-        time.time.return_value = 0.0  # type: ignore
+        time.time.return_value = 0.0  # type: ignore[attr-defined]
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')

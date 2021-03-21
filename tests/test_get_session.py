@@ -3,8 +3,6 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 
-from typing import no_type_check
-
 from aiohttp_session import (Session, get_session, SESSION_KEY, STORAGE_KEY,
                              new_session, AbstractStorage)
 
@@ -44,8 +42,10 @@ async def test_get_new_session() -> None:
 
     class Storage(AbstractStorage):
         # Ignoring typing since return type is on purpose wrong
-        @no_type_check
-        async def load_session(self, request: web.Request) -> None:
+        async def load_session(  # type: ignore[override]
+            self,
+            request: web.Request
+        ) -> None:
             pass
 
         async def save_session(
@@ -77,14 +77,13 @@ async def test_get_new_session_bad_return() -> None:
 
     class Storage(AbstractStorage):
         # Ignoring typing since return type is on purpose wrong
-        @no_type_check
-        async def new_session(self) -> str:
+        async def new_session(  # type: ignore[override]
+            self
+        ) -> str:
             return ''
 
-        # Ignoring typing since return type is on purpose wrong
-        @no_type_check
-        async def load_session(self, request: web.Request) -> None:
-            pass
+        async def load_session(self, request: web.Request) -> Session:
+            return Session(None, data=None, new=True)
 
         async def save_session(
             self,

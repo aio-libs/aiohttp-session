@@ -6,7 +6,7 @@ import nacl.utils
 import nacl.exceptions
 from nacl.encoding import Base64Encoder
 
-from aiohttp import web  # Imported for typing
+from aiohttp import web
 from typing import Any, Callable, Dict, Optional
 
 from . import AbstractStorage, Session

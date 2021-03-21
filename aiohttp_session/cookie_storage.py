@@ -4,7 +4,7 @@ import base64
 from cryptography import fernet
 from cryptography.fernet import InvalidToken
 
-from aiohttp import web  # Imported for typing
+from aiohttp import web
 from typing import Any, Callable, Dict, Optional, Union
 
 from . import AbstractStorage, Session

@@ -8,7 +8,7 @@ test: flake
 	py.test ./tests/
 
 mypy: flake
-	mypy --strict aiohttp_session tests
+	mypy
 
 vtest: flake develop
 	py.test ./tests/

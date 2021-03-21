@@ -24,7 +24,7 @@ def make_cookie(
         'session': data,
         'created': int(time.time())
     }
-    C = cookies.SimpleCookie()  # type: cookies.SimpleCookie[str]
+    C: cookies.SimpleCookie[str] = cookies.SimpleCookie()
     value = json.dumps(session_data)
     C["AIOHTTP_SESSION"] = value
     C["AIOHTTP_SESSION"]["path"] = path

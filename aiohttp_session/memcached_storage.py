@@ -1,14 +1,12 @@
+import aiomcache
 import json
 import uuid
 from time import time
 
 from aiohttp import web  # Imported for typing
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from . import AbstractStorage, Session
-
-if TYPE_CHECKING:  # pragma: nocover
-    import aiomcache.Client
 
 
 class MemcachedStorage(AbstractStorage):
@@ -16,7 +14,7 @@ class MemcachedStorage(AbstractStorage):
 
     def __init__(
         self,
-        memcached_conn: 'aiomcache.Client', *,
+        memcached_conn: aiomcache.Client, *,
         cookie_name: str = "AIOHTTP_SESSION",
         domain: Optional[str] = None,
         max_age: Optional[int] = None,

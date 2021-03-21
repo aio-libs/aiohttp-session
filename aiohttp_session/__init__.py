@@ -3,6 +3,7 @@
 import abc
 
 import json
+import sys
 import time
 
 from aiohttp import web
@@ -18,7 +19,10 @@ from typing import (
     Optional,
     Union,
 )
-from typing_extensions import TypedDict
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
 
 _TCookieParams = TypedDict(
     '_TCookieParams',
@@ -48,7 +52,7 @@ class Session(MutableMapping[str, Any]):
         max_age: Optional[int] = None
     ) -> None:
         self._changed = False
-        self._mapping = {}  # type: Dict[Any, Any]
+        self._mapping: Dict[Any, Any] = {}
         self._identity = identity if data != {} else None
         self._new = new if data != {} else True
         self._max_age = max_age
@@ -180,13 +184,11 @@ def session_middleware(storage: 'AbstractStorage') -> _Middleware:
         handler: _Handler
     ) -> web.StreamResponse:
         request[STORAGE_KEY] = storage
+        response: Union[web.StreamResponse, web.HTTPException]
         try:
-            response = await handler(
-                request
-            )  # type: Union[web.StreamResponse, web.HTTPException]
+            response = await handler(request)
         except web.HTTPException as exc:
             response = exc
-            raise_response = True
         if not isinstance(response, (web.StreamResponse, web.HTTPException)):
             raise RuntimeError(
                 "Expect response, not {!r}".format(type(response)))
@@ -227,13 +229,13 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         decoder: Callable[[str], Dict[str, Any]] = json.loads
     ) -> None:
         self._cookie_name = cookie_name
-        self._cookie_params = dict(
+        self._cookie_params = _TCookieParams(
             domain=domain,
             max_age=max_age,
             path=path,
             secure=secure,
             httponly=httponly
-        )  # type: _TCookieParams
+        )
         self._max_age = max_age
         self._encoder = encoder
         self._decoder = decoder
@@ -277,7 +279,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         pass
 
     def load_cookie(self, request: web.Request) -> Optional[str]:
-        cookie = request.cookies.get(self._cookie_name)  # type: Optional[str]
+        cookie: Optional[str] = request.cookies.get(self._cookie_name)
         return cookie
 
     def save_cookie(
@@ -286,7 +288,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         cookie_data: str, *,
         max_age: Optional[int] = None
     ) -> None:
-        params = self._cookie_params.copy()  # type: _TCookieParams
+        params = self._cookie_params.copy()
         if max_age is not None:
             params['max_age'] = max_age
             params['expires'] = time.strftime(

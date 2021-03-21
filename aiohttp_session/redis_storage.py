@@ -8,7 +8,7 @@ import warnings
 
 from distutils.version import StrictVersion
 
-from aiohttp import web  # Imported for typing
+from aiohttp import web
 from typing import Any, Callable, Dict, Optional
 
 from . import AbstractStorage, Session

@@ -3,16 +3,28 @@ import json
 import time
 
 from aiohttp import web
+from aiohttp.web_middlewares import _Handler
+from aiohttp.test_utils import TestClient
+
+from typing import Any, Optional
+
 from aiohttp_session import (session_middleware,
                              get_session, SimpleCookieStorage)
 
+from typedefs import _TAiohttpClient
 
-def make_cookie(client, data, path=None, domain=None):
+
+def make_cookie(
+    client: TestClient,
+    data: Any,
+    path: Optional[str] = None,
+    domain: Optional[str] = None
+) -> None:
     session_data = {
         'session': data,
         'created': int(time.time())
     }
-    C = cookies.SimpleCookie()
+    C: cookies.SimpleCookie[str] = cookies.SimpleCookie()
     value = json.dumps(session_data)
     C["AIOHTTP_SESSION"] = value
     C["AIOHTTP_SESSION"]["path"] = path
@@ -20,7 +32,11 @@ def make_cookie(client, data, path=None, domain=None):
     client.session.cookie_jar.update_cookies(C)
 
 
-def create_app(handler, path=None, domain=None):
+def create_app(
+    handler: _Handler,
+    path: Optional[str] = None,
+    domain: Optional[str] = None
+) -> web.Application:
     middleware = session_middleware(
         SimpleCookieStorage(
             max_age=10, path="/anotherpath", domain="127.0.0.1",
@@ -32,9 +48,9 @@ def create_app(handler, path=None, domain=None):
     return app
 
 
-async def test_with_same_path_domain(aiohttp_client):
+async def test_with_same_path_domain(aiohttp_client: _TAiohttpClient) -> None:
 
-    async def handler(request):
+    async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
@@ -59,9 +75,9 @@ async def test_with_same_path_domain(aiohttp_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_with_different_path(aiohttp_client):
+async def test_with_different_path(aiohttp_client: _TAiohttpClient) -> None:
 
-    async def handler(request):
+    async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
@@ -84,9 +100,9 @@ async def test_with_different_path(aiohttp_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_with_different_domain(aiohttp_client):
+async def test_with_different_domain(aiohttp_client: _TAiohttpClient) -> None:
 
-    async def handler(request):
+    async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
@@ -109,9 +125,11 @@ async def test_with_different_domain(aiohttp_client):
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_invalidate_with_same_path_domain(aiohttp_client):
+async def test_invalidate_with_same_path_domain(
+    aiohttp_client: _TAiohttpClient
+) -> None:
 
-    async def handler(request):
+    async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session.invalidate()
 

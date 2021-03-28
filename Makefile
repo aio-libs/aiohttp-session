@@ -1,11 +1,14 @@
 # Some simple testing tasks (sorry, UNIX only).
 
 flake:
-	flake8 aiohttp_session tests 
+	flake8 aiohttp_session tests
 
 
 test: flake
 	py.test ./tests/
+
+mypy: flake
+	mypy
 
 vtest: flake develop
 	py.test ./tests/

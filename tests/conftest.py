@@ -1,4 +1,3 @@
-# type: ignore
 import aiomcache
 import aioredis
 import asyncio
@@ -7,27 +6,62 @@ import pytest
 import sys
 import time
 import uuid
-from docker import from_env as docker_from_env
+from docker import (
+    DockerClient,
+    models as docker_models,
+    from_env as docker_from_env
+)
 import socket
 
+from typing import Any, Generator, Tuple
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
 
-def unused_port():
+_TContainerInfo = TypedDict(
+    '_TContainerInfo',
+    {
+        'host': str,
+        'port': int,
+        'container': docker_models.containers.Container,
+    },
+)
+
+
+_TRedisParams = TypedDict(
+    '_TRedisParams',
+    {
+        'address': Tuple[str, int]
+    },
+)
+
+_TMemcachedParams = TypedDict(
+    '_TMemcachedParams',
+    {
+        'host': str,
+        'port': int,
+    },
+)
+
+
+def unused_port() -> int:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("", 0))
     s.listen(1)
-    port = s.getsockname()[1]
+    port: int = s.getsockname()[1]
     s.close()
     return port
 
 
 @pytest.fixture(scope='session')
-def loop(request):
+def loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(None)
 
     yield loop
 
-    if not loop._closed:
+    if not loop.is_closed():
         loop.call_soon(loop.stop)
         loop.run_forever()
         loop.close()
@@ -36,19 +70,23 @@ def loop(request):
 
 
 @pytest.fixture(scope='session')
-def session_id():
+def session_id() -> str:
     """Unique session identifier, random string."""
     return str(uuid.uuid4())
 
 
 @pytest.fixture(scope='session')
-def docker():
+def docker() -> DockerClient:
     client = docker_from_env(version='auto')
     return client
 
 
 @pytest.fixture(scope='session')
-def redis_server(docker, session_id, loop, request):
+def redis_server(
+    docker: DockerClient,
+    session_id: str,
+    loop: asyncio.AbstractEventLoop,
+) -> Generator[_TContainerInfo, None, None]:
 
     image = 'redis:{}'.format('latest')
 
@@ -100,18 +138,28 @@ def redis_server(docker, session_id, loop, request):
 
 
 @pytest.fixture
-def redis_params(redis_server):
+def redis_params(redis_server: _TContainerInfo) -> _TRedisParams:
     return dict(address=(redis_server['host'], redis_server['port']))
 
 
 @pytest.fixture
-def redis(loop, redis_params):
+def redis(
+    loop: asyncio.AbstractEventLoop,
+    redis_params: _TRedisParams,
+) -> Generator[aioredis.commands.Redis, None, None]:
     pool = None
 
-    async def start(*args, no_loop=False, **kwargs):
+    async def start(
+        *args: Tuple[Any, ...],
+        no_loop: bool = False,
+        **kwargs: Any,
+    ) -> aioredis.commands.Redis:
         nonlocal pool
         params = redis_params.copy()
-        params.update(kwargs)
+        # Ignoring type as this is an unused option to pass arbitrary arguments
+        # when creating a redis connection. Alternative: create the typing for
+        # `aioredis.create_redis_pool` ourselves.
+        params.update(kwargs)  # type: ignore[arg-type]
         useloop = None if no_loop else loop
         pool = await aioredis.create_redis_pool(loop=useloop, **params)
         return pool
@@ -124,7 +172,10 @@ def redis(loop, redis_params):
 
 
 @pytest.fixture(scope='session')
-def memcached_server(docker, session_id, loop, request):
+def memcached_server(
+    docker: DockerClient,
+    session_id: str, loop: asyncio.AbstractEventLoop,
+) -> Generator[_TContainerInfo, None, None]:
 
     image = 'memcached:{}'.format('latest')
 
@@ -174,13 +225,16 @@ def memcached_server(docker, session_id, loop, request):
 
 
 @pytest.fixture
-def memcached_params(memcached_server):
+def memcached_params(memcached_server: _TContainerInfo) -> _TMemcachedParams:
     return dict(host=memcached_server['host'],
                 port=memcached_server['port'])
 
 
 @pytest.fixture
-def memcached(loop, memcached_params):
+def memcached(
+    loop: asyncio.AbstractEventLoop,
+    memcached_params: _TMemcachedParams
+) -> Generator[aiomcache.Client, None, None]:
     conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
     conn.close()

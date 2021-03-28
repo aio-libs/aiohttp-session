@@ -12,7 +12,7 @@ from . import AbstractStorage, Session
 class MemcachedStorage(AbstractStorage):
     """Memcached storage"""
 
-    def __init__(
+    def __init__(  # type: ignore[no-any-unimported]
         self,
         memcached_conn: aiomcache.Client, *,
         cookie_name: str = "AIOHTTP_SESSION",

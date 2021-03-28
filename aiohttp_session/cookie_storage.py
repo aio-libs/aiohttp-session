@@ -36,7 +36,9 @@ class EncryptedCookieStorage(AbstractStorage):
             pass
         elif isinstance(secret_key, (bytes, bytearray)):
             secret_key = base64.urlsafe_b64encode(secret_key)
-        self._fernet = fernet.Fernet(secret_key)
+        # TODO: `Fernet` expects `bytes` so we should `.encode()` if
+        # `secret_key` is a string
+        self._fernet = fernet.Fernet(secret_key)  # type: ignore[arg-type]
 
     async def load_session(self, request: web.Request) -> Session:
         cookie = self.load_cookie(request)

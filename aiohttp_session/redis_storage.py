@@ -17,7 +17,7 @@ from . import AbstractStorage, Session
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(
+    def __init__(  # type: ignore[no-any-unimported]
         self,
         redis_pool: 'aioredis.commands.Redis', *,
         cookie_name: str = "AIOHTTP_SESSION",

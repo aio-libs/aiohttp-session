@@ -14,7 +14,7 @@ pytest-mock==3.5.1
 pytest-sugar==0.9.4
 aiohttp<3.7
 multidict==4.7.6
-chardet==3.0.4
+chardet==4.0.0
 yarl==1.6.3
 aiomcache==0.6.0
 mypy==0.812

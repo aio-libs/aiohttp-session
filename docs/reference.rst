@@ -264,7 +264,7 @@ implement both :meth:`~AbstractStorage.load_session` and
       A helper for saving *cookie_data* (:class:`str`) into *response*
       (:class:`aiohttp.web.StreamResponse` or descendants).
 
-      *max_age* is cookie lifetime given from session. Storage defailt
+      *max_age* is cookie lifetime given from session. Storage default
       is used if the value is ``None``.
 
 Simple Storage

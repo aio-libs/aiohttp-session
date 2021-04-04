@@ -2,17 +2,17 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, cast, Dict, MutableMapping, Optional, Tuple
+from typing import Any, Callable, Dict, MutableMapping, Optional, Tuple, cast
 
-import pytest
 import aioredis
+import pytest
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
-from aiohttp_session import Session, get_session, session_middleware
-from aiohttp_session.redis_storage import RedisStorage
+from aiohttp.web_middlewares import _Handler
 from pytest_mock import MockFixture
 
+from aiohttp_session import Session, get_session, session_middleware
+from aiohttp_session.redis_storage import RedisStorage
 from .typedefs import AiohttpClient
 
 

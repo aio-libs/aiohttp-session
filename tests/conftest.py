@@ -1,15 +1,15 @@
 import asyncio
 import gc
+import socket
 import sys
 import time
 import uuid
-import socket
 from typing import Generator, Tuple
 
 import aiomcache
 import aioredis
 import pytest
-from docker import DockerClient, models as docker_models, from_env as docker_from_env
+from docker import DockerClient, from_env as docker_from_env, models as docker_models
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -89,13 +89,13 @@ def redis_server(  # type: ignore[misc]  # No docker types.
             '6379/tcp': port,
         },
         environment={
-            'http.host': '0.0.0.0',
+            'http.host': '0.0.0.0',  # noqa: S104
             'transport.host': '127.0.0.1',
         },
     )
 
     if sys.platform.startswith('darwin'):
-        host = '0.0.0.0'
+        host = '0.0.0.0'  # noqa: S104
     else:
         inspection = docker.api.inspect_container(container.id)
         host = inspection['NetworkSettings']['IPAddress']
@@ -122,7 +122,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
 
 
 @pytest.fixture
-def redis_params(redis_server: _ContainerInfo) -> _RedisParams:  # type: ignore[misc]  # No docker types.
+def redis_params(redis_server: _ContainerInfo) -> _RedisParams:  # type: ignore[misc]
     return dict(address=(redis_server['host'], redis_server['port']))
 
 
@@ -162,13 +162,13 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
             '11211/tcp': port,
         },
         environment={
-            'http.host': '0.0.0.0',
+            'http.host': '0.0.0.0',  # noqa: S104
             'transport.host': '127.0.0.1',
         },
     )
 
     if sys.platform.startswith('darwin'):
-        host = '0.0.0.0'
+        host = '0.0.0.0'  # noqa: S104
     else:
         inspection = docker.api.inspect_container(container.id)
         host = inspection['NetworkSettings']['IPAddress']
@@ -193,9 +193,8 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
 
 
 @pytest.fixture
-def memcached_params(memcached_server: _ContainerInfo) -> _MemcachedParams:  # type: ignore[misc]  # No docker types.
-    return dict(host=memcached_server['host'],
-                port=memcached_server['port'])
+def memcached_params(memcached_server: _ContainerInfo) -> _MemcachedParams:  # type: ignore[misc]
+    return dict(host=memcached_server["host"], port=memcached_server["port"])
 
 
 @pytest.fixture

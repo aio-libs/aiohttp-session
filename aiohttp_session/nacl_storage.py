@@ -2,9 +2,9 @@ import binascii
 import json
 from typing import Any, Callable, Optional
 
+import nacl.exceptions
 import nacl.secret
 import nacl.utils
-import nacl.exceptions
 from aiohttp import web
 from nacl.encoding import Base64Encoder
 

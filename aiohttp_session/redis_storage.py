@@ -1,10 +1,10 @@
 import json
 import uuid
 import warnings
+from distutils.version import StrictVersion
 from typing import Any, Callable, Optional
 
 from aiohttp import web
-from distutils.version import StrictVersion
 
 from . import AbstractStorage, Session
 

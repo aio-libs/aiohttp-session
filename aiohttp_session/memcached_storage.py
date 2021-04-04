@@ -3,7 +3,7 @@ import json
 import uuid
 from time import time
 
-from aiohttp import web  # Imported for typing
+from aiohttp import web
 from typing import Any, Callable, Dict, Optional
 
 from . import AbstractStorage, Session
@@ -12,7 +12,7 @@ from . import AbstractStorage, Session
 class MemcachedStorage(AbstractStorage):
     """Memcached storage"""
 
-    def __init__(  # type: ignore[no-any-unimported]
+    def __init__(  # type: ignore[no-any-unimported]  # TODO: aiomcache
         self,
         memcached_conn: aiomcache.Client, *,
         cookie_name: str = "AIOHTTP_SESSION",
@@ -22,8 +22,8 @@ class MemcachedStorage(AbstractStorage):
         secure: Optional[bool] = None,
         httponly: bool = True,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
-        encoder: Callable[[Dict[str, Any]], str] = json.dumps,
-        decoder: Callable[[str], Dict[str, Any]] = json.loads
+        encoder: Callable[[object], str] = json.dumps,
+        decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,

@@ -4,12 +4,11 @@ from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 from aiohttp.web_middlewares import _Handler
 
-from typing import no_type_check, Tuple
+from typing import Tuple
 
-from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage, SESSION_KEY)
+from aiohttp_session import SESSION_KEY, SimpleCookieStorage, get_session, session_middleware
 
-from typedefs import _TAiohttpClient
+from .typedefs import AiohttpClient
 
 
 def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
@@ -20,7 +19,7 @@ def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
     return app
 
 
-async def test_stream_response(aiohttp_client: _TAiohttpClient) -> None:
+async def test_stream_response(aiohttp_client: AiohttpClient) -> None:
 
     async def stream_response(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -34,11 +33,8 @@ async def test_stream_response(aiohttp_client: _TAiohttpClient) -> None:
     assert SESSION_KEY.upper() not in resp.cookies
 
 
-async def test_bad_response_type(aiohttp_client: _TAiohttpClient) -> None:
-
-    # Ignoring typing since return type is on purpose wrong
-    @no_type_check
-    async def bad_response(request: web.Request) -> str:
+async def test_bad_response_type(aiohttp_client: AiohttpClient) -> None:
+    async def bad_response(request: web.Request):  # type: ignore[no-untyped-def]
         return ''
 
     middleware = session_middleware(SimpleCookieStorage())
@@ -47,9 +43,7 @@ async def test_bad_response_type(aiohttp_client: _TAiohttpClient) -> None:
         await middleware(req, bad_response)
 
 
-async def test_prepared_response_type(
-    aiohttp_client: _TAiohttpClient
-) -> None:
+async def test_prepared_response_type(aiohttp_client: AiohttpClient) -> None:
 
     async def prepared_response(request: web.Request) -> web.StreamResponse:
         resp = web.Response()

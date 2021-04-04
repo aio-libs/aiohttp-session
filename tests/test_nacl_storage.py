@@ -17,7 +17,7 @@ from aiohttp_session import (Session, session_middleware, get_session,
                              new_session)
 from aiohttp_session.nacl_storage import NaClCookieStorage
 
-from typedefs import _TAiohttpClient
+from .typedefs import AiohttpClient
 
 
 def test_invalid_key() -> None:
@@ -28,7 +28,7 @@ def test_invalid_key() -> None:
 def make_cookie(
     client: TestClient,
     secretbox: nacl.secret.SecretBox,
-    data: Dict[Any, Any]
+    data: Dict[str, Any]
 ) -> None:
     session_data = {
         'session': data,
@@ -65,22 +65,18 @@ def decrypt(secretbox: nacl.secret.SecretBox, cookie_value: str) -> Any:
     )
 
 
-# pytest.fixture decorator strips the typing of the decorated function
-@no_type_check
 @pytest.fixture
-def secretbox(key: bytes) -> nacl.secret.SecretBox:
+def secretbox(key: bytes) -> nacl.secret.SecretBox:  # type: ignore[misc]  # No nacl types
     return nacl.secret.SecretBox(key)
 
 
-# pytest.fixture decorator strips the typing of the decorated function
-@no_type_check
 @pytest.fixture
 def key() -> bytes:
-    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
+    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)  # type: ignore[no-any-return]
 
 
 async def test_create_new_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     secretbox: nacl.secret.SecretBox,
     key: bytes
 ) -> None:
@@ -99,7 +95,7 @@ async def test_create_new_session(
 
 
 async def test_load_existing_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     secretbox: nacl.secret.SecretBox,
     key: bytes
 ) -> None:
@@ -119,7 +115,7 @@ async def test_load_existing_session(
 
 
 async def test_change_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     secretbox: nacl.secret.SecretBox,
     key: bytes
 ) -> None:
@@ -149,7 +145,7 @@ async def test_change_session(
 
 
 async def test_del_cookie_on_session_invalidation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     secretbox: nacl.secret.SecretBox,
     key: bytes
 ) -> None:
@@ -171,7 +167,7 @@ async def test_del_cookie_on_session_invalidation(
 
 
 async def test_nacl_session_fixation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     secretbox: nacl.secret.SecretBox,
     key: bytes
 ) -> None:
@@ -203,7 +199,7 @@ async def test_nacl_session_fixation(
 
 
 async def test_load_session_dont_load_expired_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     key: bytes
 ) -> None:
 
@@ -231,7 +227,7 @@ async def test_load_session_dont_load_expired_session(
 
 
 async def test_load_corrupted_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     key: bytes
 ) -> None:
 
@@ -252,7 +248,7 @@ async def test_load_corrupted_session(
 
 
 async def test_load_session_different_key(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     key: bytes
 ) -> None:
 
@@ -273,7 +269,7 @@ async def test_load_session_different_key(
 
 
 async def test_load_expired_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     key: bytes
 ) -> None:
     MAX_AGE = 2

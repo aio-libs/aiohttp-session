@@ -6,7 +6,7 @@ from aiohttp_session import setup, get_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 
-async def handler(request):
+async def handler(request: web.Request) -> web.Response:
     session = await get_session(request)
     last_visit = session['last_visit'] if 'last_visit' in session else None
     session['last_visit'] = time.time()
@@ -14,7 +14,7 @@ async def handler(request):
     return web.Response(text=text)
 
 
-def make_app():
+def make_app() -> web.Application:
     app = web.Application()
     # secret_key must be 32 url-safe base64-encoded bytes
     fernet_key = fernet.Fernet.generate_key()

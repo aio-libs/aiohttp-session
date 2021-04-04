@@ -2,7 +2,7 @@ import pytest
 import time
 
 from aiohttp_session import Session
-from typing import Any, cast, MutableMapping
+from typing import Any, MutableMapping, cast
 
 
 def test_create() -> None:

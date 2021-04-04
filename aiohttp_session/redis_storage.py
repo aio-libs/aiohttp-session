@@ -17,7 +17,7 @@ from . import AbstractStorage, Session
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(  # type: ignore[no-any-unimported]
+    def __init__(  # type: ignore[no-any-unimported]  # TODO: aioredis
         self,
         redis_pool: 'aioredis.commands.Redis', *,
         cookie_name: str = "AIOHTTP_SESSION",
@@ -27,8 +27,8 @@ class RedisStorage(AbstractStorage):
         secure: Optional[bool] = None,
         httponly: bool = True,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
-        encoder: Callable[[Dict[str, Any]], str] = json.dumps,
-        decoder: Callable[[str], Dict[str, Any]] = json.loads
+        encoder: Callable[[object], str] = json.dumps,
+        decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,

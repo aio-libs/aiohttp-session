@@ -3,10 +3,9 @@ from aiohttp.web_middlewares import _Handler
 
 from typing import Tuple
 
-from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage)
+from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
 
-from typedefs import _TAiohttpClient
+from .typedefs import AiohttpClient
 
 
 def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
@@ -17,7 +16,7 @@ def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
     return app
 
 
-async def test_exceptions(aiohttp_client: _TAiohttpClient) -> None:
+async def test_exceptions(aiohttp_client: AiohttpClient) -> None:
 
     async def save(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)

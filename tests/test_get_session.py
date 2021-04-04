@@ -41,11 +41,7 @@ async def test_get_new_session() -> None:
     session = Session('identity', data=None, new=False)
 
     class Storage(AbstractStorage):
-        # Ignoring typing since return type is on purpose wrong
-        async def load_session(  # type: ignore[override]
-            self,
-            request: web.Request
-        ) -> None:
+        async def load_session(self, request: web.Request):  # type: ignore[no-untyped-def]
             pass
 
         async def save_session(
@@ -76,10 +72,7 @@ async def test_get_new_session_bad_return() -> None:
     req = make_mocked_request('GET', '/')
 
     class Storage(AbstractStorage):
-        # Ignoring typing since return type is on purpose wrong
-        async def new_session(  # type: ignore[override]
-            self
-        ) -> str:
+        async def new_session(self):  # type: ignore[no-untyped-def]
             return ''
 
         async def load_session(self, request: web.Request) -> Session:

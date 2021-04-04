@@ -24,8 +24,8 @@ class EncryptedCookieStorage(AbstractStorage):
         path: str = '/',
         secure: Optional[bool] = None,
         httponly: bool = True,
-        encoder: Callable[[Dict[str, Any]], str] = json.dumps,
-        decoder: Callable[[str], Dict[str, Any]] = json.loads
+        encoder: Callable[[object], str] = json.dumps,
+        decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
@@ -36,8 +36,7 @@ class EncryptedCookieStorage(AbstractStorage):
             pass
         elif isinstance(secret_key, (bytes, bytearray)):
             secret_key = base64.urlsafe_b64encode(secret_key)
-        # TODO: `Fernet` expects `bytes` so we should `.encode()` if
-        # `secret_key` is a string
+        # TODO: Typing error fixed in https://github.com/pyca/cryptography/pull/5951
         self._fernet = fernet.Fernet(secret_key)  # type: ignore[arg-type]
 
     async def load_session(self, request: web.Request) -> Session:

@@ -3,4 +3,4 @@ from aiohttp.test_utils import TestClient
 
 from typing import Awaitable, Callable
 
-_TAiohttpClient = Callable[[web.Application], Awaitable[TestClient]]
+AiohttpClient = Callable[[web.Application], Awaitable[TestClient]]

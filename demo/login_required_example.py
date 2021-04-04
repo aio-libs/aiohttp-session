@@ -1,6 +1,6 @@
 import base64
 from http import HTTPStatus
-from typing import Any, Awaitable, Callable, TypeVar
+from typing import Any, Awaitable, Callable
 
 from cryptography import fernet
 from aiohttp import web

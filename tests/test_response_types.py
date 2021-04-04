@@ -1,11 +1,9 @@
-import pytest
+from typing import Tuple
 
+import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 from aiohttp.web_middlewares import _Handler
-
-from typing import Tuple
-
 from aiohttp_session import SESSION_KEY, SimpleCookieStorage, get_session, session_middleware
 
 from .typedefs import AiohttpClient

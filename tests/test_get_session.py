@@ -1,10 +1,8 @@
 import pytest
-
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
-
-from aiohttp_session import (Session, get_session, SESSION_KEY, STORAGE_KEY,
-                             new_session, AbstractStorage)
+from aiohttp_session import (SESSION_KEY, STORAGE_KEY, AbstractStorage, Session,
+                             get_session, new_session)
 
 
 async def test_get_stored_session() -> None:

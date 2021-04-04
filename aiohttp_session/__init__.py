@@ -3,7 +3,6 @@
 __version__ = '2.9.0'
 
 import abc
-
 import json
 import sys
 import time
@@ -175,7 +174,7 @@ def session_middleware(storage: 'AbstractStorage') -> _Middleware:
     ) -> web.StreamResponse:
         request[STORAGE_KEY] = storage
         raise_response = False
-        # TODO aiohttp 4: Remove Union from response, and drop the raise_response variable.
+        # TODO aiohttp 4: Remove Union from response, and drop the raise_response variable
         response: Union[web.StreamResponse, web.HTTPException]
         try:
             response = await handler(request)

@@ -1,10 +1,10 @@
-import aiomcache
 import json
 import uuid
 from time import time
+from typing import Any, Callable, Optional
 
+import aiomcache
 from aiohttp import web
-from typing import Any, Callable, Dict, Optional
 
 from . import AbstractStorage, Session
 
@@ -84,6 +84,4 @@ class MemcachedStorage(AbstractStorage):
         else:
             expire = max_age
         stored_key = (self.cookie_name + '_' + key).encode('utf-8')
-        await self.conn.set(
-                                stored_key, data.encode('utf-8'),
-                                exptime=expire)
+        await self.conn.set(stored_key, data.encode('utf-8'), exptime=expire)

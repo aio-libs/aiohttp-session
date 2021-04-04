@@ -1,15 +1,13 @@
-from unittest import mock
 import json
 import time
+from typing import Any, Dict
+from unittest import mock
 
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
+from aiohttp.web_middlewares import _Handler
 
-from typing import Any, Dict
-
-from aiohttp_session import get_session, SimpleCookieStorage
-from aiohttp_session import setup as setup_middleware
+from aiohttp_session import SimpleCookieStorage, get_session, setup as setup_middleware
 
 from .typedefs import AiohttpClient
 

@@ -1,19 +1,16 @@
-import aiomcache
-import aioredis
 import asyncio
 import gc
-import pytest
 import sys
 import time
 import uuid
-from docker import (
-    DockerClient,
-    models as docker_models,
-    from_env as docker_from_env
-)
 import socket
+from typing import Generator, Tuple
 
-from typing import Any, Generator, Tuple
+import aiomcache
+import aioredis
+import pytest
+from docker import DockerClient, models as docker_models, from_env as docker_from_env
+
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
@@ -77,7 +74,6 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     session_id: str,
     loop: asyncio.AbstractEventLoop,
 ) -> Generator[_ContainerInfo, None, None]:
-
     image = 'redis:{}'.format('latest')
 
     if sys.platform.startswith('darwin'):
@@ -106,7 +102,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
         port = 6379
 
     delay = 0.1
-    for i in range(20):
+    for _i in range(20):
         try:
             conn = loop.run_until_complete(
                 aioredis.create_connection((host, port), loop=loop)
@@ -179,7 +175,7 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
         port = 11211
 
     delay = 0.1
-    for i in range(20):
+    for _i in range(20):
         try:
             conn = aiomcache.Client(host, port, loop=loop)
             loop.run_until_complete(conn.set(b'foo', b'bar'))

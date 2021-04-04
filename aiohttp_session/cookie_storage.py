@@ -1,11 +1,10 @@
-import json
 import base64
-
-from cryptography import fernet
-from cryptography.fernet import InvalidToken
+import json
+from typing import Any, Callable, Optional, Union
 
 from aiohttp import web
-from typing import Any, Callable, Dict, Optional, Union
+from cryptography import fernet
+from cryptography.fernet import InvalidToken
 
 from . import AbstractStorage, Session
 from .log import log

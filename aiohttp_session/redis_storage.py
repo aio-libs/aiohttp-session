@@ -1,17 +1,17 @@
+import json
+import uuid
+import warnings
+from typing import Any, Callable, Optional
+
+from aiohttp import web
+from distutils.version import StrictVersion
+
+from . import AbstractStorage, Session
+
 try:
     import aioredis
 except ImportError:  # pragma: no cover
     aioredis = None
-import json
-import uuid
-import warnings
-
-from distutils.version import StrictVersion
-
-from aiohttp import web
-from typing import Any, Callable, Dict, Optional
-
-from . import AbstractStorage, Session
 
 
 class RedisStorage(AbstractStorage):
@@ -47,8 +47,7 @@ class RedisStorage(AbstractStorage):
             )
             redis_pool = aioredis.commands.Redis(redis_pool)
         elif not isinstance(redis_pool, aioredis.commands.Redis):
-            raise TypeError("Expexted aioredis.commands.Redis got {}".format(
-                    type(redis_pool)))
+            raise TypeError("Expexted aioredis.commands.Redis got {}".format(type(redis_pool)))
         self._redis = redis_pool
 
     async def load_session(self, request: web.Request) -> Session:

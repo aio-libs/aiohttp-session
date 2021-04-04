@@ -1,19 +1,17 @@
-import aioredis
-import json
-import pytest
-import uuid
-import time
 import asyncio
+import json
+import time
+import uuid
+from typing import Any, Callable, cast, Dict, MutableMapping, Optional, Tuple
 
+import pytest
+import aioredis
 from aiohttp import web
 from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
-
-from typing import Any, Callable, cast, Dict, MutableMapping, Optional, Tuple
-from pytest_mock import MockFixture
-
-from aiohttp_session import Session, session_middleware, get_session
+from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
+from pytest_mock import MockFixture
 
 from .typedefs import AiohttpClient
 

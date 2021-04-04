@@ -1,8 +1,7 @@
-from aiohttp import web
-from aiohttp.web_middlewares import _Handler
-
 from typing import Tuple
 
+from aiohttp import web
+from aiohttp.web_middlewares import _Handler
 from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
 
 from .typedefs import AiohttpClient

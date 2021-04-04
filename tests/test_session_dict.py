@@ -1,8 +1,8 @@
-import pytest
 import time
-
-from aiohttp_session import Session
 from typing import Any, MutableMapping, cast
+
+import pytest
+from aiohttp_session import Session
 
 
 def test_create() -> None:

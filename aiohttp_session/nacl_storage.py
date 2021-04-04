@@ -1,13 +1,12 @@
 import binascii
 import json
+from typing import Any, Callable, Optional
 
 import nacl.secret
 import nacl.utils
 import nacl.exceptions
-from nacl.encoding import Base64Encoder
-
 from aiohttp import web
-from typing import Any, Callable, Dict, Optional
+from nacl.encoding import Base64Encoder
 
 from . import AbstractStorage, Session
 from .log import log

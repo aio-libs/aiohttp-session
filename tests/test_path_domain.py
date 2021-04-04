@@ -1,13 +1,11 @@
-from http import cookies
 import json
 import time
-
-from aiohttp import web
-from aiohttp.web_middlewares import _Handler
-from aiohttp.test_utils import TestClient
-
+from http import cookies
 from typing import Any, Optional
 
+from aiohttp import web
+from aiohttp.test_utils import TestClient
+from aiohttp.web_middlewares import _Handler
 from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
 
 from .typedefs import AiohttpClient
@@ -36,11 +34,8 @@ def create_app(
     path: Optional[str] = None,
     domain: Optional[str] = None
 ) -> web.Application:
-    middleware = session_middleware(
-        SimpleCookieStorage(
-            max_age=10, path="/anotherpath", domain="127.0.0.1",
-            )
-        )
+    storage = SimpleCookieStorage(max_age=10, path="/anotherpath", domain="127.0.0.1")
+    middleware = session_middleware(storage)
     app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     app.router.add_route('GET', '/anotherpath', handler)

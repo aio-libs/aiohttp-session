@@ -1,21 +1,17 @@
+import asyncio
 import json
 import time
-import asyncio
+from typing import Any, Dict, MutableMapping, Optional, cast
 
-import pytest
 import nacl.secret
 import nacl.utils
+import pytest
 from aiohttp import web
 from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
-
-from nacl.encoding import Base64Encoder
-
-from typing import no_type_check, Any, cast, Dict, MutableMapping, Optional
-
-from aiohttp_session import (Session, session_middleware, get_session,
-                             new_session)
+from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.nacl_storage import NaClCookieStorage
+from nacl.encoding import Base64Encoder
 
 from .typedefs import AiohttpClient
 

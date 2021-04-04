@@ -1,19 +1,15 @@
 import asyncio
-import json
 import base64
+import json
 import time
+from typing import Any, cast, Dict, MutableMapping, Tuple, Union
 
 import pytest
 from aiohttp import web
 from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
-
-from typing import Any, cast, Dict, MutableMapping, Tuple, Union
-
 from cryptography.fernet import Fernet
-
-from aiohttp_session import (Session, session_middleware, get_session,
-                             new_session)
+from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .typedefs import AiohttpClient

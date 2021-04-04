@@ -47,7 +47,7 @@ class RedisStorage(AbstractStorage):
             )
             redis_pool = aioredis.commands.Redis(redis_pool)
         elif not isinstance(redis_pool, aioredis.commands.Redis):
-            raise TypeError("Expexted aioredis.commands.Redis got {}".format(type(redis_pool)))
+            raise TypeError("Expected aioredis.commands.Redis got {}".format(type(redis_pool)))
         self._redis = redis_pool
 
     async def load_session(self, request: web.Request) -> Session:

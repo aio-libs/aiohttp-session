@@ -141,8 +141,7 @@ async def get_session(request: web.Request) -> Session:
         if not isinstance(session, Session):
             raise RuntimeError(
                 "Installed {!r} storage should return session instance "
-                "on .load_session() call, got {!r}.".format(storage,
-                                                            session))
+                "on .load_session() call, got {!r}.".format(storage, session))
         request[SESSION_KEY] = session
     return session
 
@@ -281,7 +280,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         if max_age is not None:
             params['max_age'] = max_age
             t = time.gmtime(time.time() + max_age)
-            params['expires'] = time.strftime("%a, %d-%b-%Y %T GMT", t)
+            params["expires"] = time.strftime("%a, %d-%b-%Y %T GMT", t)
         if not cookie_data:
             response.del_cookie(self._cookie_name, domain=params["domain"],
                                 path=params["path"])

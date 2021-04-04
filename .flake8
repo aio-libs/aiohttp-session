@@ -7,6 +7,9 @@ select = A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,B901,B902,B903,B950
 # E722: Superseeded by B001 (from Bugbear)
 # W503: Mutually exclusive with W504.
 ignore = E501,E722,W503
+per-file-ignores =
+    # S101: Pytest uses assert
+    tests/*:S101
 
 # flake8-import-order
 application-import-names = aiohttp_session

@@ -7,7 +7,7 @@ aioredis==1.2
 cryptography==3.4.7
 docker==4.4.4
 pynacl==1.4.0
-pytest==6.2.2
+pytest==6.2.3
 pytest-aiohttp==0.3.0
 pytest-cov==2.11.1
 pytest-mock==3.5.1

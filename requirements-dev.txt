@@ -1,17 +1,17 @@
 attrs==20.3.0
-flake8==3.9.0
+flake8==3.9.1
 flake8-bandit==2.1.2
 flake8-bugbear==21.4.3
 flake8-import-order==0.18.1
 #flake8-requirements==1.4
-sphinx==3.5.3
+sphinx==3.5.4
 pep257==0.7.0
 -e .
 aioredis==1.2
 cryptography==3.4.7
-docker==4.4.4
+docker==5.0.0
 pynacl==1.4.0
-pytest==6.2.2
+pytest==6.2.3
 pytest-aiohttp==0.3.0
 pytest-cov==2.11.1
 pytest-mock==3.5.1

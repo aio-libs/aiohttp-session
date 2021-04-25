@@ -7,7 +7,7 @@ from aiohttp_session import setup, get_session
 from aiohttp_session.memcached_storage import MemcachedStorage
 
 
-async def handler(request):
+async def handler(request: web.Request) -> web.Response:
     session = await get_session(request)
     last_visit = session['last_visit'] if 'last_visit' in session else None
     session['last_visit'] = time.time()
@@ -15,7 +15,7 @@ async def handler(request):
     return web.Response(text=text)
 
 
-async def make_app():
+async def make_app() -> web.Application:
     app = web.Application()
     mc = aiomcache.Client("127.0.0.1", 11211, loop=loop)
     setup(app, MemcachedStorage(mc))

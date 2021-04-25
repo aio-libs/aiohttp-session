@@ -1,19 +1,17 @@
-import json
-import uuid
-import time
 import asyncio
+import json
+import time
+import uuid
+from typing import Any, Callable, Dict, MutableMapping, Optional, cast
+
 import aiomcache
-
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
+from aiohttp.web_middlewares import _Handler
 
-from typing import Any, Callable, cast, Dict, MutableMapping, Optional
-
-from aiohttp_session import Session, session_middleware, get_session
+from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.memcached_storage import MemcachedStorage
-
-from typedefs import _TAiohttpClient
+from .typedefs import AiohttpClient
 
 
 def create_app(
@@ -32,7 +30,7 @@ def create_app(
 async def make_cookie(
     client: TestClient,
     memcached: aiomcache.Client,
-    data: Dict[Any, Any]
+    data: Dict[str, Any]
 ) -> None:
     session_data = {
         'session': data,
@@ -61,21 +59,17 @@ async def make_cookie_with_bad_value(
     )
 
 
-async def load_cookie(
-    client: TestClient,
-    memcached: aiomcache.Client
-) -> Any:
+async def load_cookie(client: TestClient, memcached: aiomcache.Client) -> Dict[str, Any]:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url('/'))
     key = cookies['AIOHTTP_SESSION']
     storage_key = ('AIOHTTP_SESSION_' + key.value).encode('utf-8')
     encoded = await memcached.get(storage_key)
     s = encoded.decode('utf-8')
-    value = json.loads(s)
-    return value
+    return cast(Dict[str, Any], json.loads(s))
 
 
 async def test_create_new_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -93,7 +87,7 @@ async def test_create_new_session(
 
 
 async def test_load_existing_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -112,7 +106,7 @@ async def test_load_existing_session(
 
 
 async def test_load_bad_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -131,7 +125,7 @@ async def test_load_bad_session(
 
 
 async def test_change_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -160,7 +154,7 @@ async def test_change_session(
 
 
 async def test_clear_cookie_on_session_invalidation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -183,7 +177,7 @@ async def test_clear_cookie_on_session_invalidation(
 
 
 async def test_create_cookie_in_handler(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -213,7 +207,7 @@ async def test_create_cookie_in_handler(
 
 
 async def test_create_new_session_if_key_doesnt_exists_in_memcached(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -232,7 +226,7 @@ async def test_create_new_session_if_key_doesnt_exists_in_memcached(
 
 
 async def test_create_storage_with_custom_key_factory(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
 
@@ -258,10 +252,9 @@ async def test_create_storage_with_custom_key_factory(
 
 
 async def test_memcached_session_fixation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
-
     async def login(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session['k'] = 'v'
@@ -289,10 +282,9 @@ async def test_memcached_session_fixation(
 
 
 async def test_load_session_dont_load_expired_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
-
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         exp_param = request.rel_url.query.get('exp', None)
@@ -317,7 +309,7 @@ async def test_load_session_dont_load_expired_session(
 
 
 async def test_memcached_max_age_over_30_days(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     memcached: aiomcache.Client
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:

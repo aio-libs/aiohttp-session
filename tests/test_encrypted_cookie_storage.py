@@ -1,32 +1,24 @@
 import asyncio
-import json
 import base64
+import json
 import time
+from typing import Any, Dict, MutableMapping, Tuple, Union, cast
 
 import pytest
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
-
-from typing import no_type_check, Any, cast, Dict, MutableMapping, Tuple, Union
-
+from aiohttp.web_middlewares import _Handler
 from cryptography.fernet import Fernet
 
-from aiohttp_session import (Session, session_middleware, get_session,
-                             new_session)
+from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
-
-from typedefs import _TAiohttpClient
+from .typedefs import AiohttpClient
 
 
 MAX_AGE = 1
 
 
-def make_cookie(
-    client: TestClient,
-    fernet: Fernet,
-    data: Dict[Any, Any]
-) -> None:
+def make_cookie(client: TestClient, fernet: Fernet, data: Dict[str, Any]) -> None:
     session_data = {
         'session': data,
         'created': int(time.time())
@@ -51,15 +43,12 @@ def create_app(
     return app
 
 
-def decrypt(fernet: Fernet, cookie_value: str) -> Any:
+def decrypt(fernet: Fernet, cookie_value: str) -> Dict[str, Any]:
     assert type(cookie_value) == str
-    return json.loads(
-        fernet.decrypt(cookie_value.encode('utf-8')).decode('utf-8')
-    )
+    cookie_value = fernet.decrypt(cookie_value.encode("utf-8")).decode("utf-8")
+    return cast(Dict[str, Any], json.loads(cookie_value))
 
 
-# pytest.fixture decorator strips the typing of the decorated function
-@no_type_check
 @pytest.fixture
 def fernet_and_key() -> Tuple[Fernet, bytes]:
     key = Fernet.generate_key()
@@ -67,15 +56,11 @@ def fernet_and_key() -> Tuple[Fernet, bytes]:
     return fernet, base64.urlsafe_b64decode(key)
 
 
-# pytest.fixture decorator strips the typing of the decorated function
-@no_type_check
 @pytest.fixture
 def fernet(fernet_and_key: Tuple[Fernet, bytes]) -> Fernet:
     return fernet_and_key[0]
 
 
-# pytest.fixture decorator strips the typing of the decorated function
-@no_type_check
 @pytest.fixture
 def key(fernet_and_key: Tuple[Fernet, bytes]) -> bytes:
     return fernet_and_key[1]
@@ -87,7 +72,7 @@ def test_invalid_key() -> None:
 
 
 async def test_create_new_session_broken_by_format(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     fernet: Fernet,
     key: bytes
 ) -> None:
@@ -108,7 +93,7 @@ async def test_create_new_session_broken_by_format(
 
 
 async def test_load_existing_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     fernet: Fernet,
     key: bytes
 ) -> None:
@@ -128,7 +113,7 @@ async def test_load_existing_session(
 
 
 async def test_change_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     fernet: Fernet,
     key: bytes
 ) -> None:
@@ -158,7 +143,7 @@ async def test_change_session(
 
 
 async def test_clear_cookie_on_session_invalidation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     fernet: Fernet,
     key: bytes
 ) -> None:
@@ -180,7 +165,7 @@ async def test_clear_cookie_on_session_invalidation(
 
 
 async def test_encrypted_cookie_session_fixation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     fernet: Fernet,
     key: bytes
 ) -> None:
@@ -212,7 +197,7 @@ async def test_encrypted_cookie_session_fixation(
 
 
 async def test_fernet_ttl(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     fernet: Fernet,
     key: bytes
 ) -> None:

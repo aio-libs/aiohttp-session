@@ -1,13 +1,12 @@
 import binascii
 import json
+from typing import Any, Callable, Optional
 
+import nacl.exceptions
 import nacl.secret
 import nacl.utils
-import nacl.exceptions
-from nacl.encoding import Base64Encoder
-
 from aiohttp import web
-from typing import Any, Callable, Dict, Optional
+from nacl.encoding import Base64Encoder
 
 from . import AbstractStorage, Session
 from .log import log
@@ -26,8 +25,8 @@ class NaClCookieStorage(AbstractStorage):
         path: str = '/',
         secure: Optional[bool] = None,
         httponly: bool = True,
-        encoder: Callable[[Dict[str, Any]], str] = json.dumps,
-        decoder: Callable[[str], Dict[str, Any]] = json.loads
+        encoder: Callable[[object], str] = json.dumps,
+        decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,

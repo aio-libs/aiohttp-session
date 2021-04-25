@@ -1,20 +1,17 @@
-from unittest import mock
 import json
 import time
+from typing import Any, Dict
+from unittest import mock
 
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
+from aiohttp.web_middlewares import _Handler
 
-from typing import Any, Dict
-
-from aiohttp_session import get_session, SimpleCookieStorage
-from aiohttp_session import setup as setup_middleware
-
-from typedefs import _TAiohttpClient
+from aiohttp_session import SimpleCookieStorage, get_session, setup as setup_middleware
+from .typedefs import AiohttpClient
 
 
-def make_cookie(client: TestClient, data: Dict[Any, Any]) -> None:
+def make_cookie(client: TestClient, data: Dict[str, Any]) -> None:
     session_data = {
         'session': data,
         'created': int(time.time())
@@ -34,13 +31,9 @@ def create_app(handler: _Handler) -> web.Application:
     return app
 
 
-async def test_max_age_also_returns_expires(
-    aiohttp_client: _TAiohttpClient
-) -> None:
+async def test_max_age_also_returns_expires(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
-        # Ignoring type since time.time is mocked in this context
-        time.time.return_value = 0.0  # type: ignore[attr-defined]
         session = await get_session(request)
         session['c'] = 3
         return web.Response(body=b'OK')
@@ -52,5 +45,4 @@ async def test_max_age_also_returns_expires(
         make_cookie(client, {'a': 1, 'b': 2})
         resp = await client.get('/')
         assert resp.status == 200
-        assert 'expires=Thu, 01-Jan-1970 00:00:10 GMT' in \
-               resp.headers['SET-COOKIE']
+        assert "expires=Thu, 01-Jan-1970 00:00:10 GMT" in resp.headers["SET-COOKIE"]

@@ -1,19 +1,16 @@
 import json
 import time
+from typing import Any, Dict, MutableMapping, cast
 
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
+from aiohttp.web_middlewares import _Handler
 
-from typing import Any, cast, Dict, MutableMapping
-
-from aiohttp_session import (Session, session_middleware,
-                             get_session, SimpleCookieStorage)
-
-from typedefs import _TAiohttpClient
+from aiohttp_session import Session, SimpleCookieStorage, get_session, session_middleware
+from .typedefs import AiohttpClient
 
 
-def make_cookie(client: TestClient, data: Dict[Any, Any]) -> None:
+def make_cookie(client: TestClient, data: Dict[str, Any]) -> None:
     session_data = {
         'session': data,
         'created': int(time.time())
@@ -33,7 +30,7 @@ def create_app(handler: _Handler) -> web.Application:
     return app
 
 
-async def test_create_new_session(aiohttp_client: _TAiohttpClient) -> None:
+async def test_create_new_session(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -48,7 +45,7 @@ async def test_create_new_session(aiohttp_client: _TAiohttpClient) -> None:
     assert resp.status == 200
 
 
-async def test_load_existing_session(aiohttp_client: _TAiohttpClient) -> None:
+async def test_load_existing_session(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -65,7 +62,7 @@ async def test_load_existing_session(aiohttp_client: _TAiohttpClient) -> None:
     assert resp.status == 200
 
 
-async def test_change_session(aiohttp_client: _TAiohttpClient) -> None:
+async def test_change_session(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -91,9 +88,7 @@ async def test_change_session(aiohttp_client: _TAiohttpClient) -> None:
     assert '/' == morsel['path']
 
 
-async def test_clear_cookie_on_session_invalidation(
-    aiohttp_client: _TAiohttpClient
-) -> None:
+async def test_clear_cookie_on_session_invalidation(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -109,9 +104,7 @@ async def test_clear_cookie_on_session_invalidation(
         resp.cookies['AIOHTTP_SESSION'].output().upper()
 
 
-async def test_dont_save_not_requested_session(
-    aiohttp_client: _TAiohttpClient
-) -> None:
+async def test_dont_save_not_requested_session(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         return web.Response(body=b'OK')

@@ -1,23 +1,23 @@
+import json
+import uuid
+import warnings
+from distutils.version import StrictVersion
+from typing import Any, Callable, Optional
+
+from aiohttp import web
+
+from . import AbstractStorage, Session
+
 try:
     import aioredis
 except ImportError:  # pragma: no cover
     aioredis = None
-import json
-import uuid
-import warnings
-
-from distutils.version import StrictVersion
-
-from aiohttp import web
-from typing import Any, Callable, Dict, Optional
-
-from . import AbstractStorage, Session
 
 
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(  # type: ignore[no-any-unimported]
+    def __init__(  # type: ignore[no-any-unimported]  # TODO: aioredis
         self,
         redis_pool: 'aioredis.commands.Redis', *,
         cookie_name: str = "AIOHTTP_SESSION",
@@ -27,8 +27,8 @@ class RedisStorage(AbstractStorage):
         secure: Optional[bool] = None,
         httponly: bool = True,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
-        encoder: Callable[[Dict[str, Any]], str] = json.dumps,
-        decoder: Callable[[str], Dict[str, Any]] = json.loads
+        encoder: Callable[[object], str] = json.dumps,
+        decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
@@ -47,8 +47,7 @@ class RedisStorage(AbstractStorage):
             )
             redis_pool = aioredis.commands.Redis(redis_pool)
         elif not isinstance(redis_pool, aioredis.commands.Redis):
-            raise TypeError("Expexted aioredis.commands.Redis got {}".format(
-                    type(redis_pool)))
+            raise TypeError("Expected aioredis.commands.Redis got {}".format(type(redis_pool)))
         self._redis = redis_pool
 
     async def load_session(self, request: web.Request) -> Session:

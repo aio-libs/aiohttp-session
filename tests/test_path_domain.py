@@ -1,17 +1,14 @@
-from http import cookies
 import json
 import time
-
-from aiohttp import web
-from aiohttp.web_middlewares import _Handler
-from aiohttp.test_utils import TestClient
-
+from http import cookies
 from typing import Any, Optional
 
-from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage)
+from aiohttp import web
+from aiohttp.test_utils import TestClient
+from aiohttp.web_middlewares import _Handler
 
-from typedefs import _TAiohttpClient
+from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
+from .typedefs import AiohttpClient
 
 
 def make_cookie(
@@ -37,18 +34,15 @@ def create_app(
     path: Optional[str] = None,
     domain: Optional[str] = None
 ) -> web.Application:
-    middleware = session_middleware(
-        SimpleCookieStorage(
-            max_age=10, path="/anotherpath", domain="127.0.0.1",
-            )
-        )
+    storage = SimpleCookieStorage(max_age=10, path="/anotherpath", domain="127.0.0.1")
+    middleware = session_middleware(storage)
     app = web.Application(middlewares=[middleware])
     app.router.add_route('GET', '/', handler)
     app.router.add_route('GET', '/anotherpath', handler)
     return app
 
 
-async def test_with_same_path_domain(aiohttp_client: _TAiohttpClient) -> None:
+async def test_with_same_path_domain(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -75,7 +69,7 @@ async def test_with_same_path_domain(aiohttp_client: _TAiohttpClient) -> None:
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_with_different_path(aiohttp_client: _TAiohttpClient) -> None:
+async def test_with_different_path(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -100,7 +94,7 @@ async def test_with_different_path(aiohttp_client: _TAiohttpClient) -> None:
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_with_different_domain(aiohttp_client: _TAiohttpClient) -> None:
+async def test_with_different_domain(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -125,9 +119,7 @@ async def test_with_different_domain(aiohttp_client: _TAiohttpClient) -> None:
     assert '127.0.0.1' == morsel['domain']
 
 
-async def test_invalidate_with_same_path_domain(
-    aiohttp_client: _TAiohttpClient
-) -> None:
+async def test_invalidate_with_same_path_domain(aiohttp_client: AiohttpClient) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)

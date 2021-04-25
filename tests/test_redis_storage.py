@@ -1,21 +1,19 @@
-import aioredis
-import json
-import pytest
-import uuid
-import time
 import asyncio
+import json
+import time
+import uuid
+from typing import Any, Callable, Dict, MutableMapping, Optional, Tuple, cast
 
+import aioredis
+import pytest
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler
 from aiohttp.test_utils import TestClient
-
-from typing import Any, Callable, cast, Dict, MutableMapping, Optional, Tuple
+from aiohttp.web_middlewares import _Handler
 from pytest_mock import MockFixture
 
-from aiohttp_session import Session, session_middleware, get_session
+from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
-
-from typedefs import _TAiohttpClient
+from .typedefs import AiohttpClient
 
 
 def create_app(
@@ -77,7 +75,7 @@ async def load_cookie(
 
 
 async def test_create_new_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -95,7 +93,7 @@ async def test_create_new_session(
 
 
 async def test_load_existing_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -114,7 +112,7 @@ async def test_load_existing_session(
 
 
 async def test_load_bad_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -133,7 +131,7 @@ async def test_load_bad_session(
 
 
 async def test_change_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -162,7 +160,7 @@ async def test_change_session(
 
 
 async def test_clear_cookie_on_session_invalidation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -185,7 +183,7 @@ async def test_clear_cookie_on_session_invalidation(
 
 
 async def test_create_cookie_in_handler(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -215,7 +213,7 @@ async def test_create_cookie_in_handler(
 
 
 async def test_set_ttl_on_session_saving(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -238,7 +236,7 @@ async def test_set_ttl_on_session_saving(
 
 
 async def test_set_ttl_manually_set(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -262,7 +260,7 @@ async def test_set_ttl_manually_set(
 
 
 async def test_create_new_session_if_key_doesnt_exists_in_redis(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -281,7 +279,7 @@ async def test_create_new_session_if_key_doesnt_exists_in_redis(
 
 
 async def test_create_storage_with_custom_key_factory(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -306,7 +304,7 @@ async def test_create_storage_with_custom_key_factory(
 
 
 async def test_redis_session_fixation(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 
@@ -373,7 +371,7 @@ async def test_old_aioredis_version(mocker: MockFixture) -> None:
         pass
 
     class Dummy(object):
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
+        def __init__(self, *args: object, **kwargs: object) -> None:
             self.version = (0, 3)
 
     mocker.patch('aiohttp_session.redis_storage.StrictVersion', Dummy)
@@ -382,7 +380,7 @@ async def test_old_aioredis_version(mocker: MockFixture) -> None:
 
 
 async def test_load_session_dont_load_expired_session(
-    aiohttp_client: _TAiohttpClient,
+    aiohttp_client: AiohttpClient,
     redis: aioredis.commands.Redis
 ) -> None:
 

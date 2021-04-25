@@ -14,7 +14,7 @@ with open(os.path.join(os.path.abspath(os.path.dirname(
 def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
-install_requires = ['aiohttp>=3.0.1', 'typing_extensions>=3.7.4; python_version<"3.8"']
+install_requires = ['aiohttp>=3.8', 'typing_extensions>=3.7.4; python_version<"3.8"']
 extras_require = {
     'aioredis': ['aioredis>=1.0.0'],
     'aiomcache': ['aiomcache>=0.5.2'],

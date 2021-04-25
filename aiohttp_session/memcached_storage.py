@@ -1,16 +1,30 @@
-import uuid
 import json
+import uuid
+from time import time
+from typing import Any, Callable, Optional
+
+import aiomcache
+from aiohttp import web
+
 from . import AbstractStorage, Session
 
 
 class MemcachedStorage(AbstractStorage):
     """Memcached storage"""
 
-    def __init__(self, memcached_conn, *, cookie_name="AIOHTTP_SESSION",
-                 domain=None, max_age=None, path='/',
-                 secure=None, httponly=True,
-                 key_factory=lambda: uuid.uuid4().hex,
-                 encoder=json.dumps, decoder=json.loads):
+    def __init__(  # type: ignore[no-any-unimported]  # TODO: aiomcache
+        self,
+        memcached_conn: aiomcache.Client, *,
+        cookie_name: str = "AIOHTTP_SESSION",
+        domain: Optional[str] = None,
+        max_age: Optional[int] = None,
+        path: str = '/',
+        secure: Optional[bool] = None,
+        httponly: bool = True,
+        key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
+        encoder: Callable[[object], str] = json.dumps,
+        decoder: Callable[[str], Any] = json.loads
+    ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
                          httponly=httponly,
@@ -18,7 +32,7 @@ class MemcachedStorage(AbstractStorage):
         self._key_factory = key_factory
         self.conn = memcached_conn
 
-    async def load_session(self, request):
+    async def load_session(self, request: web.Request) -> Session:
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data=None, new=True, max_age=self.max_age)
@@ -36,7 +50,12 @@ class MemcachedStorage(AbstractStorage):
                 data = None
             return Session(key, data=data, new=False, max_age=self.max_age)
 
-    async def save_session(self, request, response, session):
+    async def save_session(
+        self,
+        request: web.Request,
+        response: web.StreamResponse,
+        session: Session
+    ) -> None:
         key = session.identity
         if key is None:
             key = self._key_factory()
@@ -53,8 +72,16 @@ class MemcachedStorage(AbstractStorage):
 
         data = self._encoder(self._get_session_data(session))
         max_age = session.max_age
-        expire = max_age if max_age is not None else 0
+        # https://github.com/memcached/memcached/wiki/Programming#expiration
+        # "Expiration times can be set from 0, meaning "never expire", to
+        # 30 days. Any time higher than 30 days is interpreted as a Unix
+        # timestamp date. If you want to expire an object on January 1st of
+        # next year, this is how you do that."
+        if max_age is None:
+            expire = 0
+        elif max_age > 30*24*60*60:
+            expire = int(time()) + max_age
+        else:
+            expire = max_age
         stored_key = (self.cookie_name + '_' + key).encode('utf-8')
-        await self.conn.set(
-                                stored_key, data.encode('utf-8'),
-                                exptime=expire)
+        await self.conn.set(stored_key, data.encode('utf-8'), exptime=expire)

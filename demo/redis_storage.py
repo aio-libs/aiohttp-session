@@ -7,7 +7,7 @@ from aiohttp_session import setup, get_session
 from aiohttp_session.redis_storage import RedisStorage
 
 
-async def handler(request):
+async def handler(request: web.Request) -> web.Response:
     session = await get_session(request)
     last_visit = session['last_visit'] if 'last_visit' in session else None
     session['last_visit'] = time.time()
@@ -15,17 +15,17 @@ async def handler(request):
     return web.Response(text=text)
 
 
-async def make_redis_pool():
+async def make_redis_pool() -> aioredis.commands.Redis:  # type: ignore[no-any-unimported]
     redis_address = ('127.0.0.1', '6379')
     return await aioredis.create_redis_pool(redis_address, timeout=1)
 
 
-def make_app():
+def make_app() -> web.Application:
     loop = asyncio.get_event_loop()
     redis_pool = loop.run_until_complete(make_redis_pool())
     storage = RedisStorage(redis_pool)
 
-    async def dispose_redis_pool(app):
+    async def dispose_redis_pool(app: web.Application) -> None:
         redis_pool.close()
         await redis_pool.wait_closed()
 

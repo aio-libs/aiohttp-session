@@ -1,9 +1,13 @@
+from typing import Tuple
+
 from aiohttp import web
-from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage)
+from aiohttp.web_middlewares import _Handler
+
+from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
+from .typedefs import AiohttpClient
 
 
-def create_app(*handlers):
+def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
     middleware = session_middleware(SimpleCookieStorage())
     app = web.Application(middlewares=[middleware])
     for url, handler in handlers:
@@ -11,14 +15,14 @@ def create_app(*handlers):
     return app
 
 
-async def test_exceptions(aiohttp_client):
+async def test_exceptions(aiohttp_client: AiohttpClient) -> None:
 
-    async def save(request):
+    async def save(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session['message'] = 'works'
         raise web.HTTPFound('/show')
 
-    async def show(request):
+    async def show(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         message = session.get('message')
         return web.Response(text=str(message))

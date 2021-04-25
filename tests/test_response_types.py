@@ -1,12 +1,15 @@
-import pytest
+from typing import Tuple
 
+import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
-from aiohttp_session import (session_middleware,
-                             get_session, SimpleCookieStorage, SESSION_KEY)
+from aiohttp.web_middlewares import _Handler
+
+from aiohttp_session import SESSION_KEY, SimpleCookieStorage, get_session, session_middleware
+from .typedefs import AiohttpClient
 
 
-def create_app(*handlers):
+def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
     middleware = session_middleware(SimpleCookieStorage())
     app = web.Application(middlewares=[middleware])
     for url, handler in handlers:
@@ -14,9 +17,9 @@ def create_app(*handlers):
     return app
 
 
-async def test_stream_response(aiohttp_client):
+async def test_stream_response(aiohttp_client: AiohttpClient) -> None:
 
-    async def stream_response(request):
+    async def stream_response(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
         session['will_not'] = 'show up'
         return web.StreamResponse()
@@ -28,9 +31,8 @@ async def test_stream_response(aiohttp_client):
     assert SESSION_KEY.upper() not in resp.cookies
 
 
-async def test_bad_response_type(aiohttp_client):
-
-    async def bad_response(request):
+async def test_bad_response_type(aiohttp_client: AiohttpClient) -> None:
+    async def bad_response(request: web.Request):  # type: ignore[no-untyped-def]
         return ''
 
     middleware = session_middleware(SimpleCookieStorage())
@@ -39,9 +41,9 @@ async def test_bad_response_type(aiohttp_client):
         await middleware(req, bad_response)
 
 
-async def test_prepared_response_type(aiohttp_client):
+async def test_prepared_response_type(aiohttp_client: AiohttpClient) -> None:
 
-    async def prepared_response(request):
+    async def prepared_response(request: web.Request) -> web.StreamResponse:
         resp = web.Response()
         await resp.prepare(request)
         return resp

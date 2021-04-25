@@ -1,12 +1,12 @@
 import pytest
-
+from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 
-from aiohttp_session import (Session, get_session, SESSION_KEY, STORAGE_KEY,
-                             new_session, AbstractStorage)
+from aiohttp_session import (AbstractStorage, SESSION_KEY, STORAGE_KEY, Session,
+                             get_session, new_session)
 
 
-async def test_get_stored_session():
+async def test_get_stored_session() -> None:
     req = make_mocked_request('GET', '/')
     session = Session('identity', data=None, new=False)
     req[SESSION_KEY] = session
@@ -15,18 +15,18 @@ async def test_get_stored_session():
     assert session is ret
 
 
-async def test_session_is_not_stored():
+async def test_session_is_not_stored() -> None:
     req = make_mocked_request('GET', '/')
 
     with pytest.raises(RuntimeError):
         await get_session(req)
 
 
-async def test_storage_returns_not_session_on_load_session():
+async def test_storage_returns_not_session_on_load_session() -> None:
     req = make_mocked_request('GET', '/')
 
     class Storage():
-        async def load_session(self, request):
+        async def load_session(self, request: web.Request) -> None:
             return None
 
     req[STORAGE_KEY] = Storage()
@@ -35,15 +35,20 @@ async def test_storage_returns_not_session_on_load_session():
         await get_session(req)
 
 
-async def test_get_new_session():
+async def test_get_new_session() -> None:
     req = make_mocked_request('GET', '/')
     session = Session('identity', data=None, new=False)
 
     class Storage(AbstractStorage):
-        async def load_session(self, request):
+        async def load_session(self, request: web.Request):  # type: ignore[no-untyped-def]
             pass
 
-        async def save_session(self, request, response, session):
+        async def save_session(
+            self,
+            request: web.Request,
+            response: web.StreamResponse,
+            session: Session
+        ) -> None:
             pass
 
     req[SESSION_KEY] = session
@@ -53,7 +58,7 @@ async def test_get_new_session():
     assert ret is not session
 
 
-async def test_get_new_session_no_storage():
+async def test_get_new_session_no_storage() -> None:
     req = make_mocked_request('GET', '/')
     session = Session('identity', data=None, new=False)
     req[SESSION_KEY] = session
@@ -62,17 +67,22 @@ async def test_get_new_session_no_storage():
         await new_session(req)
 
 
-async def test_get_new_session_bad_return():
+async def test_get_new_session_bad_return() -> None:
     req = make_mocked_request('GET', '/')
 
     class Storage(AbstractStorage):
-        async def new_session(self):
+        async def new_session(self):  # type: ignore[no-untyped-def]
             return ''
 
-        async def load_session(self, request):
-            pass
+        async def load_session(self, request: web.Request) -> Session:
+            return Session(None, data=None, new=True)
 
-        async def save_session(self, request, response, session):
+        async def save_session(
+            self,
+            request: web.Request,
+            response: web.StreamResponse,
+            session: Session
+        ) -> None:
             pass
 
     req[STORAGE_KEY] = Storage()

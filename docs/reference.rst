@@ -264,7 +264,7 @@ implement both :meth:`~AbstractStorage.load_session` and
       A helper for saving *cookie_data* (:class:`str`) into *response*
       (:class:`aiohttp.web.StreamResponse` or descendants).
 
-      *max_age* is cookie lifetime given from session. Storage defailt
+      *max_age* is cookie lifetime given from session. Storage default
       is used if the value is ``None``.
 
 Simple Storage
@@ -310,7 +310,7 @@ To use the storage you should push it into
 
    app = aiohttp.web.Application(middlewares=[
        aiohttp_session.cookie_storage.EncryptedCookieStorage(
-           b'Thirty  two  length  bytes  key.'])
+           b'Thirty  two  length  bytes  key.')])
 
 .. class:: EncryptedCookieStorage(secret_key, *, \
                                   cookie_name="AIOHTTP_SESSION", \
@@ -408,17 +408,17 @@ To use the storage you need setup it first::
    :class:`~aiohttp_session.AbstractStorage` constructor.
 
 
-Memcahed Storage
+Memcached Storage
 ----------------
 
 The storage that stores session data in Memcached and
 keeps only keys (UUIDs actually) in HTTP cookies.
 
-It operates with Memcahed database via :class:`aiomecache.Client`.
+It operates with Memcached database via :class:`aiomcache.Client`.
 
 To use the storage you need setup it first::
 
-   mc = aiomchache.Client('localhost', 11211)
+   mc = aiomcache.Client('localhost', 11211)
    storage = aiohttp_session.memcached_storage.Client(mc)
    aiohttp_session.setup(app, storage)
 
@@ -438,7 +438,7 @@ To use the storage you need setup it first::
    *memcached_conn* is a :class:`~aiomcache.Client` instance::
 
       mc = await aiomcache.Client('localhost', 6379)
-      storage = aiohttp_session.memcached_storage.MemcachedStorage(mc
+      storage = aiohttp_session.memcached_storage.MemcachedStorage(mc)
 
    Other parameters are the same as for
    :class:`~aiohttp_session.AbstractStorage` constructor.

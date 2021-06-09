@@ -21,5 +21,5 @@ multidict==4.7.6
 chardet==3.0.4
 yarl==1.6.3
 aiomcache==0.6.0
-mypy==0.812
+mypy==0.901
 typing-extensions==3.10.0.0

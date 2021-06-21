@@ -20,4 +20,5 @@ import-order-style = pycharm
 inline-quotes = "
 
 # flake8-requirements
+known-modules = pynacl:[nacl]
 requirements-file = requirements-dev.txt

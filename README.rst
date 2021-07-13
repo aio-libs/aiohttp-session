@@ -88,6 +88,13 @@ Available session storages are:
 
       $ pip install aiohttp_session[aioredis]
 
+* ``aiohttp_session.redis_storage.EncryptedRedisStorage(redis_pool, secret_key)`` -- stores
+  JSON encoded data in *redis*, keeping only the encrypted redis key (a random UUID) in
+  the cookie. ``redis_pool`` is a ``aioredis`` pool object, created by
+  ``await aioredis.create_redis_pool(...)`` call. ``secret_key`` is a ``bytes`` key for AES
+  encryption/decryption, the length should be 32 bytes. Despite of RedisStorage, added posibility to delete key from Redis.
+
+
 
 Developing
 ----------

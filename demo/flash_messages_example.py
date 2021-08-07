@@ -3,7 +3,6 @@ from typing import Awaitable, Callable, List, NoReturn, cast
 
 from aiohttp import web
 from cryptography import fernet
-
 from aiohttp_session import get_session, setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 

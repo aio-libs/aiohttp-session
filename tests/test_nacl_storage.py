@@ -9,10 +9,10 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-from nacl.encoding import Base64Encoder
-
 from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.nacl_storage import NaClCookieStorage
+from nacl.encoding import Base64Encoder
+
 from .typedefs import AiohttpClient
 
 

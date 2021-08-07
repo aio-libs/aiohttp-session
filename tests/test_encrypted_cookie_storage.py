@@ -8,10 +8,10 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-from cryptography.fernet import Fernet
-
 from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
+from cryptography.fernet import Fernet
+
 from .typedefs import AiohttpClient
 
 

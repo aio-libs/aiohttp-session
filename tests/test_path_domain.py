@@ -6,8 +6,8 @@ from typing import Any, Optional
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-
 from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
+
 from .typedefs import AiohttpClient
 
 

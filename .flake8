@@ -11,9 +11,10 @@ ignore = E226,E501,E722,W503
 per-file-ignores =
     # S101: Pytest uses assert
     tests/*:S101
+    # I900: Requirements for examples shouldn't be included
+    examples/*:I900
 
 # flake8-import-order
-application-import-names = aiohttp_session
 import-order-style = pycharm
 
 # flake8-quotes

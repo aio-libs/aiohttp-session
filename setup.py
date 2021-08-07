@@ -1,6 +1,7 @@
-from setuptools import setup
 import os
 import re
+
+from setuptools import setup
 
 
 with open(os.path.join(os.path.abspath(os.path.dirname(
@@ -13,6 +14,7 @@ with open(os.path.join(os.path.abspath(os.path.dirname(
 
 def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
+
 
 install_requires = ['aiohttp>=3.0.1', 'typing_extensions>=3.7.4; python_version<"3.8"']
 extras_require = {

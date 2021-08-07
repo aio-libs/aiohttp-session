@@ -1,10 +1,10 @@
 import base64
 from typing import Awaitable, Callable, List, NoReturn, cast
 
-from cryptography import fernet
 from aiohttp import web
-from aiohttp_session import setup, get_session
+from aiohttp_session import get_session, setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
+from cryptography import fernet
 
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
@@ -22,8 +22,8 @@ async def flash_middleware(app: web.Application, handler: _Handler) -> _Handler:
         session = await get_session(request)
         request['flash_incoming'] = session.pop('flash', [])
         response = await handler(request)
-        session['flash'] = (request.get('flash_incoming', []) +
-                            request.get('flash_outgoing', []))
+        session['flash'] = (request.get('flash_incoming', [])
+                            + request.get('flash_outgoing', []))
         return response
     return process
 
@@ -55,4 +55,3 @@ def make_app() -> web.Application:
 
 
 web.run_app(make_app())
-

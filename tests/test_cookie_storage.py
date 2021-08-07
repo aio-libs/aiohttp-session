@@ -5,8 +5,8 @@ from typing import Any, Dict, MutableMapping, cast
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-
 from aiohttp_session import Session, SimpleCookieStorage, get_session, session_middleware
+
 from .typedefs import AiohttpClient
 
 

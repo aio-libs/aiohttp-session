@@ -2,9 +2,10 @@ import base64
 from typing import Awaitable, Callable, List, NoReturn, cast
 
 from aiohttp import web
-from aiohttp_session import setup, get_session
-from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from cryptography import fernet
+
+from aiohttp_session import get_session, setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 

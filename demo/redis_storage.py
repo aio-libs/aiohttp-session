@@ -15,7 +15,7 @@ async def handler(request: web.Request) -> web.Response:
     return web.Response(text=text)
 
 
-async def redis_pool(app: web.Application) -> AsyncIterator[aioredis.commands.Redis]:  # type: ignore[no-any-unimported]
+async def redis_pool(app: web.Application) -> AsyncIterator[aioredis.commands.Redis]:  # type: ignore[no-any-unimported]  # noqa: B950
     redis_address = ('127.0.0.1', '6379')
     async with await aioredis.create_redis_pool(redis_address, timeout=1) as redis:
         storage = RedisStorage(redis)

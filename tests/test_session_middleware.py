@@ -1,5 +1,4 @@
 import pytest
-
 from aiohttp_session import session_middleware
 
 

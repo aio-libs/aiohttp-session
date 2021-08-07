@@ -1,6 +1,7 @@
 import asyncio
 import aioredis
 import time
+from typing import AsyncIterator
 
 from aiohttp import web
 from aiohttp_session import setup, get_session
@@ -15,23 +16,17 @@ async def handler(request: web.Request) -> web.Response:
     return web.Response(text=text)
 
 
-async def make_redis_pool() -> aioredis.commands.Redis:  # type: ignore[no-any-unimported]
+async def redis_pool(app: web.Application) -> AsyncIterator[aioredis.commands.Redis]:  # type: ignore[no-any-unimported]
     redis_address = ('127.0.0.1', '6379')
-    return await aioredis.create_redis_pool(redis_address, timeout=1)
+    async with await aioredis.create_redis_pool(redis_address, timeout=1) as redis:
+        storage = RedisStorage(redis)
+        setup(app, storage)
+        yield
 
 
 def make_app() -> web.Application:
-    loop = asyncio.get_event_loop()
-    redis_pool = loop.run_until_complete(make_redis_pool())
-    storage = RedisStorage(redis_pool)
-
-    async def dispose_redis_pool(app: web.Application) -> None:
-        redis_pool.close()
-        await redis_pool.wait_closed()
-
     app = web.Application()
-    setup(app, storage)
-    app.on_cleanup.append(dispose_redis_pool)
+    app.cleanup_ctx.append(redis_pool)
     app.router.add_get('/', handler)
     return app
 

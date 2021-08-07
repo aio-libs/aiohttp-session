@@ -40,8 +40,7 @@ async def make_cookie(
     }
     value = json.dumps(session_data)
     key = uuid.uuid4().hex
-    with await redis as conn:
-        await conn.set('AIOHTTP_SESSION_' + key, value)
+    await redis.set('AIOHTTP_SESSION_' + key, value)
     # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
         {'AIOHTTP_SESSION': key}  # type: ignore
@@ -53,8 +52,7 @@ async def make_cookie_with_bad_value(
     redis: aioredis.commands.Redis
 ) -> None:
     key = uuid.uuid4().hex
-    with await redis as conn:
-        await conn.set('AIOHTTP_SESSION_' + key, '')
+    await redis.set('AIOHTTP_SESSION_' + key, '')
     # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
         {'AIOHTTP_SESSION': key}  # type: ignore
@@ -67,11 +65,10 @@ async def load_cookie(
 ) -> Any:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url('/'))
     key = cookies['AIOHTTP_SESSION']
-    with await redis as conn:
-        encoded = await conn.get('AIOHTTP_SESSION_' + key.value)
-        s = encoded.decode('utf-8')
-        value = json.loads(s)
-        return value
+    encoded = await redis.get('AIOHTTP_SESSION_' + key.value)
+    s = encoded.decode('utf-8')
+    value = json.loads(s)
+    return value
 
 
 async def test_create_new_session(
@@ -207,9 +204,8 @@ async def test_create_cookie_in_handler(
     morsel = resp.cookies['AIOHTTP_SESSION']
     assert morsel['httponly']
     assert morsel['path'] == '/'
-    with await redis as conn:
-        exists = await conn.exists('AIOHTTP_SESSION_' + morsel.value)
-        assert exists
+    exists = await redis.exists('AIOHTTP_SESSION_' + morsel.value)
+    assert exists
 
 
 async def test_set_ttl_on_session_saving(
@@ -228,8 +224,7 @@ async def test_set_ttl_on_session_saving(
 
     key = resp.cookies['AIOHTTP_SESSION'].value
 
-    with await redis as conn:
-        ttl = await conn.ttl('AIOHTTP_SESSION_'+key)
+    ttl = await redis.ttl('AIOHTTP_SESSION_'+key)
 
     assert ttl > 9
     assert ttl <= 10
@@ -252,8 +247,7 @@ async def test_set_ttl_manually_set(
 
     key = resp.cookies['AIOHTTP_SESSION'].value
 
-    with await redis as conn:
-        ttl = await conn.ttl('AIOHTTP_SESSION_'+key)
+    ttl = await redis.ttl('AIOHTTP_SESSION_'+key)
 
     assert ttl > 9
     assert ttl <= 10
@@ -341,9 +335,8 @@ async def test_redis_from_create_pool(
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
 
-    redis = await aioredis.create_pool(**redis_params)
-    with pytest.warns(DeprecationWarning):
-        create_app(handler=handler, redis=redis)
+    redis = await aioredis.create_redis(**redis_params)
+    create_app(handler=handler, redis=redis)
 
 
 async def test_not_redis_provided_to_storage() -> None:

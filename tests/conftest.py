@@ -38,21 +38,6 @@ def unused_port() -> int:
 
 
 @pytest.fixture(scope='session')
-def loop() -> Iterator[asyncio.AbstractEventLoop]:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(None)
-
-    yield loop
-
-    if not loop.is_closed():
-        loop.call_soon(loop.stop)
-        loop.run_forever()
-        loop.close()
-    gc.collect()
-    asyncio.set_event_loop(None)
-
-
-@pytest.fixture(scope='session')
 def session_id() -> str:
     """Unique session identifier, random string."""
     return str(uuid.uuid4())
@@ -65,10 +50,9 @@ def docker() -> DockerClient:  # type: ignore[misc]  # No docker types.
 
 
 @pytest.fixture(scope='session')
-def redis_server(  # type: ignore[misc]  # No docker types.
+async def redis_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
     session_id: str,
-    loop: asyncio.AbstractEventLoop,
 ) -> Iterator[_ContainerInfo]:
     image = 'redis:{}'.format('latest')
 
@@ -100,10 +84,8 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = loop.run_until_complete(
-                aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
-            )
-            loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
+            conn = await aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
+            await conn.execute('SET', 'foo', 'bar')
             break
         except ConnectionRefusedError:
             time.sleep(delay)
@@ -123,25 +105,22 @@ def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
 
 
 @pytest.fixture
-def redis(
-    loop: asyncio.AbstractEventLoop,
-    redis_url: str,
-) -> Iterator[aioredis.Redis]:
+async def redis(redis_url: str) -> Iterator[aioredis.Redis]:
     async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
         return aioredis.Redis(connection_pool=pool)
 
     pool = aioredis.ConnectionPool.from_url(redis_url)
-    redis = loop.run_until_complete(start(pool))
+    redis = await start(pool)
     yield redis
     if redis is not None:
         redis.close()  # type: ignore[no-untyped-call]
-        loop.run_until_complete(pool.disconnect())
+        await pool.disconnect()
 
 
 @pytest.fixture(scope='session')
-def memcached_server(  # type: ignore[misc]  # No docker types.
+async def memcached_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
-    session_id: str, loop: asyncio.AbstractEventLoop,
+    session_id: str,
 ) -> Iterator[_ContainerInfo]:
 
     image = 'memcached:{}'.format('latest')
@@ -174,8 +153,8 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = aiomcache.Client(host, port, loop=loop)
-            loop.run_until_complete(conn.set(b'foo', b'bar'))
+            conn = aiomcache.Client(host, port)
+            await conn.set(b'foo', b'bar')
             break
         except ConnectionRefusedError:
             time.sleep(delay)
@@ -196,9 +175,8 @@ def memcached_params(memcached_server: _ContainerInfo) -> _MemcachedParams:  # t
 
 @pytest.fixture
 def memcached(  # type: ignore[misc]
-    loop: asyncio.AbstractEventLoop,
     memcached_params: _MemcachedParams
 ) -> Iterator[aiomcache.Client]:
-    conn = aiomcache.Client(loop=loop, **memcached_params)
+    conn = aiomcache.Client(**memcached_params)
     yield conn
     conn.close()

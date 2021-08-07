@@ -4,9 +4,8 @@ from typing import Any, Callable, Optional
 
 import psycopg2.extras
 from aiohttp import web
-from aiopg import Pool
-
 from aiohttp_session import AbstractStorage, Session
+from aiopg import Pool
 
 
 class PgStorage(AbstractStorage):

@@ -3,6 +3,7 @@ from typing import AsyncIterator
 
 import aioredis
 from aiohttp import web
+
 from aiohttp_session import get_session, setup
 from aiohttp_session.redis_storage import RedisStorage
 

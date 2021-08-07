@@ -15,7 +15,6 @@ per-file-ignores =
     examples/*:I900
 
 # flake8-import-order
-application-import-names = aiohttp_session
 import-order-style = pycharm
 
 # flake8-quotes

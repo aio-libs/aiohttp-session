@@ -336,8 +336,7 @@ async def test_redis_from_create_pool(
         pass
 
     redis = await aioredis.create_redis(**redis_params)
-    with pytest.warns(DeprecationWarning):
-        create_app(handler=handler, redis=redis)
+    create_app(handler=handler, redis=redis)
 
 
 async def test_not_redis_provided_to_storage() -> None:

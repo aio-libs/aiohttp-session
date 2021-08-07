@@ -11,15 +11,15 @@ from . import AbstractStorage, Session
 try:
     import aioredis
 except ImportError:  # pragma: no cover
-    aioredis = None
+    aioredis = None  # type: ignore[assignment]
 
 
 class RedisStorage(AbstractStorage):
     """Redis storage"""
 
-    def __init__(  # type: ignore[no-any-unimported]  # TODO: aioredis
+    def __init__(
         self,
-        redis_pool: 'aioredis.commands.Redis', *,
+        redis_pool: "aioredis.Redis", *,
         cookie_name: str = "AIOHTTP_SESSION",
         domain: Optional[str] = None,
         max_age: Optional[int] = None,
@@ -39,15 +39,8 @@ class RedisStorage(AbstractStorage):
         if StrictVersion(aioredis.__version__).version < (1, 0):
             raise RuntimeError("aioredis<1.0 is not supported")
         self._key_factory = key_factory
-        if isinstance(redis_pool, aioredis.pool.ConnectionsPool):
-            warnings.warn(
-                "using a pool created with aioredis.create_pool is deprecated"
-                "please use a pool created with aioredis.create_redis_pool",
-                DeprecationWarning
-            )
-            redis_pool = aioredis.commands.Redis(redis_pool)
-        elif not isinstance(redis_pool, aioredis.commands.Redis):
-            raise TypeError("Expected aioredis.commands.Redis got {}".format(type(redis_pool)))
+        if not isinstance(redis_pool, aioredis.Redis):
+            raise TypeError("Expected aioredis.Redis got {}".format(type(redis_pool)))
         self._redis = redis_pool
 
     async def load_session(self, request: web.Request) -> Session:
@@ -90,6 +83,4 @@ class RedisStorage(AbstractStorage):
         data = self._encoder(self._get_session_data(session))
         max_age = session.max_age
         expire = max_age if max_age is not None else 0
-        await self._redis.set(self.cookie_name + '_' + key,
-                              data,
-                              expire=expire)
+        await self._redis.set(self.cookie_name + '_' + key, data, ex=expire)

@@ -3,7 +3,7 @@ from http import HTTPStatus
 from typing import Any, Awaitable, Callable
 
 from aiohttp import web
-from aiohttp_session import setup, get_session, new_session
+from aiohttp_session import get_session, new_session, setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from cryptography import fernet
 

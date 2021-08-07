@@ -34,7 +34,7 @@ class PgStorage(AbstractStorage):
                 key = uuid.UUID(cookie)
                 async with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
-                    await cur.execute("SELECT session, extract(epoch from created) "
+                    await cur.execute("SELECT session, extract(epoch from created) "  # noqa: S608
                                       + "FROM web.sessions WHERE uuid = %s", (key,))
                     data = await cur.fetchone()
 
@@ -65,9 +65,9 @@ class PgStorage(AbstractStorage):
         async with self._pg.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
-                    "INSERT INTO web.sessions (uuid,session,created,expire)"
-                    + " VALUES (%s, %s, to_timestamp(%s),to_timestamp(%s))"
-                    + " ON CONFLICT (uuid)"
-                    + " DO UPDATE"
+                    "INSERT INTO web.sessions (uuid,session,created,expire)"  # noqa: S608
+                    + " VALUES (%s, %s, to_timestamp(%s),to_timestamp(%s))"  # noqa: S608
+                    + " ON CONFLICT (uuid)"  # noqa: S608
+                    + " DO UPDATE"  # noqa: S608
                     + " SET (session,expire)=(EXCLUDED.session, EXCLUDED.expire)",
                     [key, data_encoded, data["created"], expire])

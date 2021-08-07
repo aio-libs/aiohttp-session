@@ -2,7 +2,7 @@ import socket
 import sys
 import time
 import uuid
-from typing import Iterator
+from typing import AsyncIterator, Iterator
 
 import aiomcache
 import aioredis
@@ -51,7 +51,7 @@ def docker() -> DockerClient:  # type: ignore[misc]  # No docker types.
 async def redis_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
     session_id: str,
-) -> Iterator[_ContainerInfo]:
+) -> AsyncIterator[_ContainerInfo]:
     image = 'redis:{}'.format('latest')
 
     if sys.platform.startswith('darwin'):
@@ -103,7 +103,7 @@ def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
 
 
 @pytest.fixture
-async def redis(redis_url: str) -> Iterator[aioredis.Redis]:
+async def redis(redis_url: str) -> AsyncIterator[aioredis.Redis]:
     async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
         return aioredis.Redis(connection_pool=pool)
 
@@ -119,7 +119,7 @@ async def redis(redis_url: str) -> Iterator[aioredis.Redis]:
 async def memcached_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
     session_id: str,
-) -> Iterator[_ContainerInfo]:
+) -> AsyncIterator[_ContainerInfo]:
 
     image = 'memcached:{}'.format('latest')
 

@@ -2,10 +2,9 @@ import base64
 import time
 
 from aiohttp import web
-from cryptography import fernet
-
 from aiohttp_session import get_session, setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
+from cryptography import fernet
 
 
 async def handler(request: web.Request) -> web.Response:

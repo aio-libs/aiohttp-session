@@ -1,7 +1,7 @@
 # Some simple testing tasks (sorry, UNIX only).
 
 flake:
-	flake8 aiohttp_session tests
+	flake8
 
 
 test: flake

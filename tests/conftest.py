@@ -4,7 +4,7 @@ import socket
 import sys
 import time
 import uuid
-from typing import Iterator, Tuple
+from typing import Iterator
 
 import aiomcache
 import aioredis
@@ -101,7 +101,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     for _i in range(20):
         try:
             conn = loop.run_until_complete(
-                aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]
+                aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
             )
             loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
             break

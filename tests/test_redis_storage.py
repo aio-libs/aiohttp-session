@@ -2,7 +2,7 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, Dict, MutableMapping, Optional, Tuple, cast
+from typing import Any, Callable, Dict, MutableMapping, Optional, cast
 
 import aioredis
 import pytest

@@ -1,5 +1,3 @@
-import asyncio
-import gc
 import socket
 import sys
 import time

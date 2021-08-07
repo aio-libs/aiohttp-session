@@ -13,9 +13,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
-import os
 import codecs
+import os
+import sys
 import re
 
 _docs_path = os.path.dirname(__file__)

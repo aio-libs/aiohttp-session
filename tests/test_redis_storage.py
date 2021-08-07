@@ -9,10 +9,10 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-from pytest_mock import MockFixture
-
 from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
+from pytest_mock import MockFixture
+
 from .typedefs import AiohttpClient
 
 

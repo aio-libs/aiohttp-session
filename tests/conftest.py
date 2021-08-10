@@ -100,8 +100,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = loop.run_until_complete(_create_redis(host, port))
-            loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
+            loop.run_until_complete(_populate_redis(host, port))
             break
         except ConnectionRefusedError:
             time.sleep(delay)
@@ -201,5 +200,6 @@ def memcached(  # type: ignore[misc]
     conn.close()
 
 
-async def _create_redis(host: str, port: int) -> aioredis.Redis:
-    return await aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
+async def _populate_redis(host: str, port: int) -> None:
+    redis = await aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call,no-any-return]  # noqa: B950
+    await redis.set("foo", "bar")

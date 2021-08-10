@@ -40,7 +40,7 @@ def unused_port() -> int:
 @pytest.fixture(scope="session")
 def loop() -> Iterator[asyncio.AbstractEventLoop]:
     loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    asyncio.set_event_loop(None)
 
     yield loop
 
@@ -100,9 +100,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = loop.run_until_complete(
-                aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
-            )
+            conn = loop.run_until_complete(create_redis())
             loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
             break
         except ConnectionRefusedError:
@@ -201,3 +199,7 @@ def memcached(  # type: ignore[misc]
     conn = aiomcache.Client(**memcached_params)
     yield conn
     conn.close()
+
+
+async def _create_redis() -> aioredis.Redis:
+    return await aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950

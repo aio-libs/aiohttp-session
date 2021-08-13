@@ -198,6 +198,6 @@ def memcached_params(memcached_server: _ContainerInfo) -> _MemcachedParams:  # t
 def memcached(  # type: ignore[misc]
     memcached_params: _MemcachedParams
 ) -> Iterator[aiomcache.Client]:
-    conn = aiomcache.Client(**memcached_params)
+    conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
     conn.close()

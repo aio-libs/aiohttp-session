@@ -129,6 +129,7 @@ def redis(
     async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
         return aioredis.Redis(connection_pool=pool)
 
+    asyncio.set_event_loop(loop)
     pool = aioredis.ConnectionPool.from_url(redis_url)
     redis = loop.run_until_complete(start(pool))
     yield redis
@@ -173,7 +174,7 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = aiomcache.Client(host, port)
+            conn = aiomcache.Client(host, port, loop=loop)
             loop.run_until_complete(conn.set(b'foo', b'bar'))
             break
         except ConnectionRefusedError:

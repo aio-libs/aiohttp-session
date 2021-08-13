@@ -333,7 +333,7 @@ async def test_redis_from_create_pool(redis_url: str) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
 
-    redis = await aioredis.from_url(redis_url)  # type: ignore[no-untyped-call]
+    redis = aioredis.from_url(redis_url)  # type: ignore[no-untyped-call]
     create_app(handler=handler, redis=redis)
 
 

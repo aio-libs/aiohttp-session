@@ -71,6 +71,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     loop: asyncio.AbstractEventLoop,
 ) -> Iterator[_ContainerInfo]:
     image = 'redis:{}'.format('latest')
+    asyncio.set_event_loop(loop)
 
     if sys.platform.startswith('darwin'):
         port = unused_port()
@@ -100,9 +101,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = loop.run_until_complete(
-                aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
-            )
+            conn = aioredis.from_url("redis://{}:{}".format(host, port))  # type: ignore[no-untyped-call]  # noqa: B950
             loop.run_until_complete(conn.set("foo", "bar"))
             break
         except ConnectionRefusedError:

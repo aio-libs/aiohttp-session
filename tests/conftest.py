@@ -196,6 +196,7 @@ def memcached_params(memcached_server: _ContainerInfo) -> _MemcachedParams:  # t
 
 @pytest.fixture
 def memcached(  # type: ignore[misc]
+    loop: asyncio.AbstractEventLoop,
     memcached_params: _MemcachedParams
 ) -> Iterator[aiomcache.Client]:
     conn = aiomcache.Client(loop=loop, **memcached_params)

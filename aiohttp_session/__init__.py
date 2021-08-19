@@ -6,6 +6,8 @@ import abc
 import json
 import sys
 import time
+import locale
+from contextlib import contextmanager
 from typing import Any, Callable, Dict, Iterator, Mapping, MutableMapping, Optional, Union, cast
 
 from aiohttp import web
@@ -15,6 +17,15 @@ if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
     from typing_extensions import TypedDict
+
+
+@contextmanager
+def setlocale(name):
+    saved = locale.setlocale(locale.LC_ALL)
+    try:
+        yield locale.setlocale(locale.LC_ALL, name)
+    finally:
+        locale.setlocale(locale.LC_ALL, saved)
 
 
 class _CookieParams(TypedDict, total=False):
@@ -280,7 +291,8 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         if max_age is not None:
             params['max_age'] = max_age
             t = time.gmtime(time.time() + max_age)
-            params["expires"] = time.strftime("%a, %d-%b-%Y %T GMT", t)
+            with setlocale("C"):
+                params["expires"] = time.strftime("%a, %d-%b-%Y %T GMT", t)
         if not cookie_data:
             response.del_cookie(self._cookie_name, domain=params["domain"],
                                 path=params["path"])

@@ -3,12 +3,12 @@ flake8==3.9.2
 flake8-bandit==2.1.2
 flake8-bugbear==21.4.3
 flake8-import-order==0.18.1
-flake8-requirements==1.5
-sphinx==4.0.2
+flake8-requirements==1.5.1
+sphinx==4.1.2
 pep257==0.7.0
 -e .
 aioredis==2.0.0
-cryptography==3.4.7
+cryptography==3.4.8
 docker==5.0.0
 pynacl==1.4.0
 pytest==6.2.4

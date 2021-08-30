@@ -1,5 +1,6 @@
 import json
 import uuid
+from distutils.version import StrictVersion
 from typing import Any, Callable, Optional
 
 from aiohttp import web
@@ -34,6 +35,9 @@ class RedisStorage(AbstractStorage):
                          encoder=encoder, decoder=decoder)
         if aioredis is None:
             raise RuntimeError("Please install aioredis")
+        # User may have installed aioredis separately (without aiohttp-session[aioredis]).
+        if StrictVersion(aioredis.__version__).version < (2, 0):
+            raise RuntimeError("aioredis<2.0 is not supported")
         self._key_factory = key_factory
         if not isinstance(redis_pool, aioredis.Redis):
             raise TypeError("Expected aioredis.Redis got {}".format(type(redis_pool)))

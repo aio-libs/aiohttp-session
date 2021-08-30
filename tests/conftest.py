@@ -134,7 +134,7 @@ def redis(
     redis = loop.run_until_complete(start(pool))
     yield redis
     if redis is not None:
-        await redis.close()  # type: ignore[no-untyped-call]
+        loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
         loop.run_until_complete(pool.disconnect())
 
 

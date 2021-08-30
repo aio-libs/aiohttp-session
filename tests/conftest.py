@@ -113,6 +113,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
 
     yield {"host": host, "port": port, "container": container}
 
+    loop.run_until_complete(conn.close())
     container.kill(signal=9)
     container.remove(force=True)
 

@@ -108,12 +108,13 @@ def redis_server(  # type: ignore[misc]  # No docker types.
         except ConnectionError:
             time.sleep(delay)
             delay *= 2
+        finally:
+            loop.run_until_complete(conn.close())
     else:
         pytest.fail("Cannot start redis server")
 
     yield {"host": host, "port": port, "container": container}
 
-    loop.run_until_complete(conn.close())
     container.kill(signal=9)
     container.remove(force=True)
 

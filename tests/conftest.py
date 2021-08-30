@@ -133,9 +133,8 @@ def redis(
     pool = aioredis.ConnectionPool.from_url(redis_url)
     redis = loop.run_until_complete(start(pool))
     yield redis
-    if redis is not None:
-        loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
-        loop.run_until_complete(pool.disconnect())
+    loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
+    loop.run_until_complete(pool.disconnect())
 
 
 @pytest.fixture(scope='session')

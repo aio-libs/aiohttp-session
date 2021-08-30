@@ -357,6 +357,20 @@ async def test_no_aioredis_installed(mocker: MockFixture) -> None:
         create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 
 
+async def test_old_aioredis_version(mocker: MockFixture) -> None:
+
+    async def handler(request: web.Request) -> web.StreamResponse:
+        pass
+
+    class Dummy(object):
+        def __init__(self, *args: object, **kwargs: object) -> None:
+            self.version = (0, 3)
+
+    mocker.patch('aiohttp_session.redis_storage.StrictVersion', Dummy)
+    with pytest.raises(RuntimeError):
+        create_app(handler=handler, redis=None)  # type: ignore[arg-type]
+
+
 async def test_load_session_dont_load_expired_session(
     aiohttp_client: AiohttpClient,
     redis: aioredis.Redis

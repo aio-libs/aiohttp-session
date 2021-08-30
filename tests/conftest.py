@@ -201,4 +201,4 @@ def memcached(  # type: ignore[misc]
 ) -> Iterator[aiomcache.Client]:
     conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
-    conn.close()
+    loop.run_until_complete(conn.close())

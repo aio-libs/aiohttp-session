@@ -18,7 +18,7 @@ else:
 
 
 # Testing...
-aioredis.Redis.__del__ = lambda *args: None
+aioredis.Redis.__del__ = lambda *args: None  # type: ignore  # noqa
 
 
 class _ContainerInfo(TypedDict):

@@ -17,6 +17,10 @@ else:
     from typing_extensions import TypedDict
 
 
+# Testing...
+aioredis.Redis.__del__ = lambda *args: None
+
+
 class _ContainerInfo(TypedDict):
     host: str
     port: int

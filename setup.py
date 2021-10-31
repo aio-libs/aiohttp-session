@@ -1,6 +1,7 @@
-from setuptools import setup
 import os
 import re
+
+from setuptools import setup
 
 
 with open(os.path.join(os.path.abspath(os.path.dirname(
@@ -38,6 +39,7 @@ setup(name='aiohttp-session',
           'Programming Language :: Python :: 3.7',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: AsyncIO',
+          'Framework :: aiohttp',
       ],
       author='Andrew Svetlov',
       author_email='andrew.svetlov@gmail.com',

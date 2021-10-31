@@ -1,9 +1,9 @@
-import time
-from aiohttp import web
 import asyncio
-import aiomcache
-from aiohttp_session import setup, get_session
+import time
 
+import aiomcache
+from aiohttp import web
+from aiohttp_session import get_session, setup
 from aiohttp_session.memcached_storage import MemcachedStorage
 
 

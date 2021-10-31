@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 import psycopg2.extras
 from aiohttp import web
@@ -11,7 +11,7 @@ from aiopg import Pool
 class PgStorage(AbstractStorage):
     """PG storage"""
 
-    def __init__(self, pg_pool: Pool, *, cookie_name: str = "AIOHTTP_SESSION",  # type: ignore[no-any-unimported]
+    def __init__(self, pg_pool: Pool, *, cookie_name: str = "AIOHTTP_SESSION",  # type: ignore[no-any-unimported] # noqa: B950
                  domain: Optional[str] = None, max_age: Optional[int] = None,
                  path: str = '/', secure: Optional[bool] = None, httponly: bool = True,
                  key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
@@ -34,7 +34,8 @@ class PgStorage(AbstractStorage):
                 key = uuid.UUID(cookie)
                 async with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
-                    await cur.execute("SELECT session, extract(epoch from created) FROM web.sessions WHERE uuid = %s", (key,))
+                    await cur.execute("SELECT session, extract(epoch from created) "  # noqa: S608
+                                      + "FROM web.sessions WHERE uuid = %s", (key,))
                     data = await cur.fetchone()
 
                     if not data:
@@ -63,9 +64,10 @@ class PgStorage(AbstractStorage):
         expire = data["created"] + (session.max_age or 0)
         async with self._pg.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute("INSERT INTO web.sessions (uuid,session,created,expire)"
-                    " VALUES (%s, %s, to_timestamp(%s),to_timestamp(%s))"
-                    " ON CONFLICT (uuid)"
-                    " DO UPDATE"
-                    " SET (session,expire)=(EXCLUDED.session, EXCLUDED.expire)",
+                await cur.execute(
+                    "INSERT INTO web.sessions (uuid,session,created,expire)"  # noqa: S608
+                    + " VALUES (%s, %s, to_timestamp(%s),to_timestamp(%s))"  # noqa: S608
+                    + " ON CONFLICT (uuid)"  # noqa: S608
+                    + " DO UPDATE"  # noqa: S608
+                    + " SET (session,expire)=(EXCLUDED.session, EXCLUDED.expire)",
                     [key, data_encoded, data["created"], expire])

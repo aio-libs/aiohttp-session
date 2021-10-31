@@ -8,9 +8,9 @@ import aiomcache
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-
 from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.memcached_storage import MemcachedStorage
+
 from .typedefs import AiohttpClient
 
 

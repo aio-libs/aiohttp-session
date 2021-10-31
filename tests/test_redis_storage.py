@@ -2,23 +2,23 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, Dict, MutableMapping, Optional, Tuple, cast
+from typing import Any, Callable, Dict, MutableMapping, Optional, cast
 
 import aioredis
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_middlewares import _Handler
-from pytest_mock import MockFixture
-
 from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
+from pytest_mock import MockFixture
+
 from .typedefs import AiohttpClient
 
 
 def create_app(
     handler: _Handler,
-    redis: aioredis.commands.Redis,
+    redis: aioredis.Redis,
     max_age: Optional[int] = None,
     key_factory: Callable[[], str] = lambda: uuid.uuid4().hex
 ) -> web.Application:
@@ -31,7 +31,7 @@ def create_app(
 
 async def make_cookie(
     client: TestClient,
-    redis: aioredis.commands.Redis,
+    redis: aioredis.Redis,
     data: Dict[Any, Any]
 ) -> None:
     session_data = {
@@ -40,8 +40,7 @@ async def make_cookie(
     }
     value = json.dumps(session_data)
     key = uuid.uuid4().hex
-    with await redis as conn:
-        await conn.set('AIOHTTP_SESSION_' + key, value)
+    await redis.set('AIOHTTP_SESSION_' + key, value)
     # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
         {'AIOHTTP_SESSION': key}  # type: ignore
@@ -50,11 +49,10 @@ async def make_cookie(
 
 async def make_cookie_with_bad_value(
     client: TestClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
     key = uuid.uuid4().hex
-    with await redis as conn:
-        await conn.set('AIOHTTP_SESSION_' + key, '')
+    await redis.set('AIOHTTP_SESSION_' + key, '')
     # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
         {'AIOHTTP_SESSION': key}  # type: ignore
@@ -63,20 +61,19 @@ async def make_cookie_with_bad_value(
 
 async def load_cookie(
     client: TestClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> Any:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url('/'))
     key = cookies['AIOHTTP_SESSION']
-    with await redis as conn:
-        encoded = await conn.get('AIOHTTP_SESSION_' + key.value)
-        s = encoded.decode('utf-8')
-        value = json.loads(s)
-        return value
+    encoded = await redis.get('AIOHTTP_SESSION_' + key.value)
+    s = encoded.decode('utf-8')
+    value = json.loads(s)
+    return value
 
 
 async def test_create_new_session(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -94,7 +91,7 @@ async def test_create_new_session(
 
 async def test_load_existing_session(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -113,7 +110,7 @@ async def test_load_existing_session(
 
 async def test_load_bad_session(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -132,7 +129,7 @@ async def test_load_bad_session(
 
 async def test_change_session(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -161,7 +158,7 @@ async def test_change_session(
 
 async def test_clear_cookie_on_session_invalidation(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -184,7 +181,7 @@ async def test_clear_cookie_on_session_invalidation(
 
 async def test_create_cookie_in_handler(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -207,14 +204,13 @@ async def test_create_cookie_in_handler(
     morsel = resp.cookies['AIOHTTP_SESSION']
     assert morsel['httponly']
     assert morsel['path'] == '/'
-    with await redis as conn:
-        exists = await conn.exists('AIOHTTP_SESSION_' + morsel.value)
-        assert exists
+    exists = await redis.exists('AIOHTTP_SESSION_' + morsel.value)
+    assert exists
 
 
 async def test_set_ttl_on_session_saving(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -228,8 +224,7 @@ async def test_set_ttl_on_session_saving(
 
     key = resp.cookies['AIOHTTP_SESSION'].value
 
-    with await redis as conn:
-        ttl = await conn.ttl('AIOHTTP_SESSION_'+key)
+    ttl = await redis.ttl('AIOHTTP_SESSION_'+key)
 
     assert ttl > 9
     assert ttl <= 10
@@ -237,7 +232,7 @@ async def test_set_ttl_on_session_saving(
 
 async def test_set_ttl_manually_set(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -252,8 +247,7 @@ async def test_set_ttl_manually_set(
 
     key = resp.cookies['AIOHTTP_SESSION'].value
 
-    with await redis as conn:
-        ttl = await conn.ttl('AIOHTTP_SESSION_'+key)
+    ttl = await redis.ttl('AIOHTTP_SESSION_'+key)
 
     assert ttl > 9
     assert ttl <= 10
@@ -261,7 +255,7 @@ async def test_set_ttl_manually_set(
 
 async def test_create_new_session_if_key_doesnt_exists_in_redis(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -280,7 +274,7 @@ async def test_create_new_session_if_key_doesnt_exists_in_redis(
 
 async def test_create_storage_with_custom_key_factory(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
@@ -305,7 +299,7 @@ async def test_create_storage_with_custom_key_factory(
 
 async def test_redis_session_fixation(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def login(request: web.Request) -> web.StreamResponse:
@@ -334,16 +328,13 @@ async def test_redis_session_fixation(
     assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie
 
 
-async def test_redis_from_create_pool(
-    redis_params: Dict[str, Tuple[str, int]]
-) -> None:
+async def test_redis_from_create_pool(redis_url: str) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
 
-    redis = await aioredis.create_pool(**redis_params)
-    with pytest.warns(DeprecationWarning):
-        create_app(handler=handler, redis=redis)
+    redis = aioredis.from_url(redis_url)  # type: ignore[no-untyped-call]
+    create_app(handler=handler, redis=redis)
 
 
 async def test_not_redis_provided_to_storage() -> None:
@@ -352,7 +343,7 @@ async def test_not_redis_provided_to_storage() -> None:
         pass
 
     with pytest.raises(TypeError):
-        create_app(handler=handler, redis=None)
+        create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 
 
 async def test_no_aioredis_installed(mocker: MockFixture) -> None:
@@ -362,7 +353,7 @@ async def test_no_aioredis_installed(mocker: MockFixture) -> None:
 
     mocker.patch('aiohttp_session.redis_storage.aioredis', None)
     with pytest.raises(RuntimeError):
-        create_app(handler=handler, redis=None)
+        create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 
 
 async def test_old_aioredis_version(mocker: MockFixture) -> None:
@@ -376,12 +367,12 @@ async def test_old_aioredis_version(mocker: MockFixture) -> None:
 
     mocker.patch('aiohttp_session.redis_storage.StrictVersion', Dummy)
     with pytest.raises(RuntimeError):
-        create_app(handler=handler, redis=None)
+        create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 
 
 async def test_load_session_dont_load_expired_session(
     aiohttp_client: AiohttpClient,
-    redis: aioredis.commands.Redis
+    redis: aioredis.Redis
 ) -> None:
 
     async def handler(request: web.Request) -> web.StreamResponse:

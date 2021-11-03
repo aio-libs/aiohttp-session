@@ -3,13 +3,13 @@ from typing import Tuple
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
-from aiohttp.web_middlewares import _Handler
-from aiohttp_session import SESSION_KEY, SimpleCookieStorage, get_session, session_middleware
+from aiohttp_session import (Handler, SESSION_KEY, SimpleCookieStorage, get_session,
+                             session_middleware)
 
 from .typedefs import AiohttpClient
 
 
-def create_app(*handlers: Tuple[str, _Handler]) -> web.Application:
+def create_app(*handlers: Tuple[str, Handler]) -> web.Application:
     middleware = session_middleware(SimpleCookieStorage())
     app = web.Application(middlewares=[middleware])
     for url, handler in handlers:

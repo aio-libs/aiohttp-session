@@ -7,8 +7,7 @@ from typing import Any, Dict, MutableMapping, Tuple, Union, cast
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
-from aiohttp.web_middlewares import _Handler
-from aiohttp_session import Session, get_session, new_session, session_middleware
+from aiohttp_session import Handler, Session, get_session, new_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from cryptography.fernet import Fernet
 
@@ -27,14 +26,13 @@ def make_cookie(client: TestClient, fernet: Fernet, data: Dict[str, Any]) -> Non
     cookie_data = json.dumps(session_data).encode('utf-8')
     encrypted_data = fernet.encrypt(cookie_data).decode('utf-8')
 
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': encrypted_data}  # type: ignore
+        {'AIOHTTP_SESSION': encrypted_data}
     )
 
 
 def create_app(
-    handler: _Handler,
+    handler: Handler,
     key: Union[str, bytes, bytearray]
 ) -> web.Application:
     middleware = session_middleware(EncryptedCookieStorage(key))
@@ -188,9 +186,8 @@ async def test_encrypted_cookie_session_fixation(
     evil_cookie = resp.cookies['AIOHTTP_SESSION'].value
     resp = await client.delete('/')
     assert resp.cookies['AIOHTTP_SESSION'].value == ""
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': evil_cookie}  # type: ignore
+        {'AIOHTTP_SESSION': evil_cookie}
     )
     resp = await client.get('/')
     assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie
@@ -226,9 +223,8 @@ async def test_fernet_ttl(
     assert 'AIOHTTP_SESSION' in resp.cookies
     cookie = resp.cookies['AIOHTTP_SESSION'].value
     await asyncio.sleep(MAX_AGE + 1)
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': cookie}  # type: ignore
+        {'AIOHTTP_SESSION': cookie}
     )
     resp = await client.get('/')
     body = await resp.text()

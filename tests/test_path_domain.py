@@ -5,8 +5,7 @@ from typing import Any, Optional
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
-from aiohttp.web_middlewares import _Handler
-from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
+from aiohttp_session import Handler, SimpleCookieStorage, get_session, session_middleware
 
 from .typedefs import AiohttpClient
 
@@ -30,7 +29,7 @@ def make_cookie(
 
 
 def create_app(
-    handler: _Handler,
+    handler: Handler,
     path: Optional[str] = None,
     domain: Optional[str] = None
 ) -> web.Application:

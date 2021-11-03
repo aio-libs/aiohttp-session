@@ -9,7 +9,7 @@ pep257==0.7.0
 -e .
 aioredis==2.0.0
 cryptography==3.4.8
-docker==5.0.2
+docker==5.0.3
 pynacl==1.4.0
 pytest==6.2.5
 pytest-aiohttp==0.3.0
@@ -17,9 +17,9 @@ pytest-cov==3.0.0
 pytest-mock==3.6.1
 pytest-sugar==0.9.4
 aiohttp==3.8
-multidict==4.7.6
-chardet==3.0.4
-yarl==1.7.0
+multidict==5.2.0
+chardet==4.0.0
+yarl==1.7.2
 aiomcache==0.6.0
 mypy==0.910
 typing-extensions==3.10.0.2

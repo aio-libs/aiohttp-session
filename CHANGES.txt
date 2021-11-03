@@ -1,109 +1,106 @@
-Changes
-=======
-
 2.9.0 (2019-11-04)
-------------------
+==================
 
 * Fix memcached expiring time (#398)
 
 2.8.0 (2019-09-17)
-------------------
+==================
 
 * Make this compatible with Python 3.7+. Import from collections.abc, instead
   of from collections. (#373)
 
 
 2.7.0 (2018-10-13)
-------------------
+==================
 
 * Reset a session if the session age > max_age (#331)
 
 * Reset a session on TTL expiration for EncryptedCookieStorage (#326)
 
 2.6.0 (2018-09-12)
-------------------
+==================
 
 * Create a new session if `NaClCookieStorage` cannot decode a
   corrupted cookie (#317)
 
 2.5.0 (2018-05-12)
-------------------
+==================
 
 * Add an API for requesting new session explicitly (#281)
 
 2.4.0 (2018-05-04)
-------------------
+==================
 
 * Fix a bug for session fixation (#272)
 
 2.3.0 (2018-02-13)
-------------------
+==================
 
 - Support custom encoder and decoder by all storages (#252)
 - Bump to aiohttp 3.0
 
 2.2.0 (2018-01-31)
-------------------
+==================
 
 - Fixed the formatting of an error handling bad middleware return types. (#249)
 
 2.1.0 (2017-11-24)
-------------------
+==================
 
 - Add `session.set_new_identity()` method for changing identity for a
   new session (#236)
 
 2.0.1 (2017-11-22)
-------------------
+==================
 
 - Replace assertions in aioredis installation checks by `RuntimeError` (#235)
 
 2.0.0 (2017-11-21)
-------------------
+==================
 
 - Update to aioredis 1.0+. The aiohttp-session 2.0 is not compatible
   with aioredis 0.X (#234)
 
 1.2.1 (2017-11-20)
-------------------
+==================
 
 - Pin aioredis<1.0 (#231)
 
 1.2.0 (2017-11-06)
-------------------
+==================
 
 - Add MemcachedStorage (#224)
 
 1.1.0 (2017-11-03)
-------------------
+==================
 
 - Upgrade middleware to new style from aiohttp 2.3+
 
 
 1.0.1 (2017-09-13)
-------------------
+==================
 
 - Add key_factory attribute for redis_storage (#205)
 
 1.0.0 (2017-07-27)
-------------------
+==================
 
 - Catch decoder exception in RedisStorage on data load (#175)
 
 - Specify domain and path on cookie deletion (#171)
 
 0.8.0 (2016-12-04)
-------------------
+==================
 
 - Use `time.time()` instead of `time.monotonic()` for absolute times (#81)
 
 0.7.0 (2016-09-24)
-------------------
+==================
 
 - Fix tests to be compatible with aiohttp upstream API for client cookies
 
 0.6.0 (2016-09-08)
-------------------
+==================
 
 - Add expires field automatically to support older browsers (#43)
 
@@ -112,13 +109,13 @@ Changes
 - Always pass default max_age from storage into session (#45)
 
 0.5.0 (2016-02-21)
-------------------
+==================
 
 - Handle cryptography.fernet.InvalidToken exception by providing an
   empty session (#29)
 
 0.4.0 (2016-01-06)
-------------------
+==================
 
 - Add optional NaCl encrypted storage (#20)
 
@@ -130,31 +127,31 @@ Changes
 - Save the session even on exception in the middleware chain
 
 0.3.0 (2015-11-20)
-------------------
+==================
 
 - Reflect aiohttp changes: minimum required Python version is 3.4.1
 
 - Use explicit 'aiohttp_session' package
 
 0.2.0 (2015-09-07)
-------------------
+==================
 
 - Add session.created property (#14)
 
 - Replaced PyCrypto with crypthography library (#16)
 
 0.1.2 (2015-08-07)
-------------------
+==================
 
 - Add manifest file (#15)
 
 0.1.1 (2015-04-20)
-------------------
+==================
 
 - Fix #7: stop cookie name growing each time session is saved
 
 
 0.1.0 (2015-04-13)
-------------------
+==================
 
 - First public release

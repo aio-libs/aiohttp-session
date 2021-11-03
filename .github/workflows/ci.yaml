@@ -19,7 +19,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install --upgrade pip build whine
+        pip install --upgrade pip build twine
         pip install -r requirements-dev.txt
     - name: Run linters
       run: |

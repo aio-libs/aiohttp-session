@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
 
     steps:
     - name: Checkout
@@ -19,7 +19,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
+        pip install --upgrade pip build whine
         pip install -r requirements-dev.txt
     - name: Run linters
       run: |
@@ -27,7 +27,8 @@ jobs:
     - name: Run tests
       run: |
         make cov
-        python setup.py check -rms
+        python -m build
+        twine check dist/*
     - name: Upload coverage
       uses: codecov/codecov-action@v1
       with:

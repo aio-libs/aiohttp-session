@@ -6,10 +6,13 @@ import abc
 import json
 import sys
 import time
-from typing import Any, Callable, Dict, Iterator, Mapping, MutableMapping, Optional, Union, cast
+from typing import (Any, Awaitable, Callable, Dict, Iterator, Mapping,
+                    MutableMapping, Optional, Union, cast)
 
 from aiohttp import web
-from aiohttp.web_middlewares import _Handler, _Middleware
+
+Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
+Middleware = Callable[[web.Request, Handler], Awaitable[web.StreamResponse]]
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -162,14 +165,14 @@ async def new_session(request: web.Request) -> Session:
     return session
 
 
-def session_middleware(storage: 'AbstractStorage') -> _Middleware:
+def session_middleware(storage: 'AbstractStorage') -> Middleware:
     if not isinstance(storage, AbstractStorage):
         raise RuntimeError("Expected AbstractStorage got {}".format(storage))
 
     @web.middleware
     async def factory(
         request: web.Request,
-        handler: _Handler
+        handler: Handler
     ) -> web.StreamResponse:
         request[STORAGE_KEY] = storage
         raise_response = False
@@ -286,7 +289,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
                                 path=params["path"])
         else:
             # Ignoring type for params until aiohttp#4238 is released
-            response.set_cookie(self._cookie_name, cookie_data, **params)  # type: ignore
+            response.set_cookie(self._cookie_name, cookie_data, **params)
 
 
 class SimpleCookieStorage(AbstractStorage):

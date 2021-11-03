@@ -5,8 +5,8 @@ from unittest import mock
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
-from aiohttp.web_middlewares import _Handler
-from aiohttp_session import SimpleCookieStorage, get_session, setup as setup_middleware
+from aiohttp_session import (Handler, SimpleCookieStorage,
+                             get_session, setup as setup_middleware)
 
 from .typedefs import AiohttpClient
 
@@ -18,13 +18,12 @@ def make_cookie(client: TestClient, data: Dict[str, Any]) -> None:
     }
 
     value = json.dumps(session_data)
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': value}  # type: ignore
+        {'AIOHTTP_SESSION': value}
     )
 
 
-def create_app(handler: _Handler) -> web.Application:
+def create_app(handler: Handler) -> web.Application:
     app = web.Application()
     setup_middleware(app, SimpleCookieStorage(max_age=10))
     app.router.add_route('GET', '/', handler)

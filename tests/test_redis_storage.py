@@ -8,8 +8,7 @@ import aioredis
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
-from aiohttp.web_middlewares import _Handler
-from aiohttp_session import Session, get_session, session_middleware
+from aiohttp_session import Handler, Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
 from pytest_mock import MockFixture
 
@@ -17,7 +16,7 @@ from .typedefs import AiohttpClient
 
 
 def create_app(
-    handler: _Handler,
+    handler: Handler,
     redis: aioredis.Redis,
     max_age: Optional[int] = None,
     key_factory: Callable[[], str] = lambda: uuid.uuid4().hex
@@ -41,9 +40,8 @@ async def make_cookie(
     value = json.dumps(session_data)
     key = uuid.uuid4().hex
     await redis.set('AIOHTTP_SESSION_' + key, value)
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': key}  # type: ignore
+        {'AIOHTTP_SESSION': key}
     )
 
 
@@ -53,9 +51,8 @@ async def make_cookie_with_bad_value(
 ) -> None:
     key = uuid.uuid4().hex
     await redis.set('AIOHTTP_SESSION_' + key, '')
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': key}  # type: ignore
+        {'AIOHTTP_SESSION': key}
     )
 
 
@@ -264,9 +261,8 @@ async def test_create_new_session_if_key_doesnt_exists_in_redis(
         return web.Response(body=b'OK')
 
     client = await aiohttp_client(create_app(handler, redis))
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': 'invalid_key'}  # type: ignore
+        {'AIOHTTP_SESSION': 'invalid_key'}
     )
     resp = await client.get('/')
     assert resp.status == 200
@@ -320,9 +316,8 @@ async def test_redis_session_fixation(
     evil_cookie = resp.cookies['AIOHTTP_SESSION'].value
     resp = await client.delete('/')
     assert resp.cookies['AIOHTTP_SESSION'].value == ""
-    # Ignoring type until aiohttp#4252 is released
     client.session.cookie_jar.update_cookies(
-        {'AIOHTTP_SESSION': evil_cookie}  # type: ignore
+        {'AIOHTTP_SESSION': evil_cookie}
     )
     resp = await client.get('/')
     assert resp.cookies['AIOHTTP_SESSION'].value != evil_cookie

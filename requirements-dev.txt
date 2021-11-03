@@ -16,7 +16,7 @@ pytest-aiohttp==0.3.0
 pytest-cov==3.0.0
 pytest-mock==3.6.1
 pytest-sugar==0.9.4
-aiohttp<3.9
+aiohttp==3.8
 multidict==5.2.0
 chardet==4.0.0
 yarl==1.7.2

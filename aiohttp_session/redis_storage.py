@@ -25,13 +25,14 @@ class RedisStorage(AbstractStorage):
         path: str = '/',
         secure: Optional[bool] = None,
         httponly: bool = True,
+        samesite: Optional[str] = None,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
         encoder: Callable[[object], str] = json.dumps,
         decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
+                         httponly=httponly, samesite=samesite,
                          encoder=encoder, decoder=decoder)
         if aioredis is None:
             raise RuntimeError("Please install aioredis")

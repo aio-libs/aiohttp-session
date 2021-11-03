@@ -26,6 +26,7 @@ class _CookieParams(TypedDict, total=False):
     path: str
     secure: Optional[bool]
     httponly: bool
+    samesite: Optional[str]
     expires: str
 
 
@@ -219,6 +220,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         path: str = '/',
         secure: Optional[bool] = None,
         httponly: bool = True,
+        samesite: Optional[str] = None,
         encoder: Callable[[object], str] = json.dumps,
         decoder: Callable[[str], Any] = json.loads
     ) -> None:
@@ -228,7 +230,8 @@ class AbstractStorage(metaclass=abc.ABCMeta):
             max_age=max_age,
             path=path,
             secure=secure,
-            httponly=httponly
+            httponly=httponly,
+            samesite=samesite
         )
         self._max_age = max_age
         self._encoder = encoder
@@ -305,12 +308,13 @@ class SimpleCookieStorage(AbstractStorage):
         path: str = '/',
         secure: Optional[bool] = None,
         httponly: bool = True,
+        samesite: Optional[str] = None,
         encoder: Callable[[object], str] = json.dumps,
         decoder: Callable[[str], Any] = json.loads
     ) -> None:
         super().__init__(cookie_name=cookie_name, domain=domain,
                          max_age=max_age, path=path, secure=secure,
-                         httponly=httponly,
+                         httponly=httponly, samesite=samesite,
                          encoder=encoder, decoder=decoder)
 
     async def load_session(self, request: web.Request) -> Session:

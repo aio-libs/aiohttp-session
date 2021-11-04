@@ -1,25 +1,26 @@
+-e .
+aiohttp==3.8
+aiomcache==0.6.0
+aioredis==2.0.0
 attrs==21.2.0
+chardet==4.0.0
+cryptography==35.0.0
+docker==5.0.3
 flake8==4.0.1
 flake8-bandit==2.1.2
 flake8-bugbear==21.9.2
 flake8-import-order==0.18.1
 flake8-requirements==1.5.1
-sphinx==4.2.0
+multidict==5.2.0
+mypy==0.910
 pep257==0.7.0
--e .
-aioredis==2.0.0
-cryptography==35.0.0
-docker==5.0.3
+pre-commit==2.15.0
 pynacl==1.4.0
 pytest==6.2.5
 pytest-aiohttp==0.3.0
 pytest-cov==3.0.0
 pytest-mock==3.6.1
 pytest-sugar==0.9.4
-aiohttp==3.8
-multidict==5.2.0
-chardet==4.0.0
-yarl==1.7.2
-aiomcache==0.6.0
-mypy==0.910
+sphinx==4.2.0
 typing-extensions==3.10.0.2
+yarl==1.7.2

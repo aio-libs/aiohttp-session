@@ -94,11 +94,15 @@ Developing
 
 Install for local development::
 
-    $ pip install -r requirements-dev.txt
+    $ make setup
 
-Run tests with::
+Run linters::
 
-    $ pytest -sv tests/
+    $ make lint
+
+Run tests::
+
+    $ make test
 
 
 Third party extensions

@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on: [pull_request, push]
 
@@ -52,7 +52,7 @@ jobs:
       uses: aio-libs/create-release@v1.2.3
       with:
         changes_file: CHANGES.txt
-        name: aiohttp
+        name: aiohttp-session
         version_file: aiohttp_session/__init__.py
         github_token: ${{ secrets.GITHUB_TOKEN }}
         pypi_token: ${{ secrets.PYPI_API_TOKEN }}

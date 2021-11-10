@@ -17,6 +17,10 @@ else:
     from typing_extensions import TypedDict
 
 
+# TODO: Remove once fixed: https://github.com/aio-libs/aioredis-py/issues/1115
+aioredis.Redis.__del__ = lambda *args: None  # type: ignore
+
+
 class _ContainerInfo(TypedDict):
     host: str
     port: int
@@ -61,7 +65,8 @@ def session_id() -> str:
 @pytest.fixture(scope="session")
 def docker() -> DockerClient:  # type: ignore[misc]  # No docker types.
     client = docker_from_env(version="auto")
-    return client
+    yield client
+    client.close()
 
 
 @pytest.fixture(scope="session")
@@ -107,6 +112,10 @@ def redis_server(  # type: ignore[misc]  # No docker types.
         except ConnectionError:
             time.sleep(delay)
             delay *= 2
+        finally:
+            loop.run_until_complete(conn.close())
+            # TODO: Remove once fixed: github.com/aio-libs/aioredis-py/issues/1103
+            loop.run_until_complete(conn.connection_pool.disconnect())
     else:
         pytest.fail("Cannot start redis server")
 
@@ -133,9 +142,8 @@ def redis(
     pool = aioredis.ConnectionPool.from_url(redis_url)
     redis = loop.run_until_complete(start(pool))
     yield redis
-    if redis is not None:
-        redis.close()  # type: ignore[no-untyped-call]
-        loop.run_until_complete(pool.disconnect())
+    loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
+    loop.run_until_complete(pool.disconnect())
 
 
 @pytest.fixture(scope="session")
@@ -181,6 +189,8 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
         except ConnectionRefusedError:
             time.sleep(delay)
             delay *= 2
+        finally:
+            loop.run_until_complete(conn.close())
     else:
         pytest.fail("Cannot start memcached server")
 
@@ -203,4 +213,4 @@ def memcached(  # type: ignore[misc]
 ) -> Iterator[aiomcache.Client]:
     conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
-    conn.close()
+    loop.run_until_complete(conn.close())

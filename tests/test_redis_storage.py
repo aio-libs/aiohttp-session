@@ -290,6 +290,7 @@ async def test_redis_from_create_pool(redis_url: str) -> None:
 
     redis = aioredis.from_url(redis_url)  # type: ignore[no-untyped-call]
     create_app(handler=handler, redis=redis)
+    await redis.close()
 
 
 async def test_not_redis_provided_to_storage() -> None:

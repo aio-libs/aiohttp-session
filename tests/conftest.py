@@ -18,7 +18,7 @@ else:
 
 
 # TODO: Remove once fixed: https://github.com/aio-libs/aioredis-py/issues/1115
-aioredis.Redis.__del__ = lambda *args: None  # type: ignore  # noqa
+aioredis.Redis.__del__ = lambda *args: None  # type: ignore
 
 
 class _ContainerInfo(TypedDict):
@@ -106,7 +106,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]
+            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]  # noqa
             loop.run_until_complete(conn.set("foo", "bar"))
             break
         except ConnectionError:

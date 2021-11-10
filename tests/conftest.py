@@ -115,7 +115,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
         finally:
             loop.run_until_complete(conn.close())
             # TODO: Remove once fixed: https://github.com/aio-libs/aioredis-py/issues/1103
-            loop.run_until_complete(client.connection_pool.disconnect())
+            loop.run_until_complete(conn.connection_pool.disconnect())
     else:
         pytest.fail("Cannot start redis server")
 

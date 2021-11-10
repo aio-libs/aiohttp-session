@@ -44,7 +44,7 @@ class RedisStorage(AbstractStorage):
         )
         if aioredis is None:
             raise RuntimeError("Please install aioredis")
-        # User may have installed aioredis separately (without aiohttp-session[aioredis]).
+        # May have installed aioredis separately (without aiohttp-session[aioredis]).
         if StrictVersion(aioredis.__version__).version < (2, 0):
             raise RuntimeError("aioredis<2.0 is not supported")
         self._key_factory = key_factory

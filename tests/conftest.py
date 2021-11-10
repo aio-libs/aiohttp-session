@@ -66,7 +66,6 @@ def session_id() -> str:
 def docker() -> DockerClient:  # type: ignore[misc]  # No docker types.
     client = docker_from_env(version="auto")
     return client
-    client.close()
 
 
 @pytest.fixture(scope="session")

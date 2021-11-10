@@ -17,7 +17,7 @@ else:
     from typing_extensions import TypedDict
 
 
-# Testing...
+# TODO: Remove once fixed: https://github.com/aio-libs/aioredis-py/issues/1115
 aioredis.Redis.__del__ = lambda *args: None  # type: ignore  # noqa
 
 

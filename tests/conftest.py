@@ -188,6 +188,8 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
         except ConnectionRefusedError:
             time.sleep(delay)
             delay *= 2
+        finally:
+            loop.run_until_complete(conn.close())
     else:
         pytest.fail("Cannot start memcached server")
 

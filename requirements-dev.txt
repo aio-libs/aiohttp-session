@@ -21,6 +21,6 @@ pytest-aiohttp==0.3.0
 pytest-cov==3.0.0
 pytest-mock==3.6.1
 pytest-sugar==0.9.4
-sphinx==4.3.0
+sphinx==4.3.1
 typing-extensions==4.0.0
 yarl==1.7.2

@@ -7,6 +7,7 @@ import json
 import sys
 import time
 import locale
+from contextlib import contextmanager
 from typing import (
     Any,
     Awaitable,

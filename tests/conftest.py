@@ -4,7 +4,7 @@ import socket
 import sys
 import time
 import uuid
-from typing import Generator, Tuple
+from typing import Iterator
 
 import aiomcache
 import aioredis
@@ -17,14 +17,14 @@ else:
     from typing_extensions import TypedDict
 
 
+# TODO: Remove once fixed: https://github.com/aio-libs/aioredis-py/issues/1115
+aioredis.Redis.__del__ = lambda *args: None  # type: ignore
+
+
 class _ContainerInfo(TypedDict):
     host: str
     port: int
     container: docker_models.containers.Container
-
-
-class _RedisParams(TypedDict):
-    address: Tuple[str, int]
 
 
 class _MemcachedParams(TypedDict):
@@ -41,8 +41,8 @@ def unused_port() -> int:
     return port
 
 
-@pytest.fixture(scope='session')
-def loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
+@pytest.fixture(scope="session")
+def loop() -> Iterator[asyncio.AbstractEventLoop]:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(None)
 
@@ -56,27 +56,29 @@ def loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     asyncio.set_event_loop(None)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def session_id() -> str:
     """Unique session identifier, random string."""
     return str(uuid.uuid4())
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def docker() -> DockerClient:  # type: ignore[misc]  # No docker types.
-    client = docker_from_env(version='auto')
-    return client
+    client = docker_from_env(version="auto")
+    yield client
+    client.close()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def redis_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
     session_id: str,
     loop: asyncio.AbstractEventLoop,
-) -> Generator[_ContainerInfo, None, None]:
-    image = 'redis:{}'.format('latest')
+) -> Iterator[_ContainerInfo]:
+    image = "redis:{}".format("latest")
+    asyncio.set_event_loop(loop)
 
-    if sys.platform.startswith('darwin'):
+    if sys.platform.startswith("darwin"):
         port = unused_port()
     else:
         port = None
@@ -84,34 +86,36 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     container = docker.containers.run(
         image=image,
         detach=True,
-        name='redis-test-server-{}-{}'.format('latest', session_id),
+        name="redis-test-server-{}-{}".format("latest", session_id),
         ports={
-            '6379/tcp': port,
+            "6379/tcp": port,
         },
         environment={
-            'http.host': '0.0.0.0',  # noqa: S104
-            'transport.host': '127.0.0.1',
+            "http.host": "0.0.0.0",
+            "transport.host": "127.0.0.1",
         },
     )
 
-    if sys.platform.startswith('darwin'):
-        host = '0.0.0.0'  # noqa: S104
+    if sys.platform.startswith("darwin"):
+        host = "0.0.0.0"
     else:
         inspection = docker.api.inspect_container(container.id)
-        host = inspection['NetworkSettings']['IPAddress']
+        host = inspection["NetworkSettings"]["IPAddress"]
         port = 6379
 
     delay = 0.1
     for _i in range(20):
         try:
-            conn = loop.run_until_complete(
-                aioredis.create_connection((host, port), loop=loop)
-            )
-            loop.run_until_complete(conn.execute('SET', 'foo', 'bar'))
+            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]  # noqa
+            loop.run_until_complete(conn.set("foo", "bar"))
             break
-        except ConnectionRefusedError:
+        except ConnectionError:
             time.sleep(delay)
             delay *= 2
+        finally:
+            loop.run_until_complete(conn.close())
+            # TODO: Remove once fixed: github.com/aio-libs/aioredis-py/issues/1103
+            loop.run_until_complete(conn.connection_pool.disconnect())
     else:
         pytest.fail("Cannot start redis server")
 
@@ -122,34 +126,36 @@ def redis_server(  # type: ignore[misc]  # No docker types.
 
 
 @pytest.fixture
-def redis_params(redis_server: _ContainerInfo) -> _RedisParams:  # type: ignore[misc]
-    return dict(address=(redis_server['host'], redis_server['port']))
+def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
+    return "redis://{}:{}".format(redis_server["host"], redis_server["port"])
 
 
 @pytest.fixture
-def redis(  # type: ignore[misc]  # TODO: aioredis
+def redis(
     loop: asyncio.AbstractEventLoop,
-    redis_params: _RedisParams,
-) -> Generator[aioredis.commands.Redis, None, None]:
-    async def start() -> aioredis.commands.Redis:
-        return await aioredis.create_redis_pool(loop=loop, **redis_params)
+    redis_url: str,
+) -> Iterator[aioredis.Redis]:
+    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
+        return aioredis.Redis(connection_pool=pool)
 
-    pool = loop.run_until_complete(start())
-    yield pool
-    if pool is not None:
-        pool.close()
-        loop.run_until_complete(pool.wait_closed())
+    asyncio.set_event_loop(loop)
+    pool = aioredis.ConnectionPool.from_url(redis_url)
+    redis = loop.run_until_complete(start(pool))
+    yield redis
+    loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
+    loop.run_until_complete(pool.disconnect())
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def memcached_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
-    session_id: str, loop: asyncio.AbstractEventLoop,
-) -> Generator[_ContainerInfo, None, None]:
+    session_id: str,
+    loop: asyncio.AbstractEventLoop,
+) -> Iterator[_ContainerInfo]:
 
-    image = 'memcached:{}'.format('latest')
+    image = "memcached:{}".format("latest")
 
-    if sys.platform.startswith('darwin'):
+    if sys.platform.startswith("darwin"):
         port = unused_port()
     else:
         port = None
@@ -157,32 +163,34 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
     container = docker.containers.run(
         image=image,
         detach=True,
-        name='memcached-test-server-{}-{}'.format('latest', session_id),
+        name="memcached-test-server-{}-{}".format("latest", session_id),
         ports={
-            '11211/tcp': port,
+            "11211/tcp": port,
         },
         environment={
-            'http.host': '0.0.0.0',  # noqa: S104
-            'transport.host': '127.0.0.1',
+            "http.host": "0.0.0.0",
+            "transport.host": "127.0.0.1",
         },
     )
 
-    if sys.platform.startswith('darwin'):
-        host = '0.0.0.0'  # noqa: S104
+    if sys.platform.startswith("darwin"):
+        host = "0.0.0.0"
     else:
         inspection = docker.api.inspect_container(container.id)
-        host = inspection['NetworkSettings']['IPAddress']
+        host = inspection["NetworkSettings"]["IPAddress"]
         port = 11211
 
     delay = 0.1
     for _i in range(20):
         try:
             conn = aiomcache.Client(host, port, loop=loop)
-            loop.run_until_complete(conn.set(b'foo', b'bar'))
+            loop.run_until_complete(conn.set(b"foo", b"bar"))
             break
         except ConnectionRefusedError:
             time.sleep(delay)
             delay *= 2
+        finally:
+            loop.run_until_complete(conn.close())
     else:
         pytest.fail("Cannot start memcached server")
 
@@ -193,15 +201,16 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
 
 
 @pytest.fixture
-def memcached_params(memcached_server: _ContainerInfo) -> _MemcachedParams:  # type: ignore[misc]
+def memcached_params(  # type: ignore[misc]
+    memcached_server: _ContainerInfo,
+) -> _MemcachedParams:
     return dict(host=memcached_server["host"], port=memcached_server["port"])
 
 
 @pytest.fixture
 def memcached(  # type: ignore[misc]
-    loop: asyncio.AbstractEventLoop,
-    memcached_params: _MemcachedParams
-) -> Generator[aiomcache.Client, None, None]:
+    loop: asyncio.AbstractEventLoop, memcached_params: _MemcachedParams
+) -> Iterator[aiomcache.Client]:
     conn = aiomcache.Client(loop=loop, **memcached_params)
     yield conn
-    conn.close()
+    loop.run_until_complete(conn.close())

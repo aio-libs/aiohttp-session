@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on: [pull_request, push]
 
@@ -33,3 +33,29 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unit
+
+  deploy:
+    name: Deploy
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.4.0
+    - name: Update pip, wheel, setuptools, build, twine
+      run: |
+        python -m pip install -U pip wheel setuptools build twine
+    - name: Build dists
+      run: |
+        python -m build
+    - name: Make Release
+      uses: aio-libs/create-release@v1.2.3
+      with:
+        changes_file: CHANGES.txt
+        name: aiohttp-session
+        version_file: aiohttp_session/__init__.py
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        pypi_token: ${{ secrets.PYPI_API_TOKEN }}
+        dist_dir: dist
+        fix_issue_regex: "`#(\\d+) <https://github.com/aio-libs/aiohttp-session/issues/\\1>`"
+        fix_issue_repl: "(#\\1)"

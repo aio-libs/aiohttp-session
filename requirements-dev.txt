@@ -2,7 +2,7 @@
 aiohttp==3.8.1
 aiomcache==0.6.0
 aioredis==2.0.0
-attrs==21.2.0
+attrs==21.3.0
 chardet==4.0.0
 cryptography==36.0.1
 docker==5.0.3

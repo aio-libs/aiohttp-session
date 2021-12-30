@@ -1,9 +1,11 @@
 .. towncrier release notes start
 
-2.10.0a0 (2021-11-04)
+2.10.0 (2021-12-30)
 =====================
 
-* test
+* Typing support
+* Add samesite cookie option
+* Support aioredis 2
 
 2.9.0 (2019-11-04)
 ==================

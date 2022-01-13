@@ -8,7 +8,7 @@ cryptography==36.0.1
 docker==5.0.3
 flake8==4.0.1
 flake8-bandit==2.1.2
-flake8-bugbear==21.11.29
+flake8-bugbear==22.1.11
 flake8-import-order==0.18.1
 flake8-requirements==1.5.1
 multidict==5.2.0

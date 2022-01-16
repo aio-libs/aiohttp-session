@@ -12,7 +12,7 @@ flake8-bugbear==22.1.11
 flake8-import-order==0.18.1
 flake8-requirements==1.5.1
 multidict==5.2.0
-mypy==0.910
+mypy==0.931
 pep257==0.7.0
 pre-commit==2.16.0
 pynacl==1.4.0

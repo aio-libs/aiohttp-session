@@ -34,9 +34,9 @@ def make_cookie(
 
     cookie_data = json.dumps(session_data).encode("utf-8")
     nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-    encrypted_data = secretbox.encrypt(cookie_data, nonce, encoder=Base64Encoder).decode("utf-8")
+    data_s = secretbox.encrypt(cookie_data, nonce, encoder=Base64Encoder).decode("utf-8")
 
-    client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": encrypted_data})
+    client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": data_s})
 
 
 def create_app(

@@ -14,7 +14,7 @@ flake8-requirements==1.5.1
 multidict==5.2.0
 mypy==0.930
 pep257==0.7.0
-pre-commit==2.16.0
+pre-commit==2.17.0
 pynacl==1.5.0
 pytest==6.2.5
 pytest-aiohttp==0.3.0

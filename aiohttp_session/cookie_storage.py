@@ -15,7 +15,7 @@ class EncryptedCookieStorage(AbstractStorage):
 
     def __init__(
         self,
-        secret_key: Union[str, bytes, bytearray],
+        secret_key: Union[str, bytes, bytearray, fernet.Fernet],
         *,
         cookie_name: str = "AIOHTTP_SESSION",
         domain: Optional[str] = None,
@@ -39,11 +39,12 @@ class EncryptedCookieStorage(AbstractStorage):
             decoder=decoder,
         )
 
-        if isinstance(secret_key, str):
-            pass
-        elif isinstance(secret_key, (bytes, bytearray)):
-            secret_key = base64.urlsafe_b64encode(secret_key)
-        self._fernet = fernet.Fernet(secret_key)
+        if isinstance(secret_key, fernet.Fernet):
+            self._fernet = secret_key
+        else:
+            if isinstance(secret_key, (bytes, bytearray)):
+                secret_key = base64.urlsafe_b64encode(secret_key)
+            self._fernet = fernet.Fernet(secret_key)
 
     async def load_session(self, request: web.Request) -> Session:
         cookie = self.load_cookie(request)

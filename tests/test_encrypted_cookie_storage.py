@@ -32,7 +32,7 @@ def make_cookie(client: TestClient, fernet: Fernet, data: Dict[str, Any]) -> Non
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": encrypted_data})
 
 
-def create_app(handler: Handler, key: Union[str, bytes, bytearray]) -> web.Application:
+def create_app(handler: Handler, key: Union[str, bytes, bytearray, Fernet]) -> web.Application:
     middleware = session_middleware(EncryptedCookieStorage(key))
     app = web.Application(middlewares=[middleware])
     app.router.add_route("GET", "/", handler)
@@ -97,6 +97,23 @@ async def test_load_existing_session(
         return web.Response(body=b"OK")
 
     client = await aiohttp_client(create_app(handler, key))
+    make_cookie(client, fernet, {"a": 1, "b": 12})
+    resp = await client.get("/")
+    assert resp.status == 200
+
+
+async def test_load_existing_session_with_fernet(
+  aiohttp_client: AiohttpClient, fernet: Fernet
+) -> None:
+    async def handler(request: web.Request) -> web.StreamResponse:
+        session = await get_session(request)
+        assert isinstance(session, Session)
+        assert not session.new
+        assert not session._changed
+        assert {"a": 1, "b": 12} == session  # type: ignore[comparison-overlap]
+        return web.Response(body=b"OK")
+
+    client = await aiohttp_client(create_app(handler, fernet))
     make_cookie(client, fernet, {"a": 1, "b": 12})
     resp = await client.get("/")
     assert resp.status == 200

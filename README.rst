@@ -32,7 +32,6 @@ A trivial usage example:
 .. code:: python
 
     import time
-    import base64
     from cryptography import fernet
     from aiohttp import web
     from aiohttp_session import setup, get_session
@@ -49,10 +48,9 @@ A trivial usage example:
 
     def make_app():
         app = web.Application()
-        # secret_key must be 32 url-safe base64-encoded bytes
         fernet_key = fernet.Fernet.generate_key()
-        secret_key = base64.urlsafe_b64decode(fernet_key)
-        setup(app, EncryptedCookieStorage(secret_key))
+        fernet = fernet.Fernet(fernet_key)
+        setup(app, EncryptedCookieStorage(fernet))
         app.router.add_get('/', handler)
         return app
 

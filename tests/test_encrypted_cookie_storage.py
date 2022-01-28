@@ -110,7 +110,7 @@ async def test_load_existing_session_with_fernet(
         assert isinstance(session, Session)
         assert not session.new
         assert not session._changed
-        assert {"a": 1, "b": 12} == session
+        assert {"a": 1, "b": 12} == session  # type: ignore[comparison-overlap]
         return web.Response(body=b"OK")
 
     client = await aiohttp_client(create_app(handler, fernet))

@@ -32,7 +32,7 @@ def make_cookie(client: TestClient, fernet: Fernet, data: Dict[str, Any]) -> Non
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": encrypted_data})
 
 
-def create_app(handler: Handler, key: Union[str, bytes, bytearray]) -> web.Application:
+def create_app(handler: Handler, key: Union[str, bytes, bytearray, Fernet]) -> web.Application:
     middleware = session_middleware(EncryptedCookieStorage(key))
     app = web.Application(middlewares=[middleware])
     app.router.add_route("GET", "/", handler)

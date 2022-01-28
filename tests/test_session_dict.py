@@ -85,7 +85,8 @@ def test_invalidate() -> None:
     s.invalidate()
     assert s == cast(MutableMapping[str, Any], {})
     assert s._changed
-    assert s.created is not None
+    # Mypy bug: https://github.com/python/mypy/issues/11853
+    assert s.created is not None  # type: ignore[unreachable]
 
 
 def test_invalidate2() -> None:
@@ -96,7 +97,8 @@ def test_invalidate2() -> None:
     s.invalidate()
     assert s == cast(MutableMapping[str, Any], {})
     assert s._changed
-    assert s.created is not None
+    # Mypy bug: https://github.com/python/mypy/issues/11853
+    assert s.created is not None  # type: ignore[unreachable]
 
 
 def test_operations() -> None:
@@ -153,5 +155,6 @@ def test_change() -> None:
 
     s.changed()
     assert s._changed
+    # Mypy bug: https://github.com/python/mypy/issues/11853
+    assert s.created == created  # type: ignore[unreachable]
     assert cast(MutableMapping[str, Any], {"a": {"key": "value", "key2": "val2"}}) == s
-    assert s.created == created

@@ -1,6 +1,6 @@
 """User sessions for aiohttp.web."""
 
-__version__ = "2.9.0"
+__version__ = "2.10.0"
 
 import abc
 import json
@@ -57,7 +57,7 @@ class Session(MutableMapping[str, Any]):
         new: bool,
         max_age: Optional[int] = None,
     ) -> None:
-        self._changed = False
+        self._changed: bool = False
         self._mapping: Dict[str, Any] = {}
         self._identity = identity if data != {} else None
         self._new = new if data != {} else True

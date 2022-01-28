@@ -30,7 +30,7 @@ def login_required(fn: _Handler) -> _Handler:
         # actually load user from your database (e.g. with aiopg)
         user = DATABASE[user_id]
         app["user"] = user
-        return await fn(request, *args, **kwargs)  # type: ignore[call-arg]
+        return await fn(request, *args, **kwargs)
 
     return wrapped
 

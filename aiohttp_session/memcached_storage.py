@@ -12,7 +12,7 @@ from . import AbstractStorage, Session
 class MemcachedStorage(AbstractStorage):
     """Memcached storage"""
 
-    def __init__(  # type: ignore[no-any-unimported]  # TODO: aiomcache
+    def __init__(
         self,
         memcached_conn: aiomcache.Client,
         *,
@@ -48,7 +48,7 @@ class MemcachedStorage(AbstractStorage):
         else:
             key = str(cookie)
             stored_key = (self.cookie_name + "_" + key).encode("utf-8")
-            data = await self.conn.get(stored_key)
+            data = await self.conn.get(stored_key)  # type: ignore[call-overload]
             if data is None:
                 return Session(None, data=None, new=True, max_age=self.max_age)
             data = data.decode("utf-8")

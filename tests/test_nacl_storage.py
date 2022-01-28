@@ -34,10 +34,9 @@ def make_cookie(
 
     cookie_data = json.dumps(session_data).encode("utf-8")
     nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-    data = secretbox.encrypt(cookie_data, nonce, encoder=Base64Encoder).decode("utf-8")
+    encr = secretbox.encrypt(cookie_data, nonce, encoder=Base64Encoder).decode("utf-8")
 
-    # Ignoring type until aiohttp#4252 is released
-    client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": data})  # type: ignore
+    client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": encr})
 
 
 def create_app(
@@ -59,13 +58,13 @@ def decrypt(secretbox: nacl.secret.SecretBox, cookie_value: str) -> Any:
 
 
 @pytest.fixture
-def secretbox(key: bytes) -> nacl.secret.SecretBox:  # type: ignore[misc]  # No nacl types # noqa
+def secretbox(key: bytes) -> nacl.secret.SecretBox:
     return nacl.secret.SecretBox(key)
 
 
 @pytest.fixture
 def key() -> bytes:
-    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)  # type: ignore[no-any-return] # noqa
+    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 
 async def test_create_new_session(

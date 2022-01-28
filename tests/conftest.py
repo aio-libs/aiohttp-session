@@ -183,7 +183,7 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = aiomcache.Client(host, port, loop=event_loop)
+            conn = aiomcache.Client(host, port)
             event_loop.run_until_complete(conn.set(b"foo", b"bar"))
             break
         except ConnectionRefusedError:
@@ -208,9 +208,9 @@ def memcached_params(  # type: ignore[misc]
 
 
 @pytest.fixture
-def memcached(  # type: ignore[misc]
+def memcached(
     event_loop: asyncio.AbstractEventLoop, memcached_params: _MemcachedParams
 ) -> Iterator[aiomcache.Client]:
-    conn = aiomcache.Client(loop=event_loop, **memcached_params)
+    conn = aiomcache.Client(**memcached_params)
     yield conn
     event_loop.run_until_complete(conn.close())

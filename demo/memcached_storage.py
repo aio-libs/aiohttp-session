@@ -18,7 +18,7 @@ async def handler(request: web.Request) -> web.Response:
 
 async def make_app() -> web.Application:
     app = web.Application()
-    mc = aiomcache.Client("127.0.0.1", 11211, loop=loop)
+    mc = aiomcache.Client("127.0.0.1", 11211)
     setup(app, MemcachedStorage(mc))
     app.router.add_get("/", handler)
     return app

@@ -119,11 +119,10 @@ Continuous Integration.
 Dependencies
 ------------
 
-- Python 3.5.3+
 - :term:`cryptography` for
   :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
 - :term:`aioredis` for
-  :class:`~aiohttp_session.redis_storage.RedisStorage`.
+  :class:`~aiohttp_session.redis_storage.RedisStorage`
 
 
 Third party extensions

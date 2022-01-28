@@ -54,7 +54,7 @@ async def load_cookie(
     cookies = client.session.cookie_jar.filter_cookies(client.make_url("/"))
     key = cookies["AIOHTTP_SESSION"]
     storage_key = ("AIOHTTP_SESSION_" + key.value).encode("utf-8")
-    encoded = await memcached.get(storage_key)
+    encoded = await memcached.get(storage_key)  # type: ignore[call-overload]
     s = encoded.decode("utf-8")
     return cast(Dict[str, Any], json.loads(s))
 
@@ -181,7 +181,7 @@ async def test_create_cookie_in_handler(
     assert morsel["httponly"]
     assert morsel["path"] == "/"
     storage_key = ("AIOHTTP_SESSION_" + morsel.value).encode("utf-8")
-    exists = await memcached.get(storage_key)
+    exists = await memcached.get(storage_key)  # type: ignore[call-overload]
     assert exists
 
 
@@ -298,7 +298,7 @@ async def test_memcached_max_age_over_30_days(
     storage_key = ("AIOHTTP_SESSION_" + resp.cookies["AIOHTTP_SESSION"].value).encode(
         "utf-8"
     )
-    storage_value = await memcached.get(storage_key)
+    storage_value = await memcached.get(storage_key)  # type: ignore[call-overload]
     storage_value = json.loads(storage_value.decode("utf-8"))
     assert storage_value["session"]["stored"] == "TEST_VALUE"
 

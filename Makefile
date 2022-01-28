@@ -1,17 +1,24 @@
 # Some simple testing tasks (sorry, UNIX only).
 
-flake:
-	flake8 aiohttp_session tests 
+setup:
+	pip install -r requirements-dev.txt
+	python -m pre_commit install
+
+flake fmt:
+	python -m pre_commit run --all-files
 
 
-test: flake
+test:
 	py.test ./tests/
 
-vtest: flake develop
+mypy lint: fmt
+	mypy
+
+vtest: develop
 	py.test ./tests/
 
-cov cover coverage: flake
-	py.test --cov aiohttp_session --cov-report html ./tests/
+cov cover coverage:
+	py.test --cov aiohttp_session --cov-report html --cov-report=xml ./tests/
 	@echo "open file://`pwd`/coverage/index.html"
 
 clean:
@@ -34,4 +41,4 @@ doc:
 	make -C docs html
 	@echo "open file://`pwd`/docs/_build/html/index.html"
 
-.PHONY: all build venv flake test vtest testloop cov clean doc
+.PHONY: all build venv flake test vtest testloop cov clean doc lint

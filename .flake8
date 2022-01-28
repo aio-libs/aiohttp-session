@@ -1,0 +1,26 @@
+[flake8]
+enable-extensions = G
+exclude = demo/,tests/,examples/
+max-doc-length = 88
+max-line-length = 88
+select = A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,B901,B902,B903,B950
+# E226: Missing whitespace around arithmetic operators can help group things together.
+# E501: Superseeded by B950 (from Bugbear)
+# E722: Superseeded by B001 (from Bugbear)
+# W503: Mutually exclusive with W504.
+ignore = N801,N802,N803,E203,E226,E305,W504,E252,E301,E302,E704,W503,W504,F811
+per-file-ignores =
+    # S101: Pytest uses assert
+    tests/*:S101
+    # I900: Requirements for examples shouldn't be included
+    examples/*:I900
+
+# flake8-import-order
+import-order-style = pycharm
+
+# flake8-quotes
+inline-quotes = "
+
+# flake8-requirements
+known-modules = pynacl:[nacl]
+requirements-file = requirements-dev.txt

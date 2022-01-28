@@ -1,26 +1,28 @@
-import time
-from aiohttp import web
 import asyncio
-import aiomcache
-from aiohttp_session import setup, get_session
+import time
 
+import aiomcache
+from aiohttp import web
+
+from aiohttp_session import get_session, setup
 from aiohttp_session.memcached_storage import MemcachedStorage
 
 
-async def handler(request):
+async def handler(request: web.Request) -> web.Response:
     session = await get_session(request)
-    last_visit = session['last_visit'] if 'last_visit' in session else None
-    session['last_visit'] = time.time()
-    text = 'Last visited: {}'.format(last_visit)
+    last_visit = session["last_visit"] if "last_visit" in session else None
+    session["last_visit"] = time.time()
+    text = f"Last visited: {last_visit}"
     return web.Response(text=text)
 
 
-async def make_app():
+async def make_app() -> web.Application:
     app = web.Application()
-    mc = aiomcache.Client("127.0.0.1", 11211, loop=loop)
+    mc = aiomcache.Client("127.0.0.1", 11211)
     setup(app, MemcachedStorage(mc))
-    app.router.add_get('/', handler)
+    app.router.add_get("/", handler)
     return app
+
 
 loop = asyncio.get_event_loop()
 app = loop.run_until_complete(make_app())

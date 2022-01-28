@@ -34,6 +34,7 @@ setup(
     version=version,
     description=("sessions for aiohttp.web"),
     long_description="\n\n".join((read("README.rst"), read("CHANGES.txt"))),
+    long_description_content_type="text/x-rst",
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Intended Audience :: Developers",

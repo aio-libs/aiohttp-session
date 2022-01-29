@@ -3,7 +3,7 @@ from typing import Any, MutableMapping, cast
 
 import pytest
 
-from aiohttp_session import Session
+from aiohttp_session import Session, SessionData
 
 
 def test_create() -> None:
@@ -64,7 +64,7 @@ def test__repr__() -> None:
 
 def test__repr__2() -> None:
     created = int(time.time()) - 1000
-    session_data = {"session": {"key": 123}, "created": created}
+    session_data: SessionData = {"session": {"key": 123}, "created": created}
     s = Session("test_identity", data=session_data, new=False)
     assert str(
         s

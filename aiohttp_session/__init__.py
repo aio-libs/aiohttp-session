@@ -137,10 +137,12 @@ class Session(MutableMapping[str, Any]):
     def __setitem__(self, key: str, value: Any) -> None:
         self._mapping[key] = value
         self._changed = True
+        self._created = int(time.time())
 
     def __delitem__(self, key: str) -> None:
         del self._mapping[key]
         self._changed = True
+        self._created = int(time.time())
 
 
 SESSION_KEY = "aiohttp_session"

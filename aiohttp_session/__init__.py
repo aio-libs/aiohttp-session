@@ -40,7 +40,7 @@ class _CookieParams(TypedDict, total=False):
     expires: str
 
 
-class _SessionData(TypedDict, total=False):
+class SessionData(TypedDict, total=False):
     created: int
     session: Dict[str, Any]
 
@@ -53,7 +53,7 @@ class Session(MutableMapping[str, Any]):
         self,
         identity: Optional[Any],
         *,
-        data: Optional[Mapping[str, Any]],
+        data: Optional[SessionData],
         new: bool,
         max_age: Optional[int] = None,
     ) -> None:
@@ -264,7 +264,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
     def cookie_params(self) -> _CookieParams:
         return self._cookie_params
 
-    def _get_session_data(self, session: Session) -> _SessionData:
+    def _get_session_data(self, session: Session) -> SessionData:
         if session.empty:
             return {}
 

@@ -41,7 +41,6 @@ class PgStorage(AbstractStorage):
 
     async def load_session(self, request: web.Request) -> Session:
         cookie = self.load_cookie(request)
-        data = {}
         if cookie is None:
             return Session(None, data={}, new=True, max_age=self.max_age)
         else:

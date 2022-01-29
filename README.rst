@@ -49,8 +49,8 @@ A trivial usage example:
     def make_app():
         app = web.Application()
         fernet_key = fernet.Fernet.generate_key()
-        fernet = fernet.Fernet(fernet_key)
-        setup(app, EncryptedCookieStorage(fernet))
+        f = fernet.Fernet(fernet_key)
+        setup(app, EncryptedCookieStorage(f))
         app.router.add_get('/', handler)
         return app
 

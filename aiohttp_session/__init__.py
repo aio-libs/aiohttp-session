@@ -1,6 +1,6 @@
 """User sessions for aiohttp.web."""
 
-__version__ = "2.10.0"
+__version__ = "2.11.0"
 
 import abc
 import json

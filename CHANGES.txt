@@ -1,7 +1,13 @@
 .. towncrier release notes start
 
+2.11.0 (2021-01-31)
+===================
+
+* Support initialising `EncryptedCookieStorage` with `Fernet` object directly.
+* Fix an issue where the session would get reset before the cookie expiry.
+
 2.10.0 (2021-12-30)
-=====================
+===================
 
 * Typing support
 * Add samesite cookie option

@@ -109,7 +109,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
             conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]  # noqa
             event_loop.run_until_complete(conn.set("foo", "bar"))
             break
-        except ConnectionError:
+        except aioredis.exceptions.ConnectionError:
             time.sleep(delay)
             delay *= 2
         finally:

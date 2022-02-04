@@ -1,7 +1,7 @@
 -e .
 aiohttp==3.8.1
 aiomcache==0.7.0
-aioredis==2.0.0
+aioredis==2.0.1
 attrs==21.4.0
 chardet==4.0.0
 cryptography==36.0.1

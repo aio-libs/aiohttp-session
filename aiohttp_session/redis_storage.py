@@ -7,8 +7,8 @@ from aiohttp import web
 from . import AbstractStorage, Session
 
 try:
-    import redis
     from redis import asyncio as aioredis
+    from redis import VERSION  # type: ignore[attr-defined]
 except ImportError:  # pragma: no cover
     aioredis = None  # type: ignore[assignment]
 
@@ -18,7 +18,7 @@ class RedisStorage(AbstractStorage):
 
     def __init__(
         self,
-        redis_pool: "aioredis.Redis",
+        redis_pool: "aioredis.Redis[bytes]",
         *,
         cookie_name: str = "AIOHTTP_SESSION",
         domain: Optional[str] = None,
@@ -45,7 +45,7 @@ class RedisStorage(AbstractStorage):
         if aioredis is None:
             raise RuntimeError("Please install redis")
         # May have installed aioredis separately (without aiohttp-session[aioredis]).
-        lib_version = tuple(map(int, redis.__version__.split('.')[:2]))  # type: ignore
+        lib_version = tuple(map(int, VERSION.split('.')[:2]))
         if lib_version < (4, 3):
             raise RuntimeError("redis<4.3 is not supported")
         self._key_factory = key_factory

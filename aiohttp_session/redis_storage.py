@@ -45,7 +45,7 @@ class RedisStorage(AbstractStorage):
         if aioredis is None:
             raise RuntimeError("Please install redis")
         # May have installed aioredis separately (without aiohttp-session[aioredis]).
-        lib_version = tuple(map(int, VERSION.split('.')[:2]))
+        lib_version = tuple(map(int, VERSION[:2]))
         if lib_version < (4, 3):
             raise RuntimeError("redis<4.3 is not supported")
         self._key_factory = key_factory

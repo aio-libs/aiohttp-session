@@ -1,6 +1,5 @@
 import json
 import uuid
-from distutils.version import StrictVersion
 from typing import Any, Callable, Optional
 
 from aiohttp import web
@@ -8,7 +7,8 @@ from aiohttp import web
 from . import AbstractStorage, Session
 
 try:
-    import aioredis
+    import redis
+    from redis import asyncio as aioredis
 except ImportError:  # pragma: no cover
     aioredis = None  # type: ignore[assignment]
 
@@ -43,13 +43,14 @@ class RedisStorage(AbstractStorage):
             decoder=decoder,
         )
         if aioredis is None:
-            raise RuntimeError("Please install aioredis")
+            raise RuntimeError("Please install redis")
         # May have installed aioredis separately (without aiohttp-session[aioredis]).
-        if StrictVersion(aioredis.__version__).version < (2, 0):
-            raise RuntimeError("aioredis<2.0 is not supported")
+        lib_version = tuple(map(int, redis.__version__.split('.')[:2]))  # type: ignore
+        if lib_version < (4, 3):
+            raise RuntimeError("redis<4.3 is not supported")
         self._key_factory = key_factory
         if not isinstance(redis_pool, aioredis.Redis):
-            raise TypeError(f"Expected aioredis.Redis got {type(redis_pool)}")
+            raise TypeError(f"Expected redis.asyncio.Redis got {type(redis_pool)}")
         self._redis = redis_pool
 
     async def load_session(self, request: web.Request) -> Session:

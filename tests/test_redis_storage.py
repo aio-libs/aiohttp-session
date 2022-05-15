@@ -4,11 +4,11 @@ import time
 import uuid
 from typing import Any, Callable, Dict, MutableMapping, Optional, cast
 
-import aioredis
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from pytest_mock import MockFixture
+from redis import asyncio as aioredis
 
 from aiohttp_session import Handler, Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
@@ -314,11 +314,7 @@ async def test_old_aioredis_version(mocker: MockFixture) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
 
-    class Dummy:
-        def __init__(self, *args: object, **kwargs: object) -> None:
-            self.version = (0, 3)
-
-    mocker.patch("aiohttp_session.redis_storage.StrictVersion", Dummy)
+    mocker.patch("aiohttp_session.redis_storage.redis.__version__", "0.3.dev0")
     with pytest.raises(RuntimeError):
         create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 

@@ -8,7 +8,7 @@ from . import AbstractStorage, Session
 
 try:
     from redis import asyncio as aioredis
-    from redis import VERSION  # type: ignore[attr-defined]
+    from redis import VERSION
 except ImportError:  # pragma: no cover
     aioredis = None  # type: ignore[assignment]
 

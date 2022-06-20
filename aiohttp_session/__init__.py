@@ -221,7 +221,7 @@ def session_middleware(storage: "AbstractStorage") -> Middleware:
 def setup(app: web.Application, storage: "AbstractStorage") -> None:
     """Setup the library in aiohttp fashion."""
 
-    app.middlewares.append(session_middleware(storage))
+    app.middlewares.insert(0, session_middleware(storage))
 
 
 class AbstractStorage(metaclass=abc.ABCMeta):

@@ -102,7 +102,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]  # noqa
+            conn = aioredis.from_url(f"redis://{host}:{port}")
             event_loop.run_until_complete(conn.set("foo", "bar"))
             break
         except aioredis.ConnectionError:
@@ -130,15 +130,15 @@ def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
 def redis(
     event_loop: asyncio.AbstractEventLoop,
     redis_url: str,
-) -> Iterator[aioredis.Redis]:
-    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
+) -> Iterator[aioredis.Redis[bytes]]:
+    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis[bytes]:
         return aioredis.Redis(connection_pool=pool)
 
     asyncio.set_event_loop(event_loop)
     pool = aioredis.ConnectionPool.from_url(redis_url)
     redis = event_loop.run_until_complete(start(pool))
     yield redis
-    event_loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
+    event_loop.run_until_complete(redis.close())
     event_loop.run_until_complete(pool.disconnect())
 
 

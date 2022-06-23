@@ -83,9 +83,9 @@ class RedisStorage(AbstractStorage):
                 key = str(key)
                 self.save_cookie(response, key, max_age=session.max_age)
 
-        data = self._encoder(self._get_session_data(session))
+        data_str = self._encoder(self._get_session_data(session))
         await self._redis.set(
             self.cookie_name + "_" + key,
-            data,
+            data_str,
             ex=session.max_age,
         )

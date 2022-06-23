@@ -59,12 +59,12 @@ class RedisStorage(AbstractStorage):
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             key = str(cookie)
-            data = await self._redis.get(self.cookie_name + "_" + key)
-            if data is None:
+            data_bytes = await self._redis.get(self.cookie_name + "_" + key)
+            if data_bytes is None:
                 return Session(None, data=None, new=True, max_age=self.max_age)
-            data = data.decode("utf-8")
+            data_str = data_bytes.decode("utf-8")
             try:
-                data = self._decoder(data)
+                data = self._decoder(data_str)
             except ValueError:
                 data = None
             return Session(key, data=data, new=False, max_age=self.max_age)

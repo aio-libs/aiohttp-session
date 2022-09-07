@@ -4,7 +4,7 @@ aiomcache==0.7.0
 aioredis==2.0.1
 attrs==21.4.0
 chardet==5.0.0
-cryptography==37.0.4
+cryptography==38.0.0
 docker==5.0.3
 flake8==4.0.1
 flake8-bandit==3.0.0

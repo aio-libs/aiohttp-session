@@ -1,7 +1,7 @@
 aiohttp_session
 ===============
-.. image:: https://travis-ci.com/aio-libs/aiohttp-session.svg?branch=master
-    :target: https://travis-ci.com/aio-libs/aiohttp-session
+.. image:: https://github.com/aio-libs/aiohttp-session/actions/workflows/ci.yaml/badge.svg?branch=master
+    :target: https://github.com/aio-libs/aiohttp-session/actions/workflows/ci.yaml
 .. image:: https://codecov.io/github/aio-libs/aiohttp-session/coverage.svg?branch=master
     :target: https://codecov.io/github/aio-libs/aiohttp-session
 .. image:: https://readthedocs.org/projects/aiohttp-session/badge/?version=latest

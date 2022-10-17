@@ -1,5 +1,5 @@
 -e .
-aiohttp==3.8.1
+aiohttp==3.8.3
 aiomcache==0.7.0
 aioredis==2.0.1
 attrs==22.1.0

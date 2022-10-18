@@ -314,7 +314,7 @@ async def test_old_aioredis_version(mocker: MockFixture) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         pass
 
-    mocker.patch("aiohttp_session.redis_storage.VERSION", (0, 3, "dev0"))
+    mocker.patch("aiohttp_session.redis_storage.REDIS_VERSION", (0, 3, "dev0"))
     with pytest.raises(RuntimeError):
         create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 

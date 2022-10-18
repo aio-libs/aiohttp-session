@@ -52,10 +52,7 @@ async def load_cookie(client: TestClient, redis: aioredis.Redis[bytes]) -> Any:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url("/"))
     key = cookies["AIOHTTP_SESSION"]
     value_bytes = await redis.get("AIOHTTP_SESSION_" + key.value)
-    if value_bytes is None:
-        return None
-    value = json.loads(value_bytes)
-    return value
+    return None if value_bytes is None else json.loads(value_bytes)
 
 
 async def test_create_new_session(

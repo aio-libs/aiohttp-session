@@ -1,0 +1,1 @@
+Replace aioredis with redis 4.3 or higher in favor of the official asyncio support

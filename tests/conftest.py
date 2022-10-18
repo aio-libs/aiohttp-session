@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import gc
 import socket
@@ -7,18 +9,14 @@ import uuid
 from typing import Iterator
 
 import aiomcache
-import aioredis
 import pytest
 from docker import DockerClient, from_env as docker_from_env, models as docker_models
+from redis import asyncio as aioredis
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
     from typing_extensions import TypedDict
-
-
-# TODO: Remove once fixed: https://github.com/aio-libs/aioredis-py/issues/1115
-aioredis.Redis.__del__ = lambda *args: None  # type: ignore
 
 
 class _ContainerInfo(TypedDict):
@@ -106,10 +104,10 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):
         try:
-            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]  # noqa
+            conn = aioredis.from_url(f"redis://{host}:{port}")
             event_loop.run_until_complete(conn.set("foo", "bar"))
             break
-        except aioredis.exceptions.ConnectionError:
+        except aioredis.ConnectionError:
             time.sleep(delay)
             delay *= 2
         finally:
@@ -134,15 +132,15 @@ def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
 def redis(
     event_loop: asyncio.AbstractEventLoop,
     redis_url: str,
-) -> Iterator[aioredis.Redis]:
-    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
+) -> Iterator[aioredis.Redis[bytes]]:
+    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis[bytes]:
         return aioredis.Redis(connection_pool=pool)
 
     asyncio.set_event_loop(event_loop)
     pool = aioredis.ConnectionPool.from_url(redis_url)
     redis = event_loop.run_until_complete(start(pool))
     yield redis
-    event_loop.run_until_complete(redis.close())  # type: ignore[no-untyped-call]
+    event_loop.run_until_complete(redis.close())
     event_loop.run_until_complete(pool.disconnect())
 
 

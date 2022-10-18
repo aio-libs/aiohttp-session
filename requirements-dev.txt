@@ -1,7 +1,7 @@
 -e .
 aiohttp==3.8.3
 aiomcache==0.7.0
-aioredis==2.0.1
+redis==4.3.3
 attrs==22.1.0
 chardet==5.0.0
 cryptography==38.0.1
@@ -22,5 +22,6 @@ pytest-cov==4.0.0
 pytest-mock==3.10.0
 pytest-sugar==0.9.5
 sphinx==4.3.2
+types-redis==4.3.1
 typing-extensions==4.4.0
 yarl==1.8.1

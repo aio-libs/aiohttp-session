@@ -7,7 +7,6 @@ setup:
 flake fmt:
 	python -m pre_commit run --all-files
 
-
 test:
 	py.test ./tests/
 

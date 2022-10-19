@@ -343,7 +343,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     "https://docs.python.org/3": None,
     "https://aiohttp.readthedocs.io/en/stable": None,
-    "https://aioredis.readthedocs.io/en/latest": None,
+    "https://redis.readthedocs.io/en/latest": None,
     # 'https://github.com/aio-libs/aiomcache': None,
     "http://cryptography.io/en/latest": None,
     "https://pynacl.readthedocs.io/en/latest": None,

@@ -8,11 +8,11 @@
 
 .. glossary::
 
-   aioredis
+   redis
 
-      :term:`asyncio` compatible Redis client library
+      Redis client library
 
-      https://aioredis.readthedocs.io/
+      https://redis.readthedocs.io/
 
    aiomcache
 

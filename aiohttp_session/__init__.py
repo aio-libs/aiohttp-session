@@ -304,7 +304,6 @@ class AbstractStorage(metaclass=abc.ABCMeta):
                 self._cookie_name, domain=params["domain"], path=params["path"]
             )
         else:
-            # Ignoring type for params until aiohttp#4238 is released
             response.set_cookie(self._cookie_name, cookie_data, **params)
 
 

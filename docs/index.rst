@@ -79,7 +79,7 @@ Available session storages are:
   ``e33b57c7ec6e425eb626610f811ab6ae`` (a random UUID) they key inside
   redis will be ``AIOHTTP_SESSION_e33b57c7ec6e425eb626610f811ab6ae``.
 
-  Requires :term:`aioredis` library:
+  Requires :term:`redis` library:
 
   .. code-block:: bash
 
@@ -121,7 +121,7 @@ Dependencies
 
 - :term:`cryptography` for
   :class:`~aiohttp_session.cookie_storage.EncryptedCookieStorage`
-- :term:`aioredis` for
+- :term:`redis` for
   :class:`~aiohttp_session.redis_storage.RedisStorage`
 
 

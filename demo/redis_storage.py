@@ -1,8 +1,8 @@
 import time
 from typing import AsyncIterator
 
-import aioredis
 from aiohttp import web
+from redis import asyncio as aioredis
 
 from aiohttp_session import get_session, setup
 from aiohttp_session.redis_storage import RedisStorage
@@ -18,10 +18,7 @@ async def handler(request: web.Request) -> web.Response:
 
 async def redis_pool(app: web.Application) -> AsyncIterator[None]:
     redis_address = "redis://127.0.0.1:6379"
-    async with aioredis.from_url(
-        redis_address,
-        timeout=1,
-    ) as redis:
+    async with aioredis.from_url(redis_address) as redis:
         storage = RedisStorage(redis)
         setup(app, storage)
         yield

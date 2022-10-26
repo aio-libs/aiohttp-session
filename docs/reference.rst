@@ -378,11 +378,11 @@ Redis Storage
 The storage that stores session data in Redis database and
 keeps only Redis keys (UUIDs actually) in HTTP cookies.
 
-It operates with Redis database via :class:`aioredis.RedisPool`.
+It operates with Redis database via :class:`redis.asyncio.Redis`.
 
 To use the storage you need setup it first::
 
-   redis = await aioredis.create_pool(('localhost', 6379))
+   redis = await aioredis.from_url("redis://127.0.0.1:6379")
    storage = aiohttp_session.redis_storage.RedisStorage(redis)
    aiohttp_session.setup(app, storage)
 
@@ -398,10 +398,10 @@ To use the storage you need setup it first::
 
    The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
-   *redis_pool* is a :class:`~aioredis.RedisPool` which should be
-   created by :func:`~aioredis.create_pool` call, e.g.::
+   *redis_pool* is a :class:`~redis.asyncio.Redis` which should be
+   created by :func:`~redis.asyncio.from_url` call, e.g.::
 
-      redis = await aioredis.create_pool(('localhost', 6379))
+      redis = await aioredis.from_url("redis://localhost:6379")
       storage = aiohttp_session.redis_storage.RedisStorage(redis)
 
    Other parameters are the same as for
@@ -409,7 +409,7 @@ To use the storage you need setup it first::
 
 
 Memcached Storage
-----------------
+-----------------
 
 The storage that stores session data in Memcached and
 keeps only keys (UUIDs actually) in HTTP cookies.

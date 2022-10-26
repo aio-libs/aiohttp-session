@@ -382,7 +382,7 @@ It operates with Redis database via :class:`redis.asyncio.Redis`.
 
 To use the storage you need setup it first::
 
-   redis = await aioredis.from_url('redis://127.0.0.1:6379')
+   redis = await aioredis.from_url("redis://127.0.0.1:6379")
    storage = aiohttp_session.redis_storageRedisStorage(redis)
    aiohttp_session.setup(app, storage)
 

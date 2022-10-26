@@ -4,7 +4,7 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, MutableMapping, cast
+from typing import Any, Callable, Dict, MutableMapping, Optional, cast
 
 import pytest
 from aiohttp import web
@@ -21,7 +21,7 @@ from .typedefs import AiohttpClient
 def create_app(
     handler: Handler,
     redis: aioredis.Redis[bytes],
-    max_age: int | None = None,
+    max_age: Optional[int] = None,
     key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
 ) -> web.Application:
     middleware = session_middleware(
@@ -33,7 +33,7 @@ def create_app(
 
 
 async def make_cookie(
-    client: TestClient, redis: aioredis.Redis[bytes], data: dict[Any, Any]
+    client: TestClient, redis: aioredis.Redis[bytes], data: Dict[Any, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     value = json.dumps(session_data)
@@ -42,9 +42,7 @@ async def make_cookie(
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": key})
 
 
-async def make_cookie_with_bad_value(
-    client: TestClient, redis: aioredis.Redis[bytes]
-) -> None:
+async def make_cookie_with_bad_value(client: TestClient, redis: aioredis.Redis[bytes]) -> None:
     key = uuid.uuid4().hex
     await redis.set("AIOHTTP_SESSION_" + key, "")
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": key})

@@ -8,11 +8,11 @@
 
 .. glossary::
 
-   redis
+   aioredis
 
-      Redis client library
+      :term:`asyncio` compatible module in the :term:`redis` library.
 
-      https://redis.readthedocs.io/
+      https://redis-py.readthedocs.io/en/stable/examples/asyncio_examples.html
 
    aiomcache
 

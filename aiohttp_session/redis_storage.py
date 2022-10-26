@@ -9,7 +9,15 @@ from . import AbstractStorage, Session
 try:
     from redis import VERSION as REDIS_VERSION, asyncio as aioredis
 except ImportError:  # pragma: no cover
-    aioredis = None  # type: ignore[assignment]
+    try:
+        import aioredis
+    except ImportError:
+        aioredis = None  # type: ignore[assignment]
+    else:
+        import warnings
+        warnings.warn("aioredis library is deprecated, please replace with redis.",
+                      DeprecationWarning)
+        REDIS_VERSION = (4, 3)
 
 
 class RedisStorage(AbstractStorage):

@@ -1,5 +1,11 @@
 .. towncrier release notes start
 
+2.12.0 (2022-10-28)
+===================
+
+* Migrated from `aioredis` to `redis` (if using redis without installing
+  `aiohttp-session[aioredis]` then it will be necessary to manually install `redis`).
+
 2.11.0 (2021-01-31)
 ===================
 

@@ -19,7 +19,7 @@ pytest==7.2.0
 pytest-aiohttp==1.0.4
 pytest-cov==4.0.0
 pytest-mock==3.10.0
-pytest-sugar==0.9.5
+pytest-sugar==0.9.6
 redis==4.3.4
 sphinx==4.3.2
 types-redis==4.3.21.3

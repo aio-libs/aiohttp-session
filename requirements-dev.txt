@@ -22,6 +22,6 @@ pytest-mock==3.10.0
 pytest-sugar==0.9.6
 redis==4.3.4
 sphinx==4.3.2
-types-redis==4.3.21.3
+types-redis==4.3.21.4
 typing-extensions==4.4.0
 yarl==1.8.1

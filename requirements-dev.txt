@@ -9,7 +9,7 @@ flake8==5.0.4
 flake8-bandit==4.1.1
 flake8-bugbear==22.10.27
 flake8-import-order==0.18.1
-flake8-requirements==1.7.3
+flake8-requirements==1.7.4
 multidict==6.0.2
 mypy==0.990
 pep257==0.7.0

@@ -48,15 +48,15 @@ class MemcachedStorage(AbstractStorage):
         else:
             key = str(cookie)
             stored_key = (self.cookie_name + "_" + key).encode("utf-8")
-            data = await self.conn.get(stored_key)  # type: ignore[call-overload]
-            if data is None:
+            data_b = await self.conn.get(stored_key)
+            if data_b is None:
                 return Session(None, data=None, new=True, max_age=self.max_age)
-            data = data.decode("utf-8")
+            data = data_b.decode("utf-8")
             try:
-                data = self._decoder(data)
+                sess_data = self._decoder(data)
             except ValueError:
-                data = None
-            return Session(key, data=data, new=False, max_age=self.max_age)
+                sess_data = None
+            return Session(key, data=sess_data, new=False, max_age=self.max_age)
 
     async def save_session(
         self, request: web.Request, response: web.StreamResponse, session: Session

@@ -2,7 +2,7 @@
 aiohttp==3.8.3
 aiomcache==0.8.0
 attrs==22.2.0
-cryptography==38.0.4
+cryptography==39.0.0
 docker==6.0.1
 flake8==5.0.4
 flake8-bandit==4.1.1

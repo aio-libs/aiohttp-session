@@ -4,7 +4,7 @@ aiomcache==0.8.0
 attrs==22.2.0
 cryptography==39.0.0
 docker==6.0.1
-flake8==5.0.4
+flake8==6.0.0
 flake8-bandit==4.1.1
 flake8-bugbear==22.12.6
 flake8-import-order==0.18.2

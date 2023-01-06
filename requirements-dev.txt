@@ -8,5 +8,5 @@ flake8-requirements==1.7.5
 mypy==0.991
 pep257==0.7.0
 pre-commit==2.21.0
-types-redis==4.3.21.7
+types-redis==4.4.0.0
 typing-extensions==4.4.0

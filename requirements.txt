@@ -10,5 +10,5 @@ pytest-aiohttp==1.0.4
 pytest-cov==4.0.0
 pytest-mock==3.10.0
 pytest-sugar==0.9.6
-redis==4.4.2
+redis==4.5.0
 yarl==1.8.2

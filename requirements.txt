@@ -1,6 +1,6 @@
 -e .
 aiohttp==3.8.3
-aiomcache==0.8.0
+aiomcache==0.8.1
 cryptography==39.0.1
 docker==6.0.1
 multidict==6.0.4

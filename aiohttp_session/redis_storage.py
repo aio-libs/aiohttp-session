@@ -16,7 +16,7 @@ except ImportError:  # pragma: no cover
     else:
         import warnings
         warnings.warn("aioredis library is deprecated, please replace with redis.",
-                      DeprecationWarning)
+                      DeprecationWarning, stacklevel=1)
         REDIS_VERSION = (4, 3)
 
 

@@ -9,6 +9,6 @@ pytest==7.3.0
 pytest-aiohttp==1.0.4
 pytest-cov==4.0.0
 pytest-mock==3.10.0
-pytest-sugar==0.9.6
+pytest-sugar==0.9.7
 redis==4.5.4
 yarl==1.8.2

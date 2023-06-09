@@ -19,7 +19,7 @@ def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
 
-install_requires = ["aiohttp>=3.8", 'typing_extensions>=3.7.4; python_version<"3.8"']
+install_requires = ["aiohttp>=3.8"]
 extras_require = {
     "aioredis": ["redis>=4.3.1"],
     "aiomcache": ["aiomcache>=0.5.2"],
@@ -40,7 +40,6 @@ setup(
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -53,7 +52,6 @@ setup(
     url="https://github.com/aio-libs/aiohttp_session/",
     license="Apache 2",
     packages=["aiohttp_session"],
-    python_requires=">=3.7",
     install_requires=install_requires,
     include_package_data=True,
     extras_require=extras_require,

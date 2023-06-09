@@ -7,10 +7,10 @@ from typing import Any, Dict, MutableMapping, Tuple, Union, cast
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 from cryptography.fernet import Fernet
 
 from aiohttp_session import (
-    Handler,
     Session,
     get_session,
     new_session,

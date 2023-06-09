@@ -4,9 +4,9 @@ from typing import Any, Dict, MutableMapping, cast
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 
 from aiohttp_session import (
-    Handler,
     Session,
     SimpleCookieStorage,
     get_session,

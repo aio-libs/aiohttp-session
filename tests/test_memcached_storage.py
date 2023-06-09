@@ -7,8 +7,9 @@ from typing import Any, Callable, Dict, MutableMapping, Optional, cast
 import aiomcache
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 
-from aiohttp_session import Handler, Session, get_session, session_middleware
+from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.memcached_storage import MemcachedStorage
 
 from .typedefs import AiohttpClient

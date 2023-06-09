@@ -9,10 +9,11 @@ from typing import Any, Callable, Dict, MutableMapping, Optional, cast
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 from pytest_mock import MockFixture
 from redis import asyncio as aioredis
 
-from aiohttp_session import Handler, Session, get_session, session_middleware
+from aiohttp_session import Session, get_session, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
 
 from .typedefs import AiohttpClient

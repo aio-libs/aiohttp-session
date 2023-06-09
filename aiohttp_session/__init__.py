@@ -4,7 +4,6 @@ __version__ = "2.12.0"
 
 import abc
 import json
-import sys
 import time
 from typing import (
     Any,

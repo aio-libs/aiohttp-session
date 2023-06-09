@@ -3,10 +3,10 @@ from typing import Tuple
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
+from aiohttp.typedefs import Handler
 
 from aiohttp_session import (
     SESSION_KEY,
-    Handler,
     SimpleCookieStorage,
     get_session,
     session_middleware,

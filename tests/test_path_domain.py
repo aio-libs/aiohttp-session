@@ -5,13 +5,9 @@ from typing import Any, Optional
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 
-from aiohttp_session import (
-    Handler,
-    SimpleCookieStorage,
-    get_session,
-    session_middleware,
-)
+from aiohttp_session import SimpleCookieStorage, get_session, session_middleware
 
 from .typedefs import AiohttpClient
 

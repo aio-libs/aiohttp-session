@@ -1,9 +1,9 @@
 from typing import Tuple
 
 from aiohttp import web
+from aiohttp.typedefs import Handler
 
 from aiohttp_session import (
-    Handler,
     SimpleCookieStorage,
     get_session,
     session_middleware,

@@ -4,7 +4,6 @@ __version__ = "2.12.0"
 
 import abc
 import json
-import sys
 import time
 from typing import (
     Any,
@@ -14,19 +13,15 @@ from typing import (
     Iterator,
     MutableMapping,
     Optional,
+    TypedDict,
     Union,
     cast,
 )
 
 from aiohttp import web
+from aiohttp.typedefs import Handler
 
-Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 Middleware = Callable[[web.Request, Handler], Awaitable[web.StreamResponse]]
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
 
 
 class _CookieParams(TypedDict, total=False):
@@ -283,9 +278,7 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         pass
 
     def load_cookie(self, request: web.Request) -> Optional[str]:
-        # TODO: Remove explicit type anotation when aiohttp 3.8 is out
-        cookie: Optional[str] = request.cookies.get(self._cookie_name)
-        return cookie
+        return request.cookies.get(self._cookie_name)
 
     def save_cookie(
         self,

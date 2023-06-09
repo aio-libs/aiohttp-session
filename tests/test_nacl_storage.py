@@ -8,10 +8,10 @@ import nacl.utils
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 from nacl.encoding import Base64Encoder
 
 from aiohttp_session import (
-    Handler,
     Session,
     get_session,
     new_session,

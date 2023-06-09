@@ -6,17 +6,12 @@ import socket
 import sys
 import time
 import uuid
-from typing import Iterator
+from typing import Iterator, TypedDict
 
 import aiomcache
 import pytest
 from docker import DockerClient, from_env as docker_from_env, models as docker_models
 from redis import asyncio as aioredis
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
 
 
 class _ContainerInfo(TypedDict):

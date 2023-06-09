@@ -6,13 +6,9 @@ from unittest import mock
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
+from aiohttp.typedefs import Handler
 
-from aiohttp_session import (
-    Handler,
-    SimpleCookieStorage,
-    get_session,
-    setup as setup_middleware,
-)
+from aiohttp_session import SimpleCookieStorage, get_session, setup as setup_middleware
 
 from .typedefs import AiohttpClient
 

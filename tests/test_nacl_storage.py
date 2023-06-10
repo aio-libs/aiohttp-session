@@ -241,11 +241,8 @@ async def test_load_expired_session(aiohttp_client: AiohttpClient, key: bytes) -
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
-        created = session.get("created", None) if not session.new else None
-        text = ""
-        if created is not None and (time.time() - created) > MAX_AGE:
-            text += "WARNING!"
-        return web.Response(text=text)
+        created = session.get("created", "") if not session.new else ""
+        return web.Response(text=str(created))
 
     app = create_app(handler, key, max_age=MAX_AGE)
     app.router.add_route("POST", "/", login)
@@ -257,5 +254,4 @@ async def test_load_expired_session(aiohttp_client: AiohttpClient, key: bytes) -
     await asyncio.sleep(MAX_AGE + 1)
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": cookie})
     resp = await client.get("/")
-    body = await resp.text()
-    assert body == ""
+    assert await resp.text() == ""

@@ -46,16 +46,13 @@ async def test_get_new_session() -> None:
     session = Session("identity", data=None, new=False)
 
     class Storage(AbstractStorage):
-        async def load_session(  # type: ignore[no-untyped-def]
-            self,
-            request: web.Request,
-        ):
-            pass
+        async def load_session(self, request: web.Request) -> Session:  # type: ignore[empty-body]
+            """Dummy"""
 
         async def save_session(
             self, request: web.Request, response: web.StreamResponse, session: Session
         ) -> None:
-            pass
+            """Dummy"""
 
     req[SESSION_KEY] = session
     req[STORAGE_KEY] = Storage()
@@ -77,16 +74,16 @@ async def test_get_new_session_bad_return() -> None:
     req = make_mocked_request("GET", "/")
 
     class Storage(AbstractStorage):
-        async def new_session(self):  # type: ignore[no-untyped-def]
-            return ""
+        async def new_session(self) -> Session:
+            return ""  # type: ignore[return-value]
 
-        async def load_session(self, request: web.Request) -> Session:
-            return Session(None, data=None, new=True)
+        async def load_session(self, request: web.Request) -> Session:  # type: ignore[empty-body]
+            """Dummy"""
 
         async def save_session(
             self, request: web.Request, response: web.StreamResponse, session: Session
         ) -> None:
-            pass
+            """Dummy"""
 
     req[STORAGE_KEY] = Storage()
 

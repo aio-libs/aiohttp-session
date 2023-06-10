@@ -286,8 +286,8 @@ async def test_redis_session_fixation(
 
 
 async def test_redis_from_create_pool(redis_url: str) -> None:
-    async def handler(request: web.Request) -> web.Response:
-        return web.Response()
+    async def handler(request: web.Request) -> web.Response:  # type: ignore[empty-body]
+        """Dummy handler"""
 
     redis = aioredis.from_url(redis_url)
     create_app(handler=handler, redis=redis)
@@ -295,16 +295,16 @@ async def test_redis_from_create_pool(redis_url: str) -> None:
 
 
 async def test_not_redis_provided_to_storage() -> None:
-    async def handler(request: web.Request) -> web.Response:
-        return web.Response()
+    async def handler(request: web.Request) -> web.Response:  # type: ignore[empty-body]
+        """Dummy handler"""
 
     with pytest.raises(TypeError):
         create_app(handler=handler, redis=None)  # type: ignore[arg-type]
 
 
 async def test_no_aioredis_installed(mocker: MockFixture) -> None:
-    async def handler(request: web.Request) -> web.Response:
-        return web.Response()
+    async def handler(request: web.Request) -> web.Response:  # type: ignore[empty-body]
+        """Dummy handler"""
 
     mocker.patch("aiohttp_session.redis_storage.aioredis", None)
     with pytest.raises(RuntimeError):
@@ -312,8 +312,8 @@ async def test_no_aioredis_installed(mocker: MockFixture) -> None:
 
 
 async def test_old_aioredis_version(mocker: MockFixture) -> None:
-    async def handler(request: web.Request) -> web.Response:
-        return web.Response()
+    async def handler(request: web.Request) -> web.Response:  # type: ignore[empty-body]
+        """Dummy handler"""
 
     mocker.patch("aiohttp_session.redis_storage.REDIS_VERSION", (0, 3, "dev0"))
     with pytest.raises(RuntimeError):

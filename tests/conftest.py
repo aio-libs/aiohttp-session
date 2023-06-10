@@ -25,7 +25,8 @@ class _MemcachedParams(TypedDict):
     port: int
 
 
-def unused_port() -> int:
+def unused_port() -> int:  # pragma: no cover
+    """Only used for people testing on OS X."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("", 0))
     s.listen(1)
@@ -71,7 +72,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
     image = "redis:{}".format("latest")
     asyncio.set_event_loop(event_loop)
 
-    if sys.platform.startswith("darwin"):
+    if sys.platform.startswith("darwin"):  # pragma: no cover
         port = unused_port()
     else:
         port = None
@@ -89,7 +90,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
         },
     )
 
-    if sys.platform.startswith("darwin"):
+    if sys.platform.startswith("darwin"):  # pragma: no cover
         host = "0.0.0.0"
     else:
         inspection = docker.api.inspect_container(container.id)
@@ -97,7 +98,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
         port = 6379
 
     delay = 0.1
-    for _i in range(20):
+    for _i in range(20):  # pragma: no cover
         try:
             conn = aioredis.from_url(f"redis://{host}:{port}")
             event_loop.run_until_complete(conn.set("foo", "bar"))
@@ -109,7 +110,7 @@ def redis_server(  # type: ignore[misc]  # No docker types.
             event_loop.run_until_complete(conn.close())
             # TODO: Remove once fixed: github.com/aio-libs/aioredis-py/issues/1103
             event_loop.run_until_complete(conn.connection_pool.disconnect())
-    else:
+    else:  # pragma: no cover
         pytest.fail("Cannot start redis server")
 
     yield {"host": host, "port": port, "container": container}
@@ -148,7 +149,7 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
 
     image = "memcached:{}".format("latest")
 
-    if sys.platform.startswith("darwin"):
+    if sys.platform.startswith("darwin"):  # pragma: no cover
         port = unused_port()
     else:
         port = None
@@ -166,7 +167,7 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
         },
     )
 
-    if sys.platform.startswith("darwin"):
+    if sys.platform.startswith("darwin"):  # pragma: no cover
         host = "0.0.0.0"
     else:
         inspection = docker.api.inspect_container(container.id)
@@ -174,7 +175,7 @@ def memcached_server(  # type: ignore[misc]  # No docker types.
         port = 11211
 
     delay = 0.1
-    for _i in range(20):
+    for _i in range(20):  # pragma: no cover
         try:
             conn = aiomcache.Client(host, port)
             event_loop.run_until_complete(conn.set(b"foo", b"bar"))

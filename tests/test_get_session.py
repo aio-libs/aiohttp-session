@@ -46,10 +46,7 @@ async def test_get_new_session() -> None:
     session = Session("identity", data=None, new=False)
 
     class Storage(AbstractStorage):
-        async def load_session(
-            self,
-            request: web.Request,
-        ) -> Session:
+        async def load_session(self, request: web.Request):
             """Dummy"""
 
         async def save_session(
@@ -78,9 +75,9 @@ async def test_get_new_session_bad_return() -> None:
 
     class Storage(AbstractStorage):
         async def new_session(self) -> Session:
-            return ""
+            return Session(None)
 
-        async def load_session(self, request: web.Request) -> Session:
+        async def load_session(self, request: web.Request):
             """Dummy"""
 
         async def save_session(

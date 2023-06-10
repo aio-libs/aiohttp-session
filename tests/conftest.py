@@ -179,7 +179,7 @@ def memcached_params(  # type: ignore[misc]
 
 
 @pytest.fixture
-async def memcached() -> Iterator[aiomcache.Client]:
+async def memcached(memcached_params: _MemcachedParams) -> Iterator[aiomcache.Client]:
     conn = aiomcache.Client(**memcached_params)
     yield conn
     await conn.close()

@@ -241,7 +241,7 @@ async def test_load_expired_session(aiohttp_client: AiohttpClient, key: bytes) -
 
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
-        created = session.get("created", None) if not session.new else ""
+        created = session.get("created", "") if not session.new else ""
         return web.Response(text=str(created))
 
     app = create_app(handler, key, max_age=MAX_AGE)

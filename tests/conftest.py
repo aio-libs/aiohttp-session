@@ -6,7 +6,7 @@ import socket
 import sys
 import time
 import uuid
-from typing import Iterator, TypedDict
+from typing import AsyncIterator, Iterator, TypedDict
 
 import aiomcache
 import pytest
@@ -108,7 +108,7 @@ def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
 @pytest.fixture
 async def redis(
     redis_url: str,
-) -> Iterator[aioredis.Redis[bytes]]:
+) -> AsyncIterator[aioredis.Redis[bytes]]:
     async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis[bytes]:
         return aioredis.Redis(connection_pool=pool)
 
@@ -179,7 +179,7 @@ def memcached_params(  # type: ignore[misc]
 
 
 @pytest.fixture
-async def memcached(memcached_params: _MemcachedParams) -> Iterator[aiomcache.Client]:
+async def memcached(memcached_params: _MemcachedParams) -> AsyncIterator[aiomcache.Client]:
     conn = aiomcache.Client(**memcached_params)
     yield conn
     await conn.close()

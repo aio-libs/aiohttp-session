@@ -69,6 +69,11 @@ def test_invalid_key() -> None:
         EncryptedCookieStorage(b"123")  # short key
 
 
+def test_str_key() -> None:
+    k = Fernet.generate_key().decode("utf-8")
+    assert EncryptedCookieStorage(k)
+
+
 async def test_create_new_session_broken_by_format(
     aiohttp_client: AiohttpClient, fernet: Fernet, key: bytes
 ) -> None:

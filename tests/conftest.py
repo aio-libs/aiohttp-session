@@ -123,7 +123,7 @@ async def redis(
 async def memcached_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
     session_id: str,
-) -> Iterator[_ContainerInfo]:
+) -> AsyncIterator[_ContainerInfo]:
     image = "memcached:{}".format("latest")
 
     if sys.platform.startswith("darwin"):  # pragma: no cover

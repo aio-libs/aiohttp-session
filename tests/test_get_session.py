@@ -75,7 +75,7 @@ async def test_get_new_session_bad_return() -> None:
 
     class Storage(AbstractStorage):
         async def new_session(self) -> Session:
-            return Session(None)
+            return Session(None, data=None, new=True)
 
         async def load_session(self, request: web.Request):
             """Dummy"""

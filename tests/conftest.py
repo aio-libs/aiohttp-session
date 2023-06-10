@@ -120,7 +120,7 @@ async def redis(
 
 
 @pytest.fixture(scope="session")
-def memcached_server(  # type: ignore[misc]  # No docker types.
+async def memcached_server(  # type: ignore[misc]  # No docker types.
     docker: DockerClient,
     session_id: str,
 ) -> Iterator[_ContainerInfo]:

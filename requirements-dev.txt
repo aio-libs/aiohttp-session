@@ -10,4 +10,4 @@ pep257==0.7.0
 pre-commit==3.4.0
 sphinx==7.2.6
 types-redis==4.6.0.6
-typing-extensions==4.7.1
+typing-extensions==4.8.0

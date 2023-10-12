@@ -10,7 +10,7 @@ try:
     from redis import VERSION as REDIS_VERSION, asyncio as aioredis
 except ImportError:  # pragma: no cover
     try:
-        import aioredis  # type: ignore[import, no-redef]  # noqa: I900
+        import aioredis  # type: ignore[import-not-found, no-redef]  # noqa: I900
     except ImportError:
         aioredis = None  # type: ignore[assignment]
     else:

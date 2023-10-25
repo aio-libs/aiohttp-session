@@ -1,5 +1,5 @@
 -e .
-aiohttp==3.8.5
+aiohttp==3.8.6
 aiomcache==0.8.1
 cryptography==41.0.5
 docker==6.1.3

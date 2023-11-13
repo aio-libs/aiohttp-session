@@ -73,8 +73,7 @@ jobs:
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
-        file: ./coverage.xml
-        flags: unit
+        fail_ci_if_error: true
 
   check:  # This job does nothing and is only used for the branch protection
     if: always()

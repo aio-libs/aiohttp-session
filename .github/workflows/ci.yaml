@@ -20,16 +20,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
-    - name: Cache PyPI
-      uses: actions/cache@v3
-      with:
-        key: pip-lint-${{ hashFiles('requirements-dev.txt') }}
-        path: ~/.cache/pip
-        restore-keys: |
-            pip-lint-
+        cache: 'pip'
+        cache-dependency-path: '**/requirements*.txt'
     - name: Install dependencies
       uses: py-actions/py-dependency-install@v4
       with:
@@ -58,9 +53,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+        cache-dependency-path: '**/requirements*.txt'
     - name: Install dependencies
       run: |
         pip install --upgrade pip build twine

@@ -19,7 +19,7 @@ def make_cookie(
     domain: Optional[str] = None,
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
-    C: cookies.SimpleCookie[str] = cookies.SimpleCookie()
+    C = cookies.SimpleCookie()
     value = json.dumps(session_data)
     C["AIOHTTP_SESSION"] = value
     C["AIOHTTP_SESSION"]["path"] = path

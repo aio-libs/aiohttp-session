@@ -1,21 +1,11 @@
 version: 2
 updates:
-- package-ecosystem: pip
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: docker
-    versions:
-    - 4.4.1
-    - 4.4.2
-    - 4.4.3
-  - dependency-name: sphinx
-    versions:
-    - 3.4.3
-    - 3.5.0
-    - 3.5.1
-  - dependency-name: cryptography
-    versions:
-    - 3.4.1
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: daily
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

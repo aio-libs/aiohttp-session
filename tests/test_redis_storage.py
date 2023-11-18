@@ -21,7 +21,7 @@ from .typedefs import AiohttpClient
 
 def create_app(
     handler: Handler,
-    redis: aioredis.Redis[bytes],
+    redis: aioredis.Redis,
     max_age: Optional[int] = None,
     key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
 ) -> web.Application:
@@ -34,7 +34,7 @@ def create_app(
 
 
 async def make_cookie(
-    client: TestClient, redis: aioredis.Redis[bytes], data: Dict[Any, Any]
+    client: TestClient, redis: aioredis.Redis, data: Dict[Any, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     value = json.dumps(session_data)
@@ -43,13 +43,13 @@ async def make_cookie(
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": key})
 
 
-async def make_cookie_with_bad_value(client: TestClient, redis: aioredis.Redis[bytes]) -> None:
+async def make_cookie_with_bad_value(client: TestClient, redis: aioredis.Redis) -> None:
     key = uuid.uuid4().hex
     await redis.set("AIOHTTP_SESSION_" + key, "")
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": key})
 
 
-async def load_cookie(client: TestClient, redis: aioredis.Redis[bytes]) -> Any:
+async def load_cookie(client: TestClient, redis: aioredis.Redis) -> Any:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url("/"))
     key = cookies["AIOHTTP_SESSION"]
     value_bytes = await redis.get("AIOHTTP_SESSION_" + key.value)
@@ -57,7 +57,7 @@ async def load_cookie(client: TestClient, redis: aioredis.Redis[bytes]) -> Any:
 
 
 async def test_create_new_session(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -73,7 +73,7 @@ async def test_create_new_session(
 
 
 async def test_load_existing_session(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -90,7 +90,7 @@ async def test_load_existing_session(
 
 
 async def test_load_bad_session(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -107,7 +107,7 @@ async def test_load_bad_session(
 
 
 async def test_change_session(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -134,7 +134,7 @@ async def test_change_session(
 
 
 async def test_clear_cookie_on_session_invalidation(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -155,7 +155,7 @@ async def test_clear_cookie_on_session_invalidation(
 
 
 async def test_create_cookie_in_handler(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -182,7 +182,7 @@ async def test_create_cookie_in_handler(
 
 
 async def test_set_ttl_on_session_saving(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -202,7 +202,7 @@ async def test_set_ttl_on_session_saving(
 
 
 async def test_set_ttl_manually_set(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -223,7 +223,7 @@ async def test_set_ttl_manually_set(
 
 
 async def test_create_new_session_if_key_doesnt_exists_in_redis(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -237,7 +237,7 @@ async def test_create_new_session_if_key_doesnt_exists_in_redis(
 
 
 async def test_create_storage_with_custom_key_factory(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -260,7 +260,7 @@ async def test_create_storage_with_custom_key_factory(
 
 
 async def test_redis_session_fixation(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def login(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)
@@ -289,7 +289,7 @@ async def test_redis_from_create_pool(redis_url: str) -> None:
     async def handler(request: web.Request) -> web.Response:  # type: ignore[empty-body]
         """Dummy handler"""
 
-    redis = aioredis.from_url(redis_url)
+    redis = aioredis.from_url(redis_url)  # type: ignore[no-untyped-call]
     create_app(handler=handler, redis=redis)
     await redis.aclose()
 
@@ -321,7 +321,7 @@ async def test_old_aioredis_version(mocker: MockFixture) -> None:
 
 
 async def test_load_session_dont_load_expired_session(
-    aiohttp_client: AiohttpClient, redis: aioredis.Redis[bytes]
+    aiohttp_client: AiohttpClient, redis: aioredis.Redis
 ) -> None:
     async def handler(request: web.Request) -> web.StreamResponse:
         session = await get_session(request)

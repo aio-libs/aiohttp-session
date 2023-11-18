@@ -99,7 +99,7 @@ async def redis_server(  # type: ignore[misc]  # No docker types.
             time.sleep(delay)
             delay *= 2
         finally:
-            await conn.close()
+            await conn.aclose()
     else:  # pragma: no cover
         pytest.fail("Cannot start redis server")
 
@@ -124,7 +124,7 @@ async def redis(
     pool = aioredis.ConnectionPool.from_url(redis_url)
     redis = await start(pool)
     yield redis
-    await redis.close()
+    await redis.aclose()
     await pool.disconnect()
 
 

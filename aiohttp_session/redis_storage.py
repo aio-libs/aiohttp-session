@@ -25,7 +25,7 @@ class RedisStorage(AbstractStorage):
 
     def __init__(
         self,
-        redis_pool: "aioredis.Redis[bytes]",
+        redis_pool: "aioredis.Redis",
         *,
         cookie_name: str = "AIOHTTP_SESSION",
         domain: Optional[str] = None,
@@ -55,7 +55,7 @@ class RedisStorage(AbstractStorage):
         if REDIS_VERSION < (4, 3):
             raise RuntimeError("redis<4.3 is not supported")
         self._key_factory = key_factory
-        if not isinstance(redis_pool, aioredis.Redis):  # type: ignore[unreachable]
+        if not isinstance(redis_pool, aioredis.Redis):
             raise TypeError(f"Expected redis.asyncio.Redis got {type(redis_pool)}")
         self._redis = redis_pool
 

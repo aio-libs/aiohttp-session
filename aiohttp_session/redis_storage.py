@@ -25,7 +25,7 @@ class RedisStorage(AbstractStorage):
 
     def __init__(
         self,
-        redis_pool: "aioredis.Redis[bytes]",
+        redis_pool: "aioredis.Redis",
         *,
         cookie_name: str = "AIOHTTP_SESSION",
         domain: Optional[str] = None,

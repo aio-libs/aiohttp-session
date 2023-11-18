@@ -92,7 +92,7 @@ async def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):  # pragma: no cover
         try:
-            conn = aioredis.from_url(f"redis://{host}:{port}")
+            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]
             await conn.set("foo", "bar")
             break
         except aioredis.ConnectionError:
@@ -117,8 +117,8 @@ def redis_url(redis_server: _ContainerInfo) -> str:  # type: ignore[misc]
 @pytest.fixture
 async def redis(
     redis_url: str,
-) -> AsyncIterator[aioredis.Redis[bytes]]:
-    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis[bytes]:
+) -> AsyncIterator[aioredis.Redis]:
+    async def start(pool: aioredis.ConnectionPool) -> aioredis.Redis:
         return aioredis.Redis(connection_pool=pool)
 
     pool = aioredis.ConnectionPool.from_url(redis_url)

@@ -291,7 +291,7 @@ async def test_redis_from_create_pool(redis_url: str) -> None:
 
     redis = aioredis.from_url(redis_url)
     create_app(handler=handler, redis=redis)
-    await redis.close()
+    await redis.aclose()
 
 
 async def test_not_redis_provided_to_storage() -> None:

@@ -2,12 +2,11 @@ import base64
 from typing import Awaitable, Callable, List, NoReturn, cast
 
 from aiohttp import web
+from aiohttp.typedefs import Handler
 from cryptography import fernet
 
 from aiohttp_session import get_session, setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
-
-_Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 
 def flash(request: web.Request, message: str) -> None:
@@ -18,17 +17,16 @@ def get_messages(request: web.Request) -> List[str]:
     return cast(List[str], request.pop("flash_incoming"))
 
 
-async def flash_middleware(app: web.Application, handler: _Handler) -> _Handler:
-    async def process(request: web.Request) -> web.StreamResponse:
-        session = await get_session(request)
-        request["flash_incoming"] = session.pop("flash", [])
-        response = await handler(request)
+@web.middleware
+async def flash_middleware(request: web.Request, handler: Handler) -> web.StreamResponse:
+    session = await get_session(request)
+    request["flash_incoming"] = session.pop("flash", [])
+    try:
+        return await handler(request)
+    finally:
         session["flash"] = request.get("flash_incoming", []) + request.get(
             "flash_outgoing", []
         )
-        return response
-
-    return process
 
 
 async def flash_handler(request: web.Request) -> NoReturn:
@@ -50,10 +48,10 @@ def make_app() -> web.Application:
     fernet_key = fernet.Fernet.generate_key()
     secret_key = base64.urlsafe_b64decode(fernet_key)
     setup(app, EncryptedCookieStorage(secret_key))
+    # Install flash middleware (must be installed after aiohttp-session middleware).
+    app.middlewares.append(flash_middleware)
     app.router.add_get("/", handler)
     app.router.add_get("/flash", flash_handler)
-    # Install flash middleware
-    app.middlewares.append(flash_middleware)
     return app
 
 

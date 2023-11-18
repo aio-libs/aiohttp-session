@@ -13,6 +13,7 @@ DATABASE = [
 ]
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
+user_key = web.AppKey("user", str)
 
 def login_required(fn: _Handler) -> _Handler:
     async def wrapped(
@@ -29,7 +30,7 @@ def login_required(fn: _Handler) -> _Handler:
         user_id = session["user_id"]
         # actually load user from your database (e.g. with aiopg)
         user = DATABASE[user_id]
-        app["user"] = user
+        app[user_key] = user
         return await fn(request, *args, **kwargs)
 
     return wrapped
@@ -37,7 +38,7 @@ def login_required(fn: _Handler) -> _Handler:
 
 @login_required
 async def handler(request: web.Request) -> web.Response:
-    user = request.app["user"]
+    user = request.app[user_key]
     return web.Response(text=f"User {user} authorized")
 
 

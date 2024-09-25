@@ -1,5 +1,11 @@
 .. towncrier release notes start
 
+2.12.1 (2024-09-25)
+===================
+
+* Minor typing fix for aiohttp 3.10+.
+* Dropped support for Python 3.7. Started testing on 3.11 - 3.13.
+
 2.12.0 (2022-10-28)
 ===================
 

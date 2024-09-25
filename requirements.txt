@@ -1,7 +1,7 @@
 -e .
 aiohttp==3.9.1
 aiomcache==0.8.1
-cryptography==41.0.7
+cryptography==43.0.1
 docker==7.1.0
 multidict==6.0.4
 pynacl==1.5.0

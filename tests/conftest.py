@@ -36,15 +36,6 @@ def unused_port() -> int:  # pragma: no cover
 
 
 @pytest.fixture(scope="session")
-def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
-    """Redefine event_loop with session scope (from pytest-asyncio)."""
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
 def session_id() -> str:
     """Unique session identifier, random string."""
     return str(uuid.uuid4())

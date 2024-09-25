@@ -7,7 +7,6 @@ import json
 import time
 from typing import (
     Any,
-    Awaitable,
     Callable,
     Dict,
     Iterator,
@@ -19,9 +18,7 @@ from typing import (
 )
 
 from aiohttp import web
-from aiohttp.typedefs import Handler
-
-Middleware = Callable[[web.Request, Handler], Awaitable[web.StreamResponse]]
+from aiohttp.typedefs import Handler, Middleware
 
 
 class _CookieParams(TypedDict, total=False):

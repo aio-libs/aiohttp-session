@@ -19,7 +19,7 @@ def read(f):
     return open(os.path.join(os.path.dirname(__file__), f)).read().strip()
 
 
-install_requires = ["aiohttp>=3.8"]
+install_requires = ["aiohttp>=3.10"]
 extras_require = {
     "aioredis": ["redis>=4.3.1"],
     "aiomcache": ["aiomcache>=0.5.2"],

@@ -11,12 +11,7 @@ from aiohttp.test_utils import TestClient
 from aiohttp.typedefs import Handler
 from nacl.encoding import Base64Encoder
 
-from aiohttp_session import (
-    Session,
-    get_session,
-    new_session,
-    session_middleware,
-)
+from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.nacl_storage import NaClCookieStorage
 
 from .typedefs import AiohttpClient
@@ -49,7 +44,7 @@ def create_app(
 
 
 def decrypt(secretbox: nacl.secret.SecretBox, cookie_value: str) -> Any:
-    assert type(cookie_value) == str
+    assert isinstance(cookie_value, str)
     return json.loads(
         secretbox.decrypt(cookie_value.encode("utf-8"), encoder=Base64Encoder).decode(
             "utf-8"

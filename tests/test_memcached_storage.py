@@ -30,7 +30,7 @@ def create_app(
 
 
 async def make_cookie(
-    client: TestClient, memcached: aiomcache.Client, data: Dict[str, Any]
+    client: TestClient[web.Request, web.Application], memcached: aiomcache.Client, data: Dict[str, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     value = json.dumps(session_data)
@@ -41,7 +41,7 @@ async def make_cookie(
 
 
 async def make_cookie_with_bad_value(
-    client: TestClient, memcached: aiomcache.Client
+    client: TestClient[web.Request, web.Application], memcached: aiomcache.Client
 ) -> None:
     key = uuid.uuid4().hex
     storage_key = ("AIOHTTP_SESSION_" + key).encode("utf-8")
@@ -50,7 +50,7 @@ async def make_cookie_with_bad_value(
 
 
 async def load_cookie(
-    client: TestClient, memcached: aiomcache.Client
+    client: TestClient[web.Request, web.Application], memcached: aiomcache.Client
 ) -> Dict[str, Any]:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url("/"))
     key = cookies["AIOHTTP_SESSION"]

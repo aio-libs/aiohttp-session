@@ -18,7 +18,7 @@ from .typedefs import AiohttpClient
 MAX_AGE = 1
 
 
-def make_cookie(client: TestClient, fernet: Fernet, data: Dict[str, Any]) -> None:
+def make_cookie(client: TestClient[web.Request, web.Application], fernet: Fernet, data: Dict[str, Any]) -> None:
     session_data = {"session": data, "created": int(time.time())}
 
     cookie_data = json.dumps(session_data).encode("utf-8")

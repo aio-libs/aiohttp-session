@@ -23,7 +23,7 @@ def test_invalid_key() -> None:
 
 
 def make_cookie(
-    client: TestClient, secretbox: nacl.secret.SecretBox, data: Dict[str, Any]
+    client: TestClient[web.Request, web.Application], secretbox: nacl.secret.SecretBox, data: Dict[str, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
 

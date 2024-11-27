@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import asyncio
-import gc
 import socket
 import sys
 import time
@@ -83,7 +81,9 @@ async def redis_server(  # type: ignore[misc]  # No docker types.
     delay = 0.1
     for _i in range(20):  # pragma: no cover
         try:
-            conn = aioredis.from_url(f"redis://{host}:{port}")  # type: ignore[no-untyped-call]
+            conn = aioredis.from_url(
+                f"redis://{host}:{port}",
+            )  # type: ignore[no-untyped-call]
             await conn.set("foo", "bar")
             break
         except aioredis.ConnectionError:
@@ -179,7 +179,9 @@ def memcached_params(  # type: ignore[misc]
 
 
 @pytest.fixture
-async def memcached(memcached_params: _MemcachedParams) -> AsyncIterator[aiomcache.Client]:
+async def memcached(
+    memcached_params: _MemcachedParams,
+) -> AsyncIterator[aiomcache.Client]:
     conn = aiomcache.Client(**memcached_params)
     yield conn
     await conn.close()

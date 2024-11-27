@@ -10,13 +10,17 @@ try:
     from redis import VERSION as REDIS_VERSION, asyncio as aioredis
 except ImportError:  # pragma: no cover
     try:
-        import aioredis  # type: ignore[import-not-found, no-redef]  # noqa: I900
+        import aioredis  # type: ignore[import-not-found, no-redef]
     except ImportError:
         aioredis = None  # type: ignore[assignment]
     else:
         import warnings
-        warnings.warn("aioredis library is deprecated, please replace with redis.",
-                      DeprecationWarning, stacklevel=1)
+
+        warnings.warn(
+            "aioredis library is deprecated, please replace with redis.",
+            DeprecationWarning,
+            stacklevel=1,
+        )
         REDIS_VERSION = (4, 3)
 
 

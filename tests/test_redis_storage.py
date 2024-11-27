@@ -4,7 +4,7 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, Dict, MutableMapping, Optional, cast
+from typing import Any, Callable, MutableMapping, cast
 
 import pytest
 from aiohttp import web
@@ -22,7 +22,7 @@ from .typedefs import AiohttpClient
 def create_app(
     handler: Handler,
     redis: aioredis.Redis,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
 ) -> web.Application:
     middleware = session_middleware(
@@ -34,7 +34,7 @@ def create_app(
 
 
 async def make_cookie(
-    client: TestClient, redis: aioredis.Redis, data: Dict[Any, Any]
+    client: TestClient[web.Request, web.Application], redis: aioredis.Redis, data: dict[Any, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     value = json.dumps(session_data)
@@ -43,13 +43,13 @@ async def make_cookie(
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": key})
 
 
-async def make_cookie_with_bad_value(client: TestClient, redis: aioredis.Redis) -> None:
+async def make_cookie_with_bad_value(client: TestClient[web.Request, web.Application], redis: aioredis.Redis) -> None:
     key = uuid.uuid4().hex
     await redis.set("AIOHTTP_SESSION_" + key, "")
     client.session.cookie_jar.update_cookies({"AIOHTTP_SESSION": key})
 
 
-async def load_cookie(client: TestClient, redis: aioredis.Redis) -> Any:
+async def load_cookie(client: TestClient[web.Request, web.Application], redis: aioredis.Redis) -> Any:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url("/"))
     key = cookies["AIOHTTP_SESSION"]
     value_bytes = await redis.get("AIOHTTP_SESSION_" + key.value)

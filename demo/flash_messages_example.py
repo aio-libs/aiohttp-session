@@ -1,5 +1,5 @@
 import base64
-from typing import Awaitable, Callable, List, NoReturn, cast
+from typing import List, NoReturn, cast
 
 from aiohttp import web
 from aiohttp.typedefs import Handler
@@ -18,7 +18,9 @@ def get_messages(request: web.Request) -> List[str]:
 
 
 @web.middleware
-async def flash_middleware(request: web.Request, handler: Handler) -> web.StreamResponse:
+async def flash_middleware(
+    request: web.Request, handler: Handler
+) -> web.StreamResponse:
     session = await get_session(request)
     request["flash_incoming"] = session.pop("flash", [])
     try:

@@ -37,7 +37,7 @@ def create_app(
 
 
 def decrypt(fernet: Fernet, cookie_value: str) -> Dict[str, Any]:
-    assert isinstance(cookie_value, str)
+    assert type(cookie_value) == str  # noqa: E721
     cookie_value = fernet.decrypt(cookie_value.encode("utf-8")).decode("utf-8")
     return cast(Dict[str, Any], json.loads(cookie_value))
 

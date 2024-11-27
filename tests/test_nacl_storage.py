@@ -44,7 +44,7 @@ def create_app(
 
 
 def decrypt(secretbox: nacl.secret.SecretBox, cookie_value: str) -> Any:
-    assert isinstance(cookie_value, str)
+    assert type(cookie_value) == str  # noqa: E721
     return json.loads(
         secretbox.decrypt(cookie_value.encode("utf-8"), encoder=Base64Encoder).decode(
             "utf-8"

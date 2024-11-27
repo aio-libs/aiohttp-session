@@ -18,7 +18,9 @@ async def handler(request: web.Request) -> web.Response:
 
 async def redis_pool(app: web.Application) -> AsyncIterator[None]:
     redis_address = "redis://127.0.0.1:6379"
-    async with aioredis.from_url(redis_address) as redis:  # type: ignore[no-untyped-call]
+    async with aioredis.from_url(
+        redis_address,
+    ) as redis:  # type: ignore[no-untyped-call]
         storage = RedisStorage(redis)
         setup(app, storage)
         yield

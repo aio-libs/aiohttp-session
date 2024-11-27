@@ -15,6 +15,7 @@ _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 user_key = web.AppKey("user", str)
 
+
 def login_required(fn: _Handler) -> _Handler:
     async def wrapped(
         request: web.Request, *args: Any, **kwargs: Any

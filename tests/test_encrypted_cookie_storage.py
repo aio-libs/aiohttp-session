@@ -10,12 +10,7 @@ from aiohttp.test_utils import TestClient
 from aiohttp.typedefs import Handler
 from cryptography.fernet import Fernet
 
-from aiohttp_session import (
-    Session,
-    get_session,
-    new_session,
-    session_middleware,
-)
+from aiohttp_session import Session, get_session, new_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .typedefs import AiohttpClient
@@ -42,7 +37,7 @@ def create_app(
 
 
 def decrypt(fernet: Fernet, cookie_value: str) -> Dict[str, Any]:
-    assert type(cookie_value) == str
+    assert type(cookie_value) == str  # noqa: E721
     cookie_value = fernet.decrypt(cookie_value.encode("utf-8")).decode("utf-8")
     return cast(Dict[str, Any], json.loads(cookie_value))
 

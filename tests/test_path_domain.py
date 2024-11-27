@@ -13,7 +13,7 @@ from .typedefs import AiohttpClient
 
 
 def make_cookie(
-    client: TestClient,
+    client: TestClient[web.Request, web.Application],
     data: Any,
     path: Optional[str] = None,
     domain: Optional[str] = None,

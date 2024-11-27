@@ -46,12 +46,8 @@ async def test_get_new_session() -> None:
     session = Session("identity", data=None, new=False)
 
     class Storage(AbstractStorage):
-        async def load_session(
-            self,
-            request: web.Request,
-        ) -> Session:
+        async def load_session(self, request: web.Request) -> Session:  # type: ignore[empty-body]  # noqa: E501
             """Dummy"""
-            return Session("", data=None, new=True)
 
         async def save_session(
             self, request: web.Request, response: web.StreamResponse, session: Session
@@ -81,12 +77,8 @@ async def test_get_new_session_bad_return() -> None:
         async def new_session(self) -> Session:
             return ""  # type: ignore[return-value]
 
-        async def load_session(
-            self,
-            request: web.Request,
-        ) -> Session:
+        async def load_session(self, request: web.Request) -> Session:  # type: ignore[empty-body]  # noqa: E501
             """Dummy"""
-            return Session("", data=None, new=True)
 
         async def save_session(
             self, request: web.Request, response: web.StreamResponse, session: Session

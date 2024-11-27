@@ -16,6 +16,7 @@ per-file-ignores =
     examples/*:I900
     # I900: flake8-requirements doesn't see aioredis in the requirements file cause it is extra dependency
     aiohttp_session/redis_storage.py:I900
+    build/*:I900
 
 # flake8-import-order
 import-order-style = pycharm

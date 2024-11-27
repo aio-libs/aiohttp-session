@@ -49,8 +49,9 @@ async def test_get_new_session() -> None:
         async def load_session(
             self,
             request: web.Request,
-        ) -> Session:  # type: ignore[empty-body]
+        ) -> Session:
             """Dummy"""
+            return Session("", data=None, new=True)
 
         async def save_session(
             self, request: web.Request, response: web.StreamResponse, session: Session
@@ -83,8 +84,9 @@ async def test_get_new_session_bad_return() -> None:
         async def load_session(
             self,
             request: web.Request,
-        ) -> Session:  # type: ignore[empty-body]
+        ) -> Session:
             """Dummy"""
+            return Session("", data=None, new=True)
 
         async def save_session(
             self, request: web.Request, response: web.StreamResponse, session: Session

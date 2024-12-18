@@ -341,10 +341,10 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    "https://docs.python.org/3": None,
-    "https://aiohttp.readthedocs.io/en/stable": None,
-    "https://redis.readthedocs.io/en/latest": None,
-    # 'https://github.com/aio-libs/aiomcache': None,
-    "http://cryptography.io/en/latest": None,
-    "https://pynacl.readthedocs.io/en/latest": None,
+    "python": ("https://docs.python.org/3", None),
+    "aiohttp": ("https://aiohttp.readthedocs.io/en/stable", None),
+    "redis": ("https://redis.readthedocs.io/en/latest", None),
+    # "aiomcache": ("https://github.com/aio-libs/aiomcache", None),
+    "cryptography": ("http://cryptography.io/en/latest", None),
+    "pynacl": ("https://pynacl.readthedocs.io/en/latest", None),
 }

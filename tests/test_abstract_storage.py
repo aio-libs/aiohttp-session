@@ -13,7 +13,9 @@ from aiohttp_session import SimpleCookieStorage, get_session, setup as setup_mid
 from .typedefs import AiohttpClient
 
 
-def make_cookie(client: TestClient[web.Request, web.Application], data: Dict[str, Any]) -> None:
+def make_cookie(
+    client: TestClient[web.Request, web.Application], data: Dict[str, Any]
+) -> None:
     session_data = {"session": data, "created": int(time.time())}
 
     value = json.dumps(session_data)

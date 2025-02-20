@@ -30,7 +30,9 @@ def create_app(
 
 
 async def make_cookie(
-    client: TestClient[web.Request, web.Application], memcached: aiomcache.Client, data: Dict[str, Any]
+    client: TestClient[web.Request, web.Application],
+    memcached: aiomcache.Client,
+    data: Dict[str, Any],
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     value = json.dumps(session_data)

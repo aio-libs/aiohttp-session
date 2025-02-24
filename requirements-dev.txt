@@ -8,4 +8,4 @@ flake8-requirements==2.2.1
 mypy==1.15.0
 pep257==0.7.0
 pre-commit==4.1.0
-sphinx==8.2.0
+sphinx==8.2.1

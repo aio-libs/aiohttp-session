@@ -11,4 +11,4 @@ pytest-cov==6.1.0
 pytest-mock==3.14.0
 pytest-sugar==1.0.0
 redis==5.2.1
-yarl==1.18.3
+yarl==1.19.0

@@ -99,10 +99,24 @@ async def test_clear_cookie_on_session_invalidation(
     make_cookie(client, {"a": 1, "b": 2})
     resp = await client.get("/")
     assert resp.status == 200
-    assert (
-        'Set-Cookie: AIOHTTP_SESSION="{}"; '
-        "domain=127.0.0.1; httponly; Path=/".upper()
-    ) == resp.cookies["AIOHTTP_SESSION"].output().upper()
+
+    # Check the actual Set-Cookie header instead of resp.cookies
+    # which may add domain information not present in the actual response
+    set_cookie_header = resp.headers.get("Set-Cookie")
+    assert set_cookie_header is not None
+
+    # Parse the header
+    from http.cookies import SimpleCookie
+
+    cookie = SimpleCookie()
+    cookie.load(set_cookie_header)
+    assert "AIOHTTP_SESSION" in cookie
+
+    # Verify the cookie was cleared (empty value)
+    morsel = cookie["AIOHTTP_SESSION"]
+    assert morsel.value == "{}"
+    assert morsel["path"] == "/"
+    assert morsel["httponly"] == "True" or morsel["httponly"] is True
 
 
 async def test_dont_save_not_requested_session(aiohttp_client: AiohttpClient) -> None:

@@ -1,5 +1,6 @@
 import json
 import time
+from http.cookies import SimpleCookie
 from typing import Any, Dict, MutableMapping, cast
 
 from aiohttp import web
@@ -106,8 +107,6 @@ async def test_clear_cookie_on_session_invalidation(
     assert set_cookie_header is not None
 
     # Parse the header
-    from http.cookies import SimpleCookie
-
     cookie = SimpleCookie()
     cookie.load(set_cookie_header)
     assert "AIOHTTP_SESSION" in cookie

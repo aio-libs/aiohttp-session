@@ -102,7 +102,7 @@ async def test_clear_cookie_on_session_invalidation(
     assert resp.status == 200
 
     # Check the actual Set-Cookie header instead of resp.cookies
-    # which may add domain information not present in the actual response
+    # which used to leak the cookie jar details back into the resp.cookies
     set_cookie_header = resp.headers.get("Set-Cookie")
     assert set_cookie_header is not None
 

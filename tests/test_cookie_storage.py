@@ -115,7 +115,7 @@ async def test_clear_cookie_on_session_invalidation(
     morsel = cookie["AIOHTTP_SESSION"]
     assert morsel.value == "{}"
     assert morsel["path"] == "/"
-    assert morsel["httponly"] == "True"
+    assert morsel["httponly"] is True
 
 
 async def test_dont_save_not_requested_session(aiohttp_client: AiohttpClient) -> None:

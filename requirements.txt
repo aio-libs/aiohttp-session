@@ -3,7 +3,7 @@ aiohttp==3.12.13
 aiomcache==0.8.2
 cryptography==45.0.4
 docker==7.1.0
-multidict==6.5.1
+multidict==6.6.2
 pynacl==1.5.0
 pytest==8.3.5
 pytest-aiohttp==1.1.0

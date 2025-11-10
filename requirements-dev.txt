@@ -7,5 +7,5 @@ flake8-import-order==0.19.2
 flake8-requirements==2.3.0
 mypy==1.18.2
 pep257==0.7.0
-pre-commit==4.2.0
+pre-commit==4.4.0
 sphinx==8.2.3

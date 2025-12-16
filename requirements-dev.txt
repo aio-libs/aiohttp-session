@@ -5,7 +5,7 @@ flake8-bandit==4.1.1
 flake8-bugbear==25.11.29
 flake8-import-order==0.19.2
 flake8-requirements==2.3.0
-mypy==1.19.0
+mypy==1.19.1
 pep257==0.7.0
 pre-commit==4.5.0
 sphinx==9.0.4

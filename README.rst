@@ -110,6 +110,9 @@ Third party extensions
 * `aiohttp_session_dynamodb
   <https://github.com/alexpantyukhin/aiohttp-session-dynamodb>`_
 
+* `aiohttp_session_firestore
+  <https://github.com/dcgudeman/aiohttp-session-firestore>`_
+
 
 License
 -------

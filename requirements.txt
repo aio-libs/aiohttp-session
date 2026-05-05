@@ -5,7 +5,7 @@ cryptography==48.0.0
 docker==7.1.0
 multidict==6.7.1
 pynacl==1.6.2
-pytest==8.3.5
+pytest==9.0.3
 pytest-aiohttp==1.1.0
 pytest-cov==7.1.0
 pytest-mock==3.15.1

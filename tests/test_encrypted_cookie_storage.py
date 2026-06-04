@@ -2,7 +2,8 @@ import asyncio
 import base64
 import json
 import time
-from typing import Any, Dict, MutableMapping, Tuple, Union, cast
+from collections.abc import MutableMapping
+from typing import Any, cast
 
 import pytest
 from aiohttp import web
@@ -21,7 +22,7 @@ MAX_AGE = 1
 def make_cookie(
     client: TestClient[web.Request, web.Application],
     fernet: Fernet,
-    data: Dict[str, Any],
+    data: dict[str, Any],
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
 
@@ -32,7 +33,7 @@ def make_cookie(
 
 
 def create_app(
-    handler: Handler, key: Union[str, bytes, bytearray, Fernet]
+    handler: Handler, key: str | bytes | bytearray | Fernet
 ) -> web.Application:
     middleware = session_middleware(EncryptedCookieStorage(key))
     app = web.Application(middlewares=[middleware])
@@ -40,26 +41,26 @@ def create_app(
     return app
 
 
-def decrypt(fernet: Fernet, cookie_value: str) -> Dict[str, Any]:
+def decrypt(fernet: Fernet, cookie_value: str) -> dict[str, Any]:
     assert type(cookie_value) == str  # noqa: E721
     cookie_value = fernet.decrypt(cookie_value.encode("utf-8")).decode("utf-8")
-    return cast(Dict[str, Any], json.loads(cookie_value))
+    return cast(dict[str, Any], json.loads(cookie_value))
 
 
 @pytest.fixture
-def fernet_and_key() -> Tuple[Fernet, bytes]:
+def fernet_and_key() -> tuple[Fernet, bytes]:
     key = Fernet.generate_key()
     fernet = Fernet(key)
     return fernet, base64.urlsafe_b64decode(key)
 
 
 @pytest.fixture
-def fernet(fernet_and_key: Tuple[Fernet, bytes]) -> Fernet:
+def fernet(fernet_and_key: tuple[Fernet, bytes]) -> Fernet:
     return fernet_and_key[0]
 
 
 @pytest.fixture
-def key(fernet_and_key: Tuple[Fernet, bytes]) -> bytes:
+def key(fernet_and_key: tuple[Fernet, bytes]) -> bytes:
     return fernet_and_key[1]
 
 

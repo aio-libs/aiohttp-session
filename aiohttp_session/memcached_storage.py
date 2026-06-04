@@ -1,7 +1,8 @@
 import json
 import uuid
+from collections.abc import Callable
 from time import time
-from typing import Any, Callable, Optional
+from typing import Any
 
 import aiomcache
 from aiohttp import web
@@ -17,12 +18,12 @@ class MemcachedStorage(AbstractStorage):
         memcached_conn: aiomcache.Client,
         *,
         cookie_name: str = "AIOHTTP_SESSION",
-        domain: Optional[str] = None,
-        max_age: Optional[int] = None,
+        domain: str | None = None,
+        max_age: int | None = None,
         path: str = "/",
-        secure: Optional[bool] = None,
+        secure: bool | None = None,
         httponly: bool = True,
-        samesite: Optional[str] = None,
+        samesite: str | None = None,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
         encoder: Callable[[object], str] = json.dumps,
         decoder: Callable[[str], Any] = json.loads

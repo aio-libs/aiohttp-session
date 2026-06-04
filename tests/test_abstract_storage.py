@@ -1,7 +1,7 @@
 import json
 import time
 from functools import partial
-from typing import Any, Dict, Optional
+from typing import Any
 from unittest import mock
 
 from aiohttp import web
@@ -14,7 +14,7 @@ from .typedefs import AiohttpClient
 
 
 def make_cookie(
-    client: TestClient[web.Request, web.Application], data: Dict[str, Any]
+    client: TestClient[web.Request, web.Application], data: dict[str, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
 
@@ -46,7 +46,7 @@ async def test_max_age_also_returns_expires(aiohttp_client: AiohttpClient) -> No
 
 
 async def test_max_age_session_reset(aiohttp_client: AiohttpClient) -> None:
-    async def handler(request: web.Request, n: Optional[str] = None) -> web.Response:
+    async def handler(request: web.Request, n: str | None = None) -> web.Response:
         session = await get_session(request)
         if n:
             session[n] = True

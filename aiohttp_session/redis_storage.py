@@ -1,6 +1,7 @@
 import json
 import uuid
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from aiohttp import web
 
@@ -32,12 +33,12 @@ class RedisStorage(AbstractStorage):
         redis_pool: "aioredis.Redis",
         *,
         cookie_name: str = "AIOHTTP_SESSION",
-        domain: Optional[str] = None,
-        max_age: Optional[int] = None,
+        domain: str | None = None,
+        max_age: int | None = None,
         path: str = "/",
-        secure: Optional[bool] = None,
+        secure: bool | None = None,
         httponly: bool = True,
-        samesite: Optional[str] = None,
+        samesite: str | None = None,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
         encoder: Callable[[object], str] = json.dumps,
         decoder: Callable[[str], Any] = json.loads,

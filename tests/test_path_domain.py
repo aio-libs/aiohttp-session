@@ -1,7 +1,7 @@
 import json
 import time
 from http import cookies
-from typing import Any, Optional
+from typing import Any
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
@@ -15,8 +15,8 @@ from .typedefs import AiohttpClient
 def make_cookie(
     client: TestClient[web.Request, web.Application],
     data: Any,
-    path: Optional[str] = None,
-    domain: Optional[str] = None,
+    path: str | None = None,
+    domain: str | None = None,
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     C = cookies.SimpleCookie()
@@ -28,7 +28,7 @@ def make_cookie(
 
 
 def create_app(
-    handler: Handler, path: Optional[str] = None, domain: Optional[str] = None
+    handler: Handler, path: str | None = None, domain: str | None = None
 ) -> web.Application:
     storage = SimpleCookieStorage(max_age=10, path="/anotherpath", domain="127.0.0.1")
     middleware = session_middleware(storage)

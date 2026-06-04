@@ -4,7 +4,8 @@ import socket
 import sys
 import time
 import uuid
-from typing import AsyncIterator, Iterator, TypedDict
+from collections.abc import AsyncIterator, Iterator
+from typing import TypedDict
 
 import aiomcache
 import pytest

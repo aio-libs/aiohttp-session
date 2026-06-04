@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient

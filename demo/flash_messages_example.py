@@ -1,5 +1,5 @@
 import base64
-from typing import List, NoReturn, cast
+from typing import NoReturn, cast
 
 from aiohttp import web
 from aiohttp.typedefs import Handler
@@ -13,8 +13,8 @@ def flash(request: web.Request, message: str) -> None:
     request.setdefault("flash_outgoing", []).append(message)
 
 
-def get_messages(request: web.Request) -> List[str]:
-    return cast(List[str], request.pop("flash_incoming"))
+def get_messages(request: web.Request) -> list[str]:
+    return cast(list[str], request.pop("flash_incoming"))
 
 
 @web.middleware

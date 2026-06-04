@@ -66,10 +66,10 @@ repos:
       - id: detect-private-key
         exclude: ^examples/
   - repo: https://github.com/asottile/pyupgrade
-    rev: "v3.1.0"
+    rev: "v3.21.2"
     hooks:
       - id: pyupgrade
-        args: ["--py38-plus"]
+        args: ["--py310-plus"]
   - repo: https://github.com/PyCQA/flake8
     rev: "7.1.1"
     hooks:

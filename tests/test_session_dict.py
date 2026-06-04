@@ -1,5 +1,6 @@
 import time
-from typing import Any, MutableMapping, cast
+from collections.abc import MutableMapping
+from typing import Any, cast
 
 import pytest
 

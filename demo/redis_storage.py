@@ -1,5 +1,5 @@
 import time
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from aiohttp import web
 from redis import asyncio as aioredis

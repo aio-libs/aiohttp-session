@@ -2,7 +2,8 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, Dict, MutableMapping, Optional, cast
+from collections.abc import Callable, MutableMapping
+from typing import Any, cast
 
 import aiomcache
 from aiohttp import web
@@ -18,7 +19,7 @@ from .typedefs import AiohttpClient
 def create_app(
     handler: Handler,
     memcached: aiomcache.Client,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
 ) -> web.Application:
     middleware = session_middleware(
@@ -32,7 +33,7 @@ def create_app(
 async def make_cookie(
     client: TestClient[web.Request, web.Application],
     memcached: aiomcache.Client,
-    data: Dict[str, Any],
+    data: dict[str, Any],
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
     value = json.dumps(session_data)
@@ -53,14 +54,14 @@ async def make_cookie_with_bad_value(
 
 async def load_cookie(
     client: TestClient[web.Request, web.Application], memcached: aiomcache.Client
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     cookies = client.session.cookie_jar.filter_cookies(client.make_url("/"))
     key = cookies["AIOHTTP_SESSION"]
     storage_key = ("AIOHTTP_SESSION_" + key.value).encode("utf-8")
     encoded = await memcached.get(storage_key)
     assert encoded is not None
     s = encoded.decode("utf-8")
-    return cast(Dict[str, Any], json.loads(s))
+    return cast(dict[str, Any], json.loads(s))
 
 
 async def test_create_new_session(

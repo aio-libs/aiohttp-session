@@ -1,7 +1,8 @@
 import json
 import time
+from collections.abc import MutableMapping
 from http.cookies import SimpleCookie
-from typing import Any, Dict, MutableMapping, cast
+from typing import Any, cast
 
 from aiohttp import web
 from aiohttp.test_utils import TestClient
@@ -18,7 +19,7 @@ from .typedefs import AiohttpClient
 
 
 def make_cookie(
-    client: TestClient[web.Request, web.Application], data: Dict[str, Any]
+    client: TestClient[web.Request, web.Application], data: dict[str, Any]
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
 

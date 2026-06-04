@@ -1,6 +1,7 @@
 import json
 import uuid
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import psycopg2.extras
 from aiohttp import web
@@ -17,10 +18,10 @@ class PgStorage(AbstractStorage):
         pg_pool: Pool,
         *,
         cookie_name: str = "AIOHTTP_SESSION",
-        domain: Optional[str] = None,
-        max_age: Optional[int] = None,
+        domain: str | None = None,
+        max_age: int | None = None,
         path: str = "/",
-        secure: Optional[bool] = None,
+        secure: bool | None = None,
         httponly: bool = True,
         key_factory: Callable[[], str] = lambda: uuid.uuid4().hex,
         encoder: Callable[[object], str] = psycopg2.extras.Json,

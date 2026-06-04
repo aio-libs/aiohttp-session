@@ -4,7 +4,8 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Any, Callable, MutableMapping, cast
+from collections.abc import Callable, MutableMapping
+from typing import Any, cast
 
 import pytest
 from aiohttp import web

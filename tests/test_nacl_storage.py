@@ -1,7 +1,8 @@
 import asyncio
 import json
 import time
-from typing import Any, Dict, MutableMapping, Optional, cast
+from collections.abc import MutableMapping
+from typing import Any, cast
 
 import nacl.secret
 import nacl.utils
@@ -25,7 +26,7 @@ def test_invalid_key() -> None:
 def make_cookie(
     client: TestClient[web.Request, web.Application],
     secretbox: nacl.secret.SecretBox,
-    data: Dict[str, Any],
+    data: dict[str, Any],
 ) -> None:
     session_data = {"session": data, "created": int(time.time())}
 
@@ -37,7 +38,7 @@ def make_cookie(
 
 
 def create_app(
-    handler: Handler, key: bytes, max_age: Optional[int] = None
+    handler: Handler, key: bytes, max_age: int | None = None
 ) -> web.Application:
     middleware = session_middleware(NaClCookieStorage(key, max_age=max_age))
     app = web.Application(middlewares=[middleware])

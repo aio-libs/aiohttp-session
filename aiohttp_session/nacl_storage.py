@@ -1,6 +1,7 @@
 import binascii
 import json
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import nacl.exceptions
 import nacl.secret
@@ -20,12 +21,12 @@ class NaClCookieStorage(AbstractStorage):
         secret_key: bytes,
         *,
         cookie_name: str = "AIOHTTP_SESSION",
-        domain: Optional[str] = None,
-        max_age: Optional[int] = None,
+        domain: str | None = None,
+        max_age: int | None = None,
         path: str = "/",
-        secure: Optional[bool] = None,
+        secure: bool | None = None,
         httponly: bool = True,
-        samesite: Optional[str] = None,
+        samesite: str | None = None,
         encoder: Callable[[object], str] = json.dumps,
         decoder: Callable[[str], Any] = json.loads
     ) -> None:

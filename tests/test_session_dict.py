@@ -1,6 +1,7 @@
 import time
 from collections.abc import MutableMapping
 from typing import Any, cast
+from unittest import mock
 
 import pytest
 
@@ -140,18 +141,26 @@ def test_operations() -> None:
 
 
 def test_created_not_modified_on_mutation() -> None:
-    s = Session("test_identity", data=None, new=True)
-    created = s.created
+    # Advance the clock between construction and each mutation so that a
+    # regression (created being reset to the current time on mutation)
+    # can't coincide with the original value within the same second.
+    with mock.patch("time.time") as m_clock:
+        m_clock.return_value = 0.0
+        s = Session("test_identity", data=None, new=True)
+        created = s.created
 
-    s["foo"] = "bar"
-    assert s.created == created
+        m_clock.return_value = 100.0
+        s["foo"] = "bar"
+        assert s.created == created
 
-    del s["foo"]
-    assert s.created == created
+        m_clock.return_value = 200.0
+        del s["foo"]
+        assert s.created == created
 
-    s["foo"] = "bar"
-    s.invalidate()
-    assert s.created == created
+        m_clock.return_value = 300.0
+        s["foo"] = "bar"
+        s.invalidate()
+        assert s.created == created
 
 
 def test_created_preserved_across_reload() -> None:

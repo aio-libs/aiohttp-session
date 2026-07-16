@@ -139,6 +139,31 @@ def test_operations() -> None:
     assert "key" not in s
 
 
+def test_created_not_modified_on_mutation() -> None:
+    s = Session("test_identity", data=None, new=True)
+    created = s.created
+
+    s["foo"] = "bar"
+    assert s.created == created
+
+    del s["foo"]
+    assert s.created == created
+
+    s["foo"] = "bar"
+    s.invalidate()
+    assert s.created == created
+
+
+def test_created_preserved_across_reload() -> None:
+    created = int(time.time()) - 1000
+    session_data: SessionData = {"session": {"key": 123}, "created": created}
+    s = Session("test_identity", data=session_data, new=False)
+    assert s.created == created
+
+    s["key"] = 456
+    assert s.created == created
+
+
 def test_change() -> None:
     created = int(time.time())
     s = Session(

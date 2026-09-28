@@ -24,6 +24,7 @@ class _CookieParams(TypedDict, total=False):
 
 class SessionData(TypedDict, total=False):
     created: int
+    last_visit: float
     session: dict[str, Any]
 
 
@@ -45,15 +46,21 @@ class Session(MutableMapping[str, Any]):
         self._new = new if data != {} else True
         self._max_age = max_age
         created = data.get("created", None) if data else None
+        last_visit = data.get("last_visit", None) if data else None
         session_data = data.get("session", None) if data else None
-        now = int(time.time())
-        age = now - created if created else now
+        now = time.time()
+        # `last_visit` tracks the most recent activity and is used to
+        # implement an idle timeout. Older, existing session data may not
+        # have `last_visit`, so fall back to `created` for compatibility.
+        last_active = last_visit if last_visit is not None else created
+        age = now - last_active if last_active else now
         if max_age is not None and age > max_age:
             session_data = None
         if self._new or created is None:
-            self._created = now
+            self._created = int(now)
         else:
             self._created = created
+        self._last_visit = last_active if last_active is not None else now
 
         if session_data is not None:
             self._mapping.update(session_data)
@@ -119,12 +126,12 @@ class Session(MutableMapping[str, Any]):
     def __setitem__(self, key: str, value: Any) -> None:
         self._mapping[key] = value
         self._changed = True
-        self._created = int(time.time())
+        self._last_visit = time.time()
 
     def __delitem__(self, key: str) -> None:
         del self._mapping[key]
         self._changed = True
-        self._created = int(time.time())
+        self._last_visit = time.time()
 
 
 SESSION_KEY = "aiohttp_session"
@@ -250,7 +257,11 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         if session.empty:
             return {}
 
-        return {"created": session.created, "session": session._mapping}
+        return {
+            "created": session.created,
+            "last_visit": session._last_visit,
+            "session": session._mapping,
+        }
 
     async def new_session(self) -> Session:
         return Session(None, data=None, new=True, max_age=self.max_age)

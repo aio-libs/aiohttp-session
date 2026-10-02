@@ -153,6 +153,33 @@ async def test_change_session(
     assert "/" == morsel["path"]
 
 
+async def test_clearing_cookie_keeps_its_attributes(
+    aiohttp_client: AiohttpClient, fernet: Fernet, key: bytes
+) -> None:
+    async def handler(request: web.Request) -> web.StreamResponse:
+        session = await get_session(request)
+        session.invalidate()
+        return web.Response(body=b"OK")
+
+    middleware = session_middleware(
+        EncryptedCookieStorage(key, secure=True, samesite="None")
+    )
+    app = web.Application(middlewares=[middleware])
+    app.router.add_route("GET", "/", handler)
+    client = await aiohttp_client(app)
+    make_cookie(client, fernet, {"a": 1})
+
+    resp = await client.get("/")
+
+    morsel = resp.cookies["AIOHTTP_SESSION"]
+    assert morsel.value == ""
+    assert morsel["max-age"] == "0"
+    assert morsel["expires"] == "Thu, 01 Jan 1970 00:00:00 GMT"
+    assert morsel["secure"]
+    assert morsel["samesite"] == "None"
+    assert morsel["httponly"]
+
+
 async def test_clear_cookie_on_session_invalidation(
     aiohttp_client: AiohttpClient, fernet: Fernet, key: bytes
 ) -> None:
@@ -168,7 +195,7 @@ async def test_clear_cookie_on_session_invalidation(
 
     morsel = resp.cookies["AIOHTTP_SESSION"]
     assert "" == morsel.value
-    assert not morsel["httponly"]
+    assert morsel["httponly"]
     assert morsel["path"] == "/"
 
 

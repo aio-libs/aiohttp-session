@@ -1,0 +1,3 @@
+Kept ``secure``, ``httponly`` and ``samesite`` on the ``Set-Cookie`` that clears the
+session -- a browser that requires ``SameSite=None; Secure`` to accept a cookie written
+in a cross-site context rejected the old clearing header, leaving the session alive.

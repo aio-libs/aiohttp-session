@@ -276,16 +276,16 @@ class AbstractStorage(metaclass=abc.ABCMeta):
         max_age: int | None = None,
     ) -> None:
         params = self._cookie_params.copy()
-        if max_age is not None:
+        if not cookie_data:
+            # Not del_cookie: it only accepts the attributes we need to keep
+            # from aiohttp 3.11, above the version we depend on.
+            params["max_age"] = 0
+            params["expires"] = "Thu, 01 Jan 1970 00:00:00 GMT"
+        elif max_age is not None:
             params["max_age"] = max_age
             t = time.gmtime(time.time() + max_age)
             params["expires"] = time.strftime("%a, %d-%b-%Y %T GMT", t)
-        if not cookie_data:
-            response.del_cookie(
-                self._cookie_name, domain=params["domain"], path=params["path"]
-            )
-        else:
-            response.set_cookie(self._cookie_name, cookie_data, **params)
+        response.set_cookie(self._cookie_name, cookie_data, **params)
 
 
 class SimpleCookieStorage(AbstractStorage):

@@ -140,7 +140,7 @@ async def test_del_cookie_on_session_invalidation(
 
     morsel = resp.cookies["AIOHTTP_SESSION"]
     assert "" == morsel.value
-    assert not morsel["httponly"]
+    assert morsel["httponly"]
     assert morsel["path"] == "/"
 
 

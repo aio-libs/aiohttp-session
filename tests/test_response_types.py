@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
@@ -54,3 +57,39 @@ async def test_prepared_response_type(aiohttp_client: AiohttpClient) -> None:
     req = make_mocked_request("GET", "/")
     with pytest.raises(RuntimeError):
         await middleware(req, prepared_response)
+
+
+async def test_file_response_saves_session(
+    aiohttp_client: AiohttpClient, tmp_path: Path
+) -> None:
+    path = tmp_path / "download.txt"
+    path.write_text("download content")
+
+    async def download(request: web.Request) -> web.FileResponse:
+        session = await get_session(request)
+        session["downloads"] = session.get("downloads", 0) + 1
+        return web.FileResponse(path)
+
+    client = await aiohttp_client(create_app(("/file", download)))
+    for count in (1, 2):
+        resp = await client.get("/file")
+        assert resp.status == 200
+        assert await resp.text() == "download content"
+        cookie = resp.cookies["AIOHTTP_SESSION"]
+        assert json.loads(cookie.value)["session"] == {"downloads": count}
+
+
+async def test_file_response_without_session(
+    aiohttp_client: AiohttpClient, tmp_path: Path
+) -> None:
+    path = tmp_path / "download.txt"
+    path.write_text("download content")
+
+    async def download(request: web.Request) -> web.FileResponse:
+        return web.FileResponse(path)
+
+    client = await aiohttp_client(create_app(("/file", download)))
+    resp = await client.get("/file")
+    assert resp.status == 200
+    assert await resp.text() == "download content"
+    assert "AIOHTTP_SESSION" not in resp.cookies

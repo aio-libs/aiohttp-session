@@ -185,7 +185,9 @@ def session_middleware(storage: "AbstractStorage") -> Middleware:
             raise_response = True
         if not isinstance(response, (web.StreamResponse, web.HTTPException)):
             raise RuntimeError(f"Expect response, not {type(response)!r}")
-        if not isinstance(response, (web.Response, web.HTTPException)):
+        if not isinstance(
+            response, (web.Response, web.FileResponse, web.HTTPException)
+        ):
             # likely got websocket or streaming
             return response
         if response.prepared:

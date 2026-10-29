@@ -10,7 +10,8 @@
 
    aioredis
 
-      :term:`asyncio` compatible module in the :term:`redis` library.
+      Legacy name of the ``aiohttp_session[aioredis]`` extra, which
+      now installs :term:`redis` with asyncio support.
 
       https://redis-py.readthedocs.io/en/stable/examples/asyncio_examples.html
 
@@ -33,15 +34,21 @@
 
    cryptography
 
-      The libary used for encrypting secure cookied session
+      The library used for encrypting secure cookie sessions
 
       https://cryptography.io
 
    pynacl
 
-      Yet another libary used for encrypting secure cookied session
+      Yet another library used for encrypting secure cookie sessions
 
       https://pynacl.readthedocs.io
+
+   redis
+
+      Redis database client library, used through :mod:`redis.asyncio`.
+
+      https://redis.readthedocs.io
 
    session
 

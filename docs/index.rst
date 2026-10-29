@@ -48,7 +48,8 @@ A trivial usage example:
 
     web.run_app(init())
 
-All storages uses HTTP Cookie named ``AIOHTTP_COOKIE_SESSION`` for storing data.
+All storages use the HTTP cookie named ``AIOHTTP_SESSION`` by default for
+storing data.
 
 Available session storages are:
 
@@ -76,7 +77,7 @@ Available session storages are:
   Inside redis the key will be saved as COOKIENAME_VALUEOFTHECOOKIE.
   For example if inside the browser the cookie is saved with name
   ``'AIOHTTP_SESSION'`` (default option) and value
-  ``e33b57c7ec6e425eb626610f811ab6ae`` (a random UUID) they key inside
+  ``e33b57c7ec6e425eb626610f811ab6ae`` (a random UUID) the key inside
   redis will be ``AIOHTTP_SESSION_e33b57c7ec6e425eb626610f811ab6ae``.
 
   Requires :term:`redis` library:
@@ -112,7 +113,8 @@ Please feel free to file an issue on `bug tracker
 <https://github.com/aio-libs/aiohttp_session/issues>`_ if you have found a bug
 or have some suggestion for library improvement.
 
-The library uses `Travis <https://travis-ci.org/aio-libs/aiohttp_session>`_ for
+The library uses `GitHub Actions
+<https://github.com/aio-libs/aiohttp_session/actions>`_ for
 Continuous Integration.
 
 

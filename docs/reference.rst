@@ -320,7 +320,7 @@ To use the storage you should push it into
                                   secure=None, httponly=True, samesite=None, \
                                   encoder=json.dumps, decoder=json.loads)
 
-   Create encryted cookies storage.
+   Create encrypted cookies storage.
 
    The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
@@ -336,7 +336,6 @@ To use the storage you should push it into
       :meth:`cryptography.fernet.Fernet.generate_key` method.
 
 
-.. module:: aiohttp_session.cookie_storage
 .. currentmodule:: aiohttp_session.cookie_storage
 
 
@@ -359,7 +358,7 @@ To use the storage you should push it into
                                   secure=None, httponly=True, samesite=None, \
                                   encoder=json.dumps, decoder=json.loads)
 
-   Create encryted cookies storage.
+   Create encrypted cookies storage.
 
    The class is inherited from :class:`~aiohttp_session.AbstractStorage`.
 
@@ -384,7 +383,7 @@ It operates with Redis database via :class:`redis.asyncio.Redis`.
 
 To use the storage you need setup it first::
 
-   redis = await aioredis.from_url("redis://127.0.0.1:6379")
+   redis = redis.asyncio.from_url("redis://127.0.0.1:6379")
    storage = aiohttp_session.redis_storage.RedisStorage(redis)
    aiohttp_session.setup(app, storage)
 
@@ -403,7 +402,7 @@ To use the storage you need setup it first::
    *redis_pool* is a :class:`~redis.asyncio.Redis` which should be
    created by :func:`~redis.asyncio.from_url` call, e.g.::
 
-      redis = await aioredis.from_url("redis://localhost:6379")
+      redis = redis.asyncio.from_url("redis://localhost:6379")
       storage = aiohttp_session.redis_storage.RedisStorage(redis)
 
    Other parameters are the same as for
@@ -421,7 +420,7 @@ It operates with Memcached database via :class:`aiomcache.Client`.
 To use the storage you need setup it first::
 
    mc = aiomcache.Client('localhost', 11211)
-   storage = aiohttp_session.memcached_storage.Client(mc)
+   storage = aiohttp_session.memcached_storage.MemcachedStorage(mc)
    aiohttp_session.setup(app, storage)
 
 .. versionadded:: 1.2
@@ -439,7 +438,7 @@ To use the storage you need setup it first::
 
    *memcached_conn* is a :class:`~aiomcache.Client` instance::
 
-      mc = await aiomcache.Client('localhost', 6379)
+      mc = aiomcache.Client('localhost', 11211)
       storage = aiohttp_session.memcached_storage.MemcachedStorage(mc)
 
    Other parameters are the same as for

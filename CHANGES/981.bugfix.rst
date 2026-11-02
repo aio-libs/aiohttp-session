@@ -1,0 +1,5 @@
+Stopped resetting :py:attr:`Session.created` to the current time whenever the
+session was mutated (via ``__setitem__``/``__delitem__``). ``created`` now
+reflects the session's actual creation time, as documented, while a new
+internal ``last_visit`` timestamp is used to preserve the existing idle
+``max_age`` timeout behavior -- by :user:`pctablet505`.
